@@ -1,0 +1,79 @@
+{
+  "prospects": [
+    {
+      "company_name": "The Grand Hotel",
+      "industry": "hotel",
+      "contact_name": "Michael Chen",
+      "contact_email": "mchen@grandhotel.example.com",
+      "contact_phone": "+1-555-0101",
+      "website": "www.grandhotel.example.com",
+      "location": "New York, NY",
+      "notes": "Luxury 5-star, 250 rooms. High volume of guest inquiries. International clientele."
+    },
+    {
+      "company_name": "Bella Cucina Restaurant",
+      "industry": "restaurant",
+      "contact_name": "Sofia Romano",
+      "contact_email": "sofia@bellacucina.example.com",
+      "contact_phone": "+1-555-0102",
+      "website": "www.bellacucina.example.com",
+      "location": "Chicago, IL",
+      "notes": "Upscale Italian, 80 seats, packed Fri–Sat. Staff overwhelmed with reservation calls during service."
+    },
+    {
+      "company_name": "Peak Performance Gym",
+      "industry": "gym",
+      "contact_name": "James Miller",
+      "contact_email": "james@peakperformance.example.com",
+      "contact_phone": "+1-555-0103",
+      "website": "www.peakperformance.example.com",
+      "location": "Los Angeles, CA",
+      "notes": "3 locations, 1,200 members. Struggles with membership inquiry overload and class scheduling calls."
+    },
+    {
+      "company_name": "Coastal Retreat Resort",
+      "industry": "hotel",
+      "contact_name": "Emily Watson",
+      "contact_email": "ewatson@coastalretreat.example.com",
+      "website": "www.coastalretreat.example.com",
+      "location": "Miami, FL",
+      "notes": "Boutique beachfront resort, 85 rooms, heavy international guests. Language barrier challenges."
+    },
+    {
+      "company_name": "The Fitness Hub",
+      "industry": "gym",
+      "contact_name": "David Park",
+      "contact_email": "david@fitnesshub.example.com",
+      "location": "Austin, TX",
+      "notes": "CrossFit-style gym, 400 members, growing fast. Owner also handles front-desk calls."
+    },
+    {
+      "company_name": "Sakura Japanese Restaurant",
+      "industry": "restaurant",
+      "contact_name": "Yuki Tanaka",
+      "contact_email": "yuki@sakuradining.example.com",
+      "contact_phone": "+1-555-0106",
+      "website": "www.sakuradining.example.com",
+      "location": "San Francisco, CA",
+      "notes": "Popular omakase restaurant. Long wait times for reservations. Wants to reduce phone load."
+    },
+    {
+      "company_name": "Alpine Wellness Hotel",
+      "industry": "hotel",
+      "contact_name": "Thomas Berg",
+      "contact_email": "tberg@alpinewellness.example.com",
+      "website": "www.alpinewellness.example.com",
+      "location": "Denver, CO",
+      "notes": "Spa-focused resort, 120 rooms. High inquiry volume for spa bookings and room upgrades."
+    },
+    {
+      "company_name": "Iron Temple Gym",
+      "industry": "gym",
+      "contact_name": "Marcus Johnson",
+      "contact_email": "marcus@irontemple.example.com",
+      "contact_phone": "+1-555-0108",
+      "location": "Houston, TX",
+      "notes": "Bodybuilding gym, 600 members. Interested in AI tools (mentioned at fitness expo)."
+    }
+  ]
+}
