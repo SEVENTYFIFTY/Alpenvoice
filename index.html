@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Petrus AI — Early Warning System for Children's Mental Health</title>
+  <meta name="description" content="Petrus AI detects behavioural shifts in children two to four weeks before a mental-health crisis escalates, giving qualified professionals the window to act." />
+  <meta property="og:title" content="Petrus AI — Early Warning System for Children's Mental Health" />
+  <meta property="og:description" content="AI-powered behavioural intelligence platform for psychologists, psychiatrists, and school counsellors. Petrus Labs · Arosa, Switzerland." />
+  <meta property="og:type" content="website" />
+  <style>
+    /* ─── Reset & base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal-dark:   #0d2b38;
+      --teal-mid:    #14404f;
+      --teal-light:  #1e5a6e;
+      --teal-border: rgba(30, 90, 110, 0.45);
+      --orange:      #c94a2b;
+      --orange-light:#e05a38;
+      --white:       #ffffff;
+      --offwhite:    #f4f1ec;
+      --text:        #dde9ec;
+      --text-muted:  #89aab4;
+      --section-gap: 6rem;
+      --inner:       880px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--teal-dark);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    /* ─── Typography helpers ───────────────────────────────────── */
+    .label {
+      font-family: 'Arial', 'Helvetica', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--orange);
+      font-weight: 600;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Georgia', serif;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.2;
+    }
+
+    h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); }
+    h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+    h3 { font-size: clamp(1.2rem, 2.5vw, 1.5rem); font-weight: 700; }
+
+    p { color: var(--text); margin-bottom: 1rem; }
+
+    a { color: var(--orange-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    strong { color: var(--white); }
+
+    em { font-style: italic; }
+
+    /* ─── Layout ───────────────────────────────────────────────── */
+    .inner {
+      max-width: var(--inner);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    section { padding: var(--section-gap) 0; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--teal-border);
+      margin: 0;
+    }
+
+    /* ─── Navigation ───────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(13, 43, 56, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--teal-border);
+    }
+
+    .nav-inner {
+      max-width: var(--inner);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+
+    .nav-logo {
+      font-family: 'Arial', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+      letter-spacing: 0.06em;
+    }
+
+    .nav-logo span { color: var(--orange); }
+
+    .nav-links {
+      display: flex;
+      gap: 1.8rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--white); text-decoration: none; }
+
+    .nav-cta {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.78rem;
+      padding: 0.4rem 1.1rem;
+      border: 1px solid var(--orange);
+      border-radius: 3px;
+      color: var(--orange) !important;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav-cta:hover {
+      background: var(--orange);
+      color: var(--white) !important;
+      text-decoration: none;
+    }
+
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+    }
+
+    /* ─── Hero ─────────────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 56px;
+      background: linear-gradient(160deg, #0d2b38 0%, #0a2030 60%, #061820 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(201, 74, 43, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-content { padding: 4rem 0; }
+
+    .hero-tag {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 1.2rem;
+    }
+
+    .hero-content h1 {
+      margin-bottom: 1.4rem;
+      max-width: 780px;
+    }
+
+    .hero-content h1 em {
+      font-style: italic;
+      color: var(--offwhite);
+    }
+
+    .hero-lead {
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: var(--text);
+      max-width: 640px;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-rule {
+      width: 52px;
+      height: 3px;
+      background: var(--orange);
+      margin: 1.8rem 0 2.4rem;
+      border: none;
+    }
+
+    .hero-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1.2rem;
+      max-width: 620px;
+      margin-bottom: 3rem;
+    }
+
+    .hero-meta-item .label { margin-bottom: 0.3rem; }
+
+    .hero-meta-item p {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--white);
+      margin: 0;
+    }
+
+    .hero-quote {
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      border-left: 3px solid var(--orange);
+      padding-left: 1rem;
+      max-width: 520px;
+    }
+
+    /* ─── Stat cards ───────────────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1px;
+      background: var(--teal-border);
+      border: 1px solid var(--teal-border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 2.5rem 0;
+    }
+
+    .stat-card {
+      background: var(--teal-mid);
+      padding: 1.8rem 1.4rem;
+    }
+
+    .stat-number {
+      font-family: 'Arial', sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      color: var(--orange);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-desc {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ─── Highlight box ────────────────────────────────────────── */
+    .highlight-box {
+      background: rgba(30, 90, 110, 0.22);
+      border-left: 3px solid var(--orange);
+      border-radius: 0 4px 4px 0;
+      padding: 1.4rem 1.6rem;
+      margin: 2rem 0;
+    }
+
+    .highlight-box .label { margin-bottom: 0.6rem; }
+
+    .highlight-box p { margin: 0; }
+
+    /* ─── Info card ────────────────────────────────────────────── */
+    .card {
+      background: var(--teal-mid);
+      border: 1px solid var(--teal-border);
+      border-radius: 6px;
+      padding: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .card .label { margin-bottom: 0.5rem; }
+
+    .card h3 { margin-bottom: 0.6rem; }
+
+    .card p { margin: 0; }
+
+    /* ─── Two-column grid ──────────────────────────────────────── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 640px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Three-column grid ────────────────────────────────────── */
+    .three-col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 720px) {
+      .three-col { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .three-col { grid-template-columns: 1fr; }
+    }
+
+    /* ─── Section header ───────────────────────────────────────── */
+    .section-header {
+      margin-bottom: 2.8rem;
+    }
+
+    .section-header .label { margin-bottom: 0.8rem; }
+
+    .section-header h2 { margin-bottom: 1rem; }
+
+    .section-header p {
+      font-size: 1.05rem;
+      max-width: 680px;
+      color: var(--text);
+    }
+
+    /* ─── Blockquote ───────────────────────────────────────────── */
+    blockquote {
+      border-left: 3px solid var(--teal-light);
+      padding: 1rem 1.4rem;
+      margin: 1.5rem 0;
+      background: rgba(20, 64, 79, 0.3);
+      border-radius: 0 4px 4px 0;
+    }
+
+    blockquote p {
+      font-style: italic;
+      font-size: 0.96rem;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    blockquote cite {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-style: normal;
+    }
+
+    /* ─── Table ────────────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; margin: 1.5rem 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.85rem;
+    }
+
+    thead tr {
+      background: var(--teal-mid);
+    }
+
+    thead th {
+      text-align: left;
+      padding: 0.8rem 1rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--teal-border);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--teal-border);
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+
+    tbody td {
+      padding: 0.85rem 1rem;
+      color: var(--text);
+      vertical-align: top;
+    }
+
+    tbody tr:hover { background: rgba(30, 90, 110, 0.18); }
+
+    /* ─── List ─────────────────────────────────────────────────── */
+    ul.feature-list {
+      list-style: none;
+      margin: 1rem 0;
+    }
+
+    ul.feature-list li {
+      padding: 0.5rem 0 0.5rem 1.4rem;
+      position: relative;
+      color: var(--text);
+      border-bottom: 1px solid rgba(30, 90, 110, 0.25);
+      font-size: 0.95rem;
+    }
+
+    ul.feature-list li:last-child { border-bottom: none; }
+
+    ul.feature-list li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--orange);
+    }
+
+    ul.plain-list {
+      list-style: none;
+      margin: 1rem 0;
+    }
+
+    ul.plain-list li {
+      padding: 0.3rem 0 0.3rem 1.2rem;
+      position: relative;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    ul.plain-list li::before {
+      content: '·';
+      position: absolute;
+      left: 0;
+      color: var(--orange);
+      font-size: 1.2rem;
+      line-height: 1.2;
+    }
+
+    /* ─── Team card ────────────────────────────────────────────── */
+    .team-card {
+      background: var(--teal-mid);
+      border: 1px solid var(--teal-border);
+      border-radius: 6px;
+      padding: 1.8rem;
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 1.4rem;
+    }
+
+    .team-avatar {
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Arial', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    .team-avatar.dark { background: var(--teal-light); }
+
+    .team-body h3 { margin-bottom: 0.2rem; }
+
+    .team-body .role {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 0.8rem;
+    }
+
+    .team-body p { margin: 0; font-size: 0.9rem; }
+
+    /* ─── Status badge ─────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 3px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .badge-green  { background: rgba(52, 168, 83, 0.15); color: #5cc773; border: 1px solid rgba(52, 168, 83, 0.3); }
+    .badge-orange { background: rgba(201, 74, 43, 0.15); color: #e07050; border: 1px solid rgba(201, 74, 43, 0.3); }
+    .badge-blue   { background: rgba(66, 133, 244, 0.12); color: #7ab4f5; border: 1px solid rgba(66, 133, 244, 0.25); }
+    .badge-yellow { background: rgba(251, 188, 4, 0.12); color: #f5c842; border: 1px solid rgba(251, 188, 4, 0.25); }
+
+    /* ─── Timeline ─────────────────────────────────────────────── */
+    .timeline { position: relative; padding-left: 2rem; margin: 2rem 0; }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--teal-border);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -1.7rem;
+      top: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid var(--orange);
+      background: var(--teal-dark);
+    }
+
+    .timeline-item .label { margin-bottom: 0.3rem; }
+
+    .timeline-item h3 { margin-bottom: 0.5rem; font-size: 1.1rem; }
+
+    .timeline-item p { font-size: 0.92rem; color: var(--text); margin: 0; }
+
+    /* ─── Revenue bar ──────────────────────────────────────────── */
+    .arr-chart { margin: 1.5rem 0; }
+
+    .arr-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.8rem;
+      gap: 1rem;
+    }
+
+    .arr-label {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      min-width: 120px;
+    }
+
+    .arr-bar-wrap {
+      flex: 1;
+      background: rgba(30, 90, 110, 0.25);
+      border-radius: 2px;
+      height: 14px;
+      overflow: hidden;
+    }
+
+    .arr-bar {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--orange);
+    }
+
+    .arr-value {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--white);
+      min-width: 70px;
+      text-align: right;
+    }
+
+    /* ─── Section alternating ──────────────────────────────────── */
+    .section-alt {
+      background: rgba(20, 64, 79, 0.18);
+    }
+
+    /* ─── CTA banner ───────────────────────────────────────────── */
+    #contact {
+      background: linear-gradient(135deg, var(--teal-mid) 0%, #0a2838 100%);
+      border-top: 1px solid var(--teal-border);
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 680px) {
+      .contact-grid { grid-template-columns: 1fr; }
+    }
+
+    .contact-block .label { margin-bottom: 0.6rem; }
+
+    .contact-block p {
+      font-size: 0.95rem;
+      margin: 0.15rem 0;
+      color: var(--text);
+    }
+
+    .contact-block a { color: var(--text); }
+
+    .contact-block a:hover { color: var(--white); }
+
+    /* ─── Footer ───────────────────────────────────────────────── */
+    footer {
+      background: var(--teal-dark);
+      border-top: 1px solid var(--teal-border);
+      padding: 1.8rem 0;
+    }
+
+    .footer-inner {
+      max-width: var(--inner);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    footer p {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    /* ─── Disclosure ───────────────────────────────────────────── */
+    .disclosure {
+      background: rgba(20, 64, 79, 0.35);
+      border: 1px solid var(--teal-border);
+      border-radius: 4px;
+      padding: 1.2rem 1.4rem;
+      margin-top: 2rem;
+    }
+
+    .disclosure p {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    /* ─── Responsive nav ───────────────────────────────────────── */
+    @media (max-width: 860px) {
+      .nav-links li:not(:last-child) { display: none; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ─── Navigation ─────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">Petrus <span>AI</span></div>
+    <ul class="nav-links">
+      <li><a href="#problem">The Problem</a></li>
+      <li><a href="#solution">The Solution</a></li>
+      <li><a href="#model">Model</a></li>
+      <li><a href="#team">Team</a></li>
+      <li><a href="#partners">Partners</a></li>
+      <li><a href="#contact" class="nav-cta">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ─── Hero ────────────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="inner">
+    <div class="hero-content">
+      <p class="hero-tag">Petrus Labs · Arosa, Switzerland · Phase 0 — Pre-Development</p>
+      <h1>AI-powered early warning<br>for children's mental health</h1>
+      <hr class="hero-rule">
+      <p class="hero-lead">
+        Petrus AI detects behavioural shifts <em>two to four weeks before</em> a crisis
+        escalates — so a psychologist gets the window the family did not have.
+      </p>
+
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <p class="label">Stage</p>
+          <p>Phase 0 — Pre-Development</p>
+        </div>
+        <div class="hero-meta-item">
+          <p class="label">Vehicle</p>
+          <p>Petrus Labs · Arosa, CH</p>
+        </div>
+        <div class="hero-meta-item">
+          <p class="label">Funding Sought</p>
+          <p>CHF 5.5M · 2026–2028</p>
+        </div>
+      </div>
+
+      <p class="hero-quote">"There is always a window. The system exists to find it before it closes."</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── Executive Summary ────────────────────────────────────────── -->
+<section id="summary">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">01 — Executive Summary</p>
+      <h2>The opportunity in one page</h2>
+      <p>
+        Petrus AI is a Swiss-Portuguese deep-tech venture building the first behavioural
+        early-warning system for children's mental health. The platform is a working tool
+        for the professionals who carry the duty of care — psychologists, psychiatrists,
+        school counsellors, paediatricians, sport psychologists. It detects pattern shifts
+        two to four weeks before a crisis becomes visible, and surfaces them with
+        explainable, time-stamped evidence to the qualified clinician in a position to act.
+      </p>
+      <p>
+        Petrus AI is deployed through schools, clinical services, sports formation centres,
+        and healthcare providers — but in every deployment, the user is the professional.
+        We are not a chatbot. We are not a diagnostic tool. We are the layer between
+        observation and intervention that does not currently exist.
+      </p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-number">11.2M</div>
+        <div class="stat-desc">European children facing mental-health challenges (UNICEF, 2024)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">CHF 3.9B</div>
+        <div class="stat-desc">European school-based mental-health SAM (24% CAGR)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">CHF 4M</div>
+        <div class="stat-desc">Year-5 ARR target — credible glide path (Y7 target CHF 15M)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">CHF 5.5M</div>
+        <div class="stat-desc">Total 3-year funding requirement (private capital + grants)</div>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <p class="label">What is already in place</p>
+      <p>
+        <strong>FH Graubünden — Signed research partnership</strong> (400+ research hours,
+        2 teams, 8 student researchers, supervised by Prof. Dr. Ivan Nikitin).
+        <strong>Advisory Board lead confirmed</strong> (Marcel Greutmann, former IBM VP).
+        <strong>Clinical Lead engaged</strong> (Dr. Pedro Bem-Haja — Neuroscientist,
+        Clinical Psychologist, Professor Auxiliar at Universidade de Aveiro).
+        <strong>CTO confirmed</strong> (Mikkel Solnado, founder of Nodel.app).
+        <strong>Market research completed</strong> across 33 Swiss institutions in 8 cantons.
+      </p>
+    </div>
+
+    <h3 style="margin: 2.5rem 0 1rem;">The investment thesis</h3>
+    <ul class="feature-list">
+      <li><strong>Massive unmet need.</strong> 11.2M European children, no proactive cross-environment detection product exists.</li>
+      <li><strong>Defensible position.</strong> First-mover in the child-focused B2B school segment.</li>
+      <li><strong>Swiss + EU regulatory advantage.</strong> Privacy-first architecture unlocks the European market.</li>
+      <li><strong>Clinically grounded.</strong> Methodology co-developed with practising psychologists and a research-active university chair.</li>
+      <li><strong>Multi-stream B2B SaaS.</strong> Schools, healthcare providers, anonymised research data — single AI engine, 95% code reuse.</li>
+      <li><strong>Data network effect.</strong> Longitudinal dataset compounds in scientific and commercial value.</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── The Problem ──────────────────────────────────────────────── -->
+<section id="problem" class="section-alt">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">02 — The Problem</p>
+      <h2>Children are signalling.<br>The system is not listening.</h2>
+      <p>
+        Mental-health distress in children rarely arrives as a single event. It arrives as a
+        slow shift in behaviour over weeks. The shift is observable — but it is observed in
+        fragments, by people who do not share notes, and by the time it reaches a clinician,
+        the situation has typically already escalated.
+      </p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-number">#1</div>
+        <div class="stat-desc">Cause of death — youth aged 15–29 in Europe (WHO/Europe, Nov 2025)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">50%</div>
+        <div class="stat-desc">Of all mental-health disorders begin before age 14 (WHO)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">20.4%</div>
+        <div class="stat-desc">Of bullying victims attempt suicide; 38% never tell anyone (UCM / ANAR 2024)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">15%</div>
+        <div class="stat-desc">European children report cyberbullying — up from 12% in 2018 (WHO HBSC 2024)</div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin: 2.5rem 0;">
+      <div>
+        <h3 style="margin-bottom: 1rem;">The scale</h3>
+        <div class="card">
+          <p class="label">Switzerland</p>
+          <h3>3× rise since 2019</h3>
+          <p>Swiss suicide consultations for children and adolescents have tripled since 2019. Pro Juventute receives nine calls a day from children in distress. Wait times for child-psychiatry appointments routinely exceed six months.</p>
+        </div>
+        <div class="card">
+          <p class="label">DACH Region</p>
+          <h3>12.3M children (ages 6–18)</h3>
+          <p>146K–219K young people affected in Switzerland alone (ages 11–18). Average waiting time for child psychiatry: 6–8 months.</p>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 1rem;">The detection gap</h3>
+        <div class="card">
+          <p class="label">The fragmented view</p>
+          <p>Parents see one half. Teachers see another. Clinicians see neither — until escalation. In 70–85% of crisis cases, the situation has already escalated by the time professional support is engaged.</p>
+        </div>
+        <div class="card">
+          <p class="label">The economic cost of inaction</p>
+          <p>Untreated child mental-health conditions cost Europe an estimated CHF 680B annually in lost productivity, healthcare burden, and intergenerational impact.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-bottom: 1rem;">Why the current system cannot solve this</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Stakeholder</th>
+            <th>Current view</th>
+            <th>What is missed</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Parent</strong></td>
+            <td>Behaviour at home, evening and weekend windows</td>
+            <td>Classroom behaviour, peer interaction, academic patterns</td>
+          </tr>
+          <tr>
+            <td><strong>Teacher</strong></td>
+            <td>Classroom of 25+, daily observation</td>
+            <td>Home behaviour, sleep patterns, family context</td>
+          </tr>
+          <tr>
+            <td><strong>School counsellor / psychologist</strong></td>
+            <td>Reactive — engaged once a problem is flagged</td>
+            <td>The 2–4 week pre-crisis window of behavioural drift</td>
+          </tr>
+          <tr>
+            <td><strong>Clinician (CAMHS / PDGR)</strong></td>
+            <td>Engaged after referral — typically after escalation</td>
+            <td>The earliest signal; longitudinal context</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin: 2.5rem 0 1rem;">Voices from the field</h3>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">
+      FH Graubünden primary-research survey of Swiss institutions, January 2026 · 33 institutional responses · 18 schools + 14 child-psychiatry services · 8 cantons
+    </p>
+
+    <blockquote>
+      <p>"We have one school psychologist for nine hundred students. By the time the parents notice something, the teachers notice something, and we coordinate — it is often already too late. The student is in crisis mode."</p>
+      <cite>— School director, Zürich (900-student school)</cite>
+    </blockquote>
+
+    <blockquote>
+      <p>"Our waiting list is six to eight months. By the time schools refer a student to us, they are already at a critical point. We need a way to identify these children earlier — before they reach us."</p>
+      <cite>— Child psychiatrist, Graubünden</cite>
+    </blockquote>
+
+    <blockquote>
+      <p>"Communication between home and school is fragmented. Parents do not know what we observe; we do not know what they observe. The full picture only becomes clear when something has gone seriously wrong."</p>
+      <cite>— School psychologist, Bern</cite>
+    </blockquote>
+
+    <div class="stat-grid" style="margin-top: 2rem;">
+      <div class="stat-card">
+        <div class="stat-number">4.4–4.7</div>
+        <div class="stat-desc">Stakeholder rating (out of 5) for importance of early detection — highest of all needs surveyed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">33</div>
+        <div class="stat-desc">Institutional responses · 18 schools + 14 child-psychiatry services + 1 other</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">400+</div>
+        <div class="stat-desc">Total research hours · supervised by Prof. Dr. Ivan Nikitin, FH Graubünden</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── The Competitive Landscape ───────────────────────────────── -->
+<section id="landscape">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">03 — State of the Art</p>
+      <h2>The CHF 4.7B that did not solve this</h2>
+      <p>
+        Mental-health technology has attracted over CHF 4.7B of global venture funding
+        since 2020. Almost all of it serves adults, in workplace or consumer settings, in
+        a reactive model. No incumbent owns child-focused, school-deployed, proactive
+        behavioural detection.
+      </p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Competitor</th>
+            <th>Funding</th>
+            <th>Focus</th>
+            <th>Gap Petrus fills</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Limbic (UK)</strong></td>
+            <td>$14M</td>
+            <td>Adult triage AI, NHS</td>
+            <td>Adults only, reactive triage</td>
+          </tr>
+          <tr>
+            <td><strong>Woebot Health (US)</strong></td>
+            <td>$114M</td>
+            <td>CBT chatbot, US-centric</td>
+            <td>No child focus, no detection layer</td>
+          </tr>
+          <tr>
+            <td><strong>Lyra Health (US)</strong></td>
+            <td>$910M</td>
+            <td>Enterprise HR mental health</td>
+            <td>Workplace, not schools</td>
+          </tr>
+          <tr>
+            <td><strong>Spring Health (US)</strong></td>
+            <td>$300M</td>
+            <td>Corporate wellness</td>
+            <td>Adults, B2B HR channel</td>
+          </tr>
+          <tr>
+            <td><strong>Headspace / Ginger</strong></td>
+            <td>$3B</td>
+            <td>Consumer meditation app</td>
+            <td>Self-help, no detection</td>
+          </tr>
+          <tr>
+            <td><strong>Bark / Qustodio</strong></td>
+            <td>$50M+</td>
+            <td>Parental monitoring</td>
+            <td>Surveillance, B2C, no clinical layer</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="highlight-box" style="margin-top: 2rem;">
+      <p class="label">Why the gap exists</p>
+      <p>
+        Building a child-focused product requires three things almost no incumbent has aligned:
+        <strong>(1)</strong> a B2B school go-to-market with cantonal/ministerial procurement experience,
+        <strong>(2)</strong> a clinical methodology co-developed with practising child psychologists, and
+        <strong>(3)</strong> a privacy-first architecture compatible with both Swiss and EU child-protection law.
+        Petrus AI is built on all three from the foundation.
+      </p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── The Solution ─────────────────────────────────────────────── -->
+<section id="solution" class="section-alt">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">04 — The Solution</p>
+      <h2>An early-warning system,<br>not a diagnostic tool</h2>
+      <p>
+        Petrus AI is a behavioural intelligence platform. It collects multi-source data on
+        child wellbeing through age-appropriate interactions, identifies pattern shifts against
+        a personalised baseline, and surfaces them — with full explainability — to a qualified
+        adult who is in a position to act. The clinical decision remains human. Always.
+      </p>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <h3 style="margin-bottom: 1rem; color: var(--orange);">What Petrus AI does</h3>
+        <ul class="feature-list">
+          <li><strong>Age-adaptive interaction.</strong> Different interface paradigms for ages 6–8 (playful tasks), 9–12 (mood journals), 13–18 (anonymous structured check-ins).</li>
+          <li><strong>Multi-source data fusion.</strong> Behavioural, contextual, longitudinal — and, where consented, biometric proxies via existing devices.</li>
+          <li><strong>Personalised baseline.</strong> Each child is benchmarked against their own history, not against a population norm.</li>
+          <li><strong>Explainable alerts.</strong> Every alert ships with a ranked contributor list, time-window visualisation, and confidence score.</li>
+          <li><strong>Cross-environment bridge.</strong> Home and school context combined for the first time, with role-based privacy controls.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="margin-bottom: 1rem; color: var(--text-muted);">What Petrus AI does <em>not</em> do</h3>
+        <ul class="feature-list">
+          <li><strong>Not a diagnostic tool.</strong> Petrus does not give DSM/ICD labels. It surfaces signal, never diagnosis.</li>
+          <li><strong>Not a replacement for a clinician.</strong> Every alert routes to a qualified professional; the platform does not act.</li>
+          <li><strong>Not surveillance.</strong> The child is the user, not the subject. All design choices are vetted for child safeguarding.</li>
+          <li><strong>Not a chatbot companion.</strong> We do not build relationships with children. We build a thin observational layer with explicit consent.</li>
+          <li><strong>Not a replacement for human relationships.</strong> Teachers, families, clinicians remain primary. Petrus is infrastructure.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin: 2.5rem 0 1.2rem;">Architecture pillars</h3>
+    <div class="three-col">
+      <div class="card">
+        <p class="label">Layer 1</p>
+        <h3>Interaction Engine</h3>
+        <p>Age-adaptive front-end. Co-designed with child psychologists. Web and tablet. Offline-capable. Multi-language: DE, FR, IT, RM, EN, PT.</p>
+      </div>
+      <div class="card">
+        <p class="label">Layer 2</p>
+        <h3>Detection Engine</h3>
+        <p>Gradient-boosted ensemble model. SHAP-based feature attribution. Personalised baselines. Threshold calibration tuned to clinical cost asymmetry.</p>
+      </div>
+      <div class="card">
+        <p class="label">Layer 3</p>
+        <h3>Alert &amp; Explainability</h3>
+        <p>Human-readable contributor breakdown. 28-day time-window visualisation. Confidence score. Full audit trail for clinical review.</p>
+      </div>
+    </div>
+
+    <h3 style="margin: 2.5rem 0 1rem;">Six modules, one platform</h3>
+    <p style="margin-bottom: 1.5rem;">The detection layer is invisible to the child. From the child's point of view, the platform is a structured space for self-expression — six modules, each clinically grounded, each producing observational signal that flows to the professional dashboard.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Module</th>
+            <th>Clinical description</th>
+            <th>Value to the professional</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Mood Circle</strong></td>
+            <td>Daily emotional-state register — simple, non-invasive entry point</td>
+            <td>Longitudinal mood data; pattern and cyclicity identification</td>
+          </tr>
+          <tr>
+            <td><strong>Dynamic Sociogram</strong></td>
+            <td>Visual mapping of relationships: friends, family, pets, zones of proximity and distance</td>
+            <td>Relationship evolution over time; isolation and conflict signals</td>
+          </tr>
+          <tr>
+            <td><strong>Petrus Family</strong></td>
+            <td>Conversational AI characters — a functional family model and peaceful conflict-resolution scaffolding</td>
+            <td>Conversation content visible in the dashboard; proxy for family-environment perception</td>
+          </tr>
+          <tr>
+            <td><strong>Diary</strong></td>
+            <td>Free or guided writing — text or voice</td>
+            <td>Access to thoughts the child may not verbalise in session</td>
+          </tr>
+          <tr>
+            <td><strong>Voice Games</strong></td>
+            <td>Story Adventure, Emotion Explorer, Sound Detective, Bully Shield — all under clinical supervision</td>
+            <td>Assessment of emotional competency, stress response, emotional vocabulary</td>
+          </tr>
+          <tr>
+            <td><strong>Professional Dashboard</strong></td>
+            <td>Daily summaries, alerts, sociogram evolution, diary entries</td>
+            <td>Structured clinical context before each session — without the human filter</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="highlight-box" style="margin-top: 2rem;">
+      <p class="label">The "167 Hours" Principle</p>
+      <p>
+        A child sees their therapist one hour per week. They live the other <strong>167 hours</strong>
+        without continuous clinical observation. Petrus AI captures structured signal during
+        brief, voluntary, age-appropriate interactions spread across the week (target: 3–5 short
+        interactions per child per week, total ~30–60 minutes). What is different is that those
+        interactions are <em>longitudinal</em>, structured, and visible to the clinician — converting
+        episodic observation into temporal patterning.
+      </p>
+    </div>
+
+    <h3 style="margin: 2.5rem 0 1rem;">Privacy &amp; safeguarding by design</h3>
+    <ul class="plain-list">
+      <li><strong>Swiss-hosted infrastructure</strong> with edge-computing for behavioural raw data; only derived signals leave the device.</li>
+      <li><strong>GDPR + Swiss FADP compliant</strong> by architecture, not by retrofit. Data Protection Impact Assessment (DPIA) led by Swiss legal counsel.</li>
+      <li><strong>EU AI Act conformity</strong> roadmap aligned with high-risk-system requirements (children, sensitive health context).</li>
+      <li><strong>Explicit, layered consent:</strong> child assent, parental consent, school authorisation. Renewable annually.</li>
+      <li><strong>Right to deletion and portability</strong> built into the data model from day one.</li>
+      <li><strong>No data sale, ever.</strong> Anonymised research access requires institutional ethics approval and aggregated outputs only.</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── Scientific Innovation ────────────────────────────────────── -->
+<section id="science">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">05 — Scientific Innovation</p>
+      <h2>What is genuinely new</h2>
+      <p>
+        The funding case for Petrus AI is not "we are building an app." It is that we are
+        producing a defensible scientific contribution at the intersection of developmental
+        psychology, behavioural data science, and explainable AI — a contribution that has
+        commercial deployment as its natural distribution channel.
+      </p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <p class="label">Innovation 1</p>
+        <h3>Personalised Behavioural Baselining</h3>
+        <p>Most behavioural-detection models compare individuals to population norms. Children are too heterogeneous for that to work. Petrus AI builds a per-child longitudinal baseline within the first weeks of engagement — a methodology adapted from neuropsychological assessment.</p>
+      </div>
+      <div class="card">
+        <p class="label">Innovation 2</p>
+        <h3>Cross-Environment Signal Fusion</h3>
+        <p>We fuse home-context and school-context signals through a privacy-preserving role-based access model. To our knowledge, no deployed product currently does this in the child wellbeing setting.</p>
+      </div>
+      <div class="card">
+        <p class="label">Innovation 3</p>
+        <h3>Clinically Grounded XAI Architecture</h3>
+        <p>Every alert is accompanied by ranked SHAP-style contributors translated into clinically meaningful language. The explainability layer is a co-design with practising psychologists, not a post-hoc retrofit.</p>
+      </div>
+      <div class="card">
+        <p class="label">Innovation 4</p>
+        <h3>Longitudinal Child Mental-Health Dataset</h3>
+        <p>Anonymised, consented, ethics-approved. The first dataset of its kind in the European context. A scientific public good with commercial license value to research institutions, public-health bodies, and pharmaceutical research.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top: 2rem;">
+      <p class="label">Expected scientific outputs (2026–2028)</p>
+      <ul class="plain-list" style="margin-top: 0.5rem;">
+        <li>2 peer-reviewed publications: methodology paper (signal taxonomy) + validation study results</li>
+        <li>1 conference paper at a Tier-1 venue (ICML / NeurIPS / EMNLP or a developmental psychology venue)</li>
+        <li>1 master-thesis / PhD-thesis topic supervised through FH Graubünden and Universidade de Aveiro</li>
+        <li>1 dataset release (anonymised summary statistics) under controlled access</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── Business Model ───────────────────────────────────────────── -->
+<section id="model" class="section-alt">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">06 — Business Model</p>
+      <h2>Five revenue streams, one platform</h2>
+      <p>
+        Petrus AI is a multi-stream B2B SaaS with high-margin licensing and data layers
+        above it. The same AI engine serves all five streams — a single product investment,
+        five commercial channels, and a dataset whose value compounds with adoption.
+      </p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Stream</th>
+            <th>Customer</th>
+            <th>Pricing</th>
+            <th>Margin</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1 · Schools (B2B SaaS)</strong></td>
+            <td>Public schools, private schools, school networks (CH / DACH)</td>
+            <td>CHF 16–27 / student / year</td>
+            <td>75–80%</td>
+          </tr>
+          <tr>
+            <td><strong>2 · Healthcare providers</strong></td>
+            <td>Child-psychiatry services, paediatric practices, CAMHS-equivalents</td>
+            <td>CHF 2.1K–5.3K / provider / month</td>
+            <td>78–82%</td>
+          </tr>
+          <tr>
+            <td><strong>3 · Sports formation centres</strong></td>
+            <td>Football academies, multi-sport youth-development centres, federation training programmes</td>
+            <td>CHF 16K–53K / academy / year</td>
+            <td>78–82%</td>
+          </tr>
+          <tr>
+            <td><strong>4 · Pharmaceutical R&amp;D</strong></td>
+            <td>Pharma companies developing paediatric psychiatric medication; CROs running paediatric trials</td>
+            <td>CHF 107K–500K / therapeutic class / year (RWE licensing)</td>
+            <td>90%+</td>
+          </tr>
+          <tr>
+            <td><strong>5 · Research data platform</strong></td>
+            <td>Universities, public-health bodies, foundation-funded researchers</td>
+            <td>CHF 53K–200K / institution / year</td>
+            <td>90%+</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin: 2.5rem 0 1rem;">5-year ARR trajectory — realistic glide path</h3>
+
+    <div class="arr-chart">
+      <div class="arr-row">
+        <span class="arr-label">Year 1 (2026)</span>
+        <div class="arr-bar-wrap"><div class="arr-bar" style="width: 0%; background: var(--teal-border);"></div></div>
+        <span class="arr-value">CHF 0</span>
+      </div>
+      <div class="arr-row">
+        <span class="arr-label">Year 2 (2027)</span>
+        <div class="arr-bar-wrap"><div class="arr-bar" style="width: 0.5%; background: #9b3f28;"></div></div>
+        <span class="arr-value">CHF 50K</span>
+      </div>
+      <div class="arr-row">
+        <span class="arr-label">Year 3 (2028)</span>
+        <div class="arr-bar-wrap"><div class="arr-bar" style="width: 7%; background: #b54430;"></div></div>
+        <span class="arr-value">CHF 980K</span>
+      </div>
+      <div class="arr-row">
+        <span class="arr-label">Year 4 (2029)</span>
+        <div class="arr-bar-wrap"><div class="arr-bar" style="width: 17%;"></div></div>
+        <span class="arr-value">CHF 2.5M</span>
+      </div>
+      <div class="arr-row">
+        <span class="arr-label">Year 5 (2030)</span>
+        <div class="arr-bar-wrap"><div class="arr-bar" style="width: 28%;"></div></div>
+        <span class="arr-value">CHF 4.0M</span>
+      </div>
+      <div class="arr-row">
+        <span class="arr-label">Year 7 — outlook</span>
+        <div class="arr-bar-wrap"><div class="arr-bar" style="width: 100%; background: #e06040;"></div></div>
+        <span class="arr-value">CHF 15M</span>
+      </div>
+    </div>
+
+    <div class="stat-grid" style="margin-top: 2rem;">
+      <div class="stat-card">
+        <div class="stat-number">75–80%</div>
+        <div class="stat-desc">Gross margin (school stream)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">M30</div>
+        <div class="stat-desc">Break-even target month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">85%</div>
+        <div class="stat-desc">Annual gross retention target</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">8:1</div>
+        <div class="stat-desc">LTV-to-CAC target (mature state)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── Market Strategy ──────────────────────────────────────────── -->
+<section id="market">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">07 — Market &amp; Commercialisation Strategy</p>
+      <h2>Switzerland first.<br>DACH next. EU after that.</h2>
+      <p>
+        We do not chase scale before traction. The commercialisation path is sequenced:
+        Swiss beachhead with clinically validated pilots, then DACH expansion using
+        Swiss validation as institutional credentialing, then broader EU through regulatory
+        and language adaptation.
+      </p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Market</th>
+            <th>TAM / SAM / SOM</th>
+            <th>Target year</th>
+            <th>Entry strategy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Switzerland (beachhead)</strong></td>
+            <td>1.2M children · ~15K schools · CHF 280M ed-tech spend</td>
+            <td>2026–2027</td>
+            <td>Graubünden &amp; German-speaking cantons; FH Graubünden as institutional anchor</td>
+          </tr>
+          <tr>
+            <td><strong>Germany</strong></td>
+            <td>10.2M children · 32K schools · CHF 480M ed-tech spend</td>
+            <td>2028–2029</td>
+            <td>Bavaria + Baden-Württemberg first; entry through DACH academic and clinical partner network</td>
+          </tr>
+          <tr>
+            <td><strong>Austria</strong></td>
+            <td>1.1M children · ~6K schools</td>
+            <td>2028–2029</td>
+            <td>Federal-state pilots; cross-border cooperation through Tirol &amp; Vorarlberg</td>
+          </tr>
+          <tr>
+            <td><strong>Portugal &amp; lusophone EU</strong></td>
+            <td>~1.7M children · public-school system</td>
+            <td>2029–2030</td>
+            <td>Universidade de Aveiro / CINTESIS@RISE as research and clinical anchor (through Dr. Pedro Bem-Haja)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── Founding Team ─────────────────────────────────────────────── -->
+<section id="team" class="section-alt">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">08 — Founding Team</p>
+      <h2>The people behind the platform</h2>
+      <p>
+        Petrus AI is led by a complementary founding team combining Swiss-market
+        commercial operations and AI systems engineering — with clinical depth provided
+        by the Clinical Team and institutional credibility provided by the Advisory Board
+        and academic partners.
+      </p>
+    </div>
+
+    <div class="team-card">
+      <div class="team-avatar">AM</div>
+      <div class="team-body">
+        <h3>Alexandre Maia de Matos</h3>
+        <p class="role">Founder &amp; CEO</p>
+        <p>
+          25+ years of international business leadership across Switzerland, Portugal, Angola, Spain and Macau.
+          Cambridge Business Analytics certification (2024). Multilingual: Portuguese (native), English, Spanish, German.
+          Based in Arosa, Graubünden — operating Petrus AI as his full-time mission since Q2 2025. Responsible for
+          investor relations, institutional partnerships, and commercial strategy. Father of four.
+          <strong>The original mission of Petrus AI is personal — the platform is named after his cousin Pedro,
+          lost to an undetected mental-health crisis. "There is always a window."</strong>
+        </p>
+      </div>
+    </div>
+
+    <div class="team-card">
+      <div class="team-avatar">MS</div>
+      <div class="team-body">
+        <h3>Mikkel Solnado</h3>
+        <p class="role">Co-Founder &amp; CTO</p>
+        <p>
+          Founder of Nodel.app. Background in AI systems architecture, custom workflow automation, and children's
+          integration work in Denmark. Responsible for technology architecture, platform development, the MVP
+          rebuild for ages 6–8, and the data engineering layer of the platform. Privacy-first engineering principles.
+          Will lead a technical team of 2–3 senior engineers hired immediately on Gate 1 release
+          (Q3 2026). Committed full-time on seed close.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── Clinical Team ─────────────────────────────────────────────── -->
+<section id="clinical">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">09 — Clinical Team</p>
+      <h2>A two-layer clinical team</h2>
+      <p>
+        The <strong>Clinical Leadership team</strong> (Dr. Pedro Bem-Haja plus two senior methodology
+        researchers) defines the clinical specification, oversees validation, and authors the
+        peer-reviewed publications. The <strong>Clinical Operations team</strong> (three working
+        psychologists hired from Q1 2027) work daily with children and adolescents through the
+        pilot and commercial deployments and review every alert generated by the platform.
+      </p>
+    </div>
+
+    <div class="team-card">
+      <div class="team-avatar dark">PB</div>
+      <div class="team-body">
+        <h3>Dr. Pedro Bem-Haja, PhD <span class="badge badge-green">Engaged · Q2 2026</span></h3>
+        <p class="role">Lead Clinical Psychologist · Neuroscientist · Professor</p>
+        <p>
+          PhD in Psychology (Universidade de Aveiro, 2018). Master's in Forensic Psychology (Universidade de Aveiro, 2011).
+          Professor Auxiliar (convidado) at the Department of Education and Psychology, Universidade de Aveiro, teaching
+          neuropsychological assessment, neuropsychological rehabilitation, and psychobiology.
+          Integrated researcher at <strong>CINTESIS@RISE</strong> (AgeingCluster research group) and at the
+          <strong>Neurolab of the Universidade de Aveiro</strong>.
+        </p>
+        <p style="margin-top: 0.6rem;">
+          Research areas: cognitive neuroscience across Health, Education, Forensic and Occupational settings.
+          Methodology &amp; statistics specialist — validations, classification algorithms, machine learning applied to
+          education and health data. ~20 peer-reviewed publications. ORCID 0000-0002-7547-5743.
+        </p>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top: 0.5rem;">
+      <div class="card">
+        <p class="label">Clinical Team Member · Developmental / Child Psychology <span class="badge badge-yellow">LOI in progress</span></p>
+        <h3>Workstream Lead — Signal Taxonomy &amp; Interaction Framework</h3>
+        <p>Senior child psychologist sourced through the Lead Clinical Psychologist's network. Specific expertise in child and adolescent development, executive function assessment, and behavioural observation in educational settings.</p>
+      </div>
+      <div class="card">
+        <p class="label">Clinical Team Member · Research Methodology &amp; Validation <span class="badge badge-yellow">LOI in progress</span></p>
+        <h3>Workstream Lead — Validation Protocol Design</h3>
+        <p>Senior researcher with expertise in psychometric instrument design, study methodology, statistical validation, and academic publication. Owns the validation-study design and the ethics-committee submission.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top: 2rem;">
+      <p class="label">Clinical Operations team — from Q1 2027</p>
+      <p>
+        Three working psychologists hired as Petrus AI employees. Their daily responsibility:
+        work directly with children in pilots and deployments, review every alert before it routes
+        externally, provide the front-line clinical interface partner institutions interact with, and
+        maintain the safeguarding-disclosure pathway. Every alert needs human clinical review
+        before it routes externally — this is both a safeguarding requirement and an EU AI Act
+        human-oversight obligation for high-risk AI systems.
+      </p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── Advisory Board ───────────────────────────────────────────── -->
+<section id="advisory" class="section-alt">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">10 — Advisory Board</p>
+      <h2>Institutional weight where it matters</h2>
+      <p>
+        The Advisory Board provides perspectives the founding team does not natively carry —
+        large-organisation enterprise technology, education-sector procurement, child-protection
+        regulation, and Swiss/EU institutional access.
+      </p>
+    </div>
+
+    <div class="team-card">
+      <div class="team-avatar" style="background: #8B4513;">MG</div>
+      <div class="team-body">
+        <h3>Marcel Greutmann <span class="badge badge-green">Confirmed</span></h3>
+        <p class="role">Lead Advisory Board Member · Advisor only (no capital commitment)</p>
+        <p>
+          Former Vice President, IBM. Senior enterprise technology executive with decades of Swiss-market experience.
+          Marcel brings deep operational understanding of how production AI systems behave in regulated environments.
+          His critical lens on architecture, security, and explainability informed the technical-due-diligence framework
+          that now sits at the foundation of the platform's design.
+          <strong>Advisory remit:</strong> technology architecture review, enterprise-grade compliance, Swiss institutional
+          introductions, technical due-diligence support for capital partners.
+        </p>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top: 1.5rem;">
+      <table>
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Remit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Lead — Enterprise technology &amp; technical advisory</td>
+            <td><span class="badge badge-green">Marcel Greutmann · Confirmed</span></td>
+            <td>Architecture, compliance, capital strategy</td>
+          </tr>
+          <tr>
+            <td>Child psychiatrist (clinical practice)</td>
+            <td><span class="badge badge-blue">In recruitment via PDGR network</span></td>
+            <td>Clinical deployment, alert-handling pathways, regulator-facing credibility</td>
+          </tr>
+          <tr>
+            <td>Data protection &amp; child-rights legal expert</td>
+            <td><span class="badge badge-blue">In recruitment via Swiss legal counsel</span></td>
+            <td>DPIA oversight, EU AI Act conformity, child-consent framework</td>
+          </tr>
+          <tr>
+            <td>Education authority representative</td>
+            <td><span class="badge badge-yellow">Target Q3 2026</span></td>
+            <td>Cantonal procurement pathways, ministerial-level introductions</td>
+          </tr>
+          <tr>
+            <td>International scaling / DACH go-to-market</td>
+            <td><span class="badge badge-yellow">Target Q1 2027</span></td>
+            <td>Germany/Austria entry, healthcare-tech commercial scaling</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── Strategic Partnerships ──────────────────────────────────── -->
+<section id="partners">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">11 — Strategic Partnerships</p>
+      <h2>The network that makes deployment possible</h2>
+      <p>
+        Petrus AI is not built in isolation. The clinical specification, the validation pipeline,
+        the institutional procurement pathway and the academic credibility all run through
+        partners who have committed to the project.
+      </p>
+    </div>
+
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+        <p class="label">FH Graubünden <span class="badge badge-green">Signed · Research partner</span></p>
+      </div>
+      <h3 style="margin-bottom: 0.8rem;">University of Applied Sciences Graubünden</h3>
+      <p>Two research teams, eight student researchers, 400+ research hours, supervised by Prof. Dr. Ivan Nikitin. Final reports delivered January 2026.</p>
+      <p style="margin-top: 0.6rem;"><strong>Team 1 — Market Research:</strong> 23-page final report, 200+ hours. Survey of 33 Swiss institutions across 8 cantons (160 contacted; 30.5% effective response rate).</p>
+      <p><strong>Team 2 — Communication Plan &amp; Compliance:</strong> 17-page final report, 200+ hours. Six legal-expert consultations on EU AI Act and Swiss FADP compliance; twenty UX and accessibility specialists on age-appropriate interface design. Recommendation: adopt EU AI Act voluntarily as the operating standard, even for Swiss-only deployment.</p>
+    </div>
+
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <p class="label">Universidade de Aveiro / CINTESIS@RISE / Neurolab <span class="badge badge-blue">Clinical anchor</span></p>
+      <h3 style="margin-bottom: 0.8rem;">Clinical &amp; Research Anchor — through Dr. Pedro Bem-Haja</h3>
+      <p>Universidade de Aveiro is a top-tier Portuguese research university with a strong Department of Education and Psychology. CINTESIS@RISE — the merged Health Research Network unit comprising CINTESIS, UnIC, MedInUP and CICS-UBI; ~500 researchers across nine Portuguese universities — is one of Europe's largest health-research networks. The Neurolab at Universidade de Aveiro provides experimental psychophysiology infrastructure relevant to the platform's signal architecture.</p>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <p class="label">PDGR — Psychiatrische Dienste Graubünden <span class="badge badge-blue">Active</span></p>
+        <h3 style="margin-bottom: 0.6rem;">Co-Development Outreach</h3>
+        <p>Public-system child-psychiatry service for the canton of Graubünden. Outreach advanced for a co-development partnership. If formalised, PDGR becomes the first clinical reference customer and the institutional gateway to other cantonal psychiatric services.</p>
+      </div>
+      <div class="card">
+        <p class="label">Swiss legal counsel <span class="badge badge-blue">Engaged</span></p>
+        <h3 style="margin-bottom: 0.6rem;">DPIA &amp; EU AI Act Conformity</h3>
+        <p>Specialised Swiss data-protection counsel engaged for the Data Protection Impact Assessment, child-consent framework, and EU AI Act conformity-assessment roadmap. DPIA completion target Q2 2027; EU AI Act high-risk-system conformity planned for 2027–2028.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── 3-Year Roadmap ───────────────────────────────────────────── -->
+<section id="roadmap" class="section-alt">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">12 — 3-Year Workplan</p>
+      <h2>From clinical specification<br>to commercial scale</h2>
+      <p>
+        The sequencing principle is fixed and non-negotiable: <strong>clinical validation precedes commercial deployment.</strong>
+        The three-year plan is structured as four phases — clinical foundation, MVP and pilots,
+        validation and commercial launch, scale and DACH expansion — with each phase gated
+        by milestone deliverables that trigger the next seed tranche.
+      </p>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <p class="label">Q2 2026 — Phase 0 Launch + Team Hiring</p>
+        <h3>Clinical foundation + technical team build</h3>
+        <p>Lead Clinical Psychologist engagement signed. Signal taxonomy work initiated. FH Graubünden briefed. PDGR co-development negotiation advanced. Swiss DPIA workstream commenced. CTO recruits first 2 senior AI/ML engineers and Full-Stack Developer.</p>
+      </div>
+
+      <div class="timeline-item">
+        <p class="label">Q3 2026 — Phase 0 Complete · Gate 1: CHF 320K</p>
+        <h3>Clinical specification finalised</h3>
+        <p>Signal taxonomy, interaction framework, alert architecture and validation protocol finalised. Technical team begins MVP integration of clinical logic.</p>
+      </div>
+
+      <div class="timeline-item">
+        <p class="label">Q4 2026 — MVP &amp; First Pilots · Gate 2: CHF 372K</p>
+        <h3>First buildable product, first school agreements</h3>
+        <p>MVP complete for ages 6–8. Internal clinical review. 3–5 Swiss school pilot agreements signed. Ethics committee submission filed.</p>
+      </div>
+
+      <div class="timeline-item">
+        <p class="label">Q1–Q2 2027 — Pilots Live</p>
+        <h3>Pilot operations and validation study</h3>
+        <p>Pilots operational in 3–5 Graubünden schools (target: 300–600 students). FH Graubünden and Universidade de Aveiro / CINTESIS@RISE joint validation study running. First commercial revenue possible from early-pilot conversion contracts.</p>
+      </div>
+
+      <div class="timeline-item">
+        <p class="label">Q3 2027 — Validation Complete · Gate 3: CHF 372K</p>
+        <h3>Platform clinically validated</h3>
+        <p>Platform validated against pre-defined clinical criteria. Academic methodology paper submitted. Validation study results submitted for peer review.</p>
+      </div>
+
+      <div class="timeline-item">
+        <p class="label">Q3–Q4 2027 — Commercial Launch · Gate 4a: CHF 350K</p>
+        <h3>Revenue at scale begins</h3>
+        <p>30–50 Swiss school contracts signed. Healthcare-provider dashboard launched with PDGR-network partners. Research-data platform opened to ethics-vetted institutional clients. Target ARR: CHF 50K exit Y2; CHF 980K exit Y3 base case.</p>
+      </div>
+
+      <div class="timeline-item">
+        <p class="label">Q1 2028 — Growth-round Preparation · Gate 4b: CHF 350K</p>
+        <h3>Bridge to growth funding</h3>
+        <p>Growth funding round prepared. EU AI Act high-risk-system conformity assessment launched.</p>
+      </div>
+
+      <div class="timeline-item">
+        <p class="label">Q2–Q4 2028 — DACH Expansion</p>
+        <h3>Germany &amp; Austria entry</h3>
+        <p>German federal-state pilots commenced (Bavaria, Baden-Württemberg). Austrian regional pilots through Tirol/Vorarlberg cross-border channels. Clinical methodology paper published.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── Funding Structure ─────────────────────────────────────────── -->
+<section id="funding">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">15 — Funding Structure</p>
+      <h2>How CHF 5.5M is assembled</h2>
+      <p>
+        The total 3-year requirement of CHF 5.5M is structured to combine private capital
+        with non-dilutive grant funding from Swiss and supranational sources, plus the
+        limited commercial revenue achievable within the window. No single source is
+        critical-path, and Year 1 is executable on private capital alone if grant timing slips.
+      </p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Indicative share</th>
+            <th>Indicative amount</th>
+            <th>Use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Private capital — seed round</strong></td>
+            <td>~56%</td>
+            <td>CHF 3,100K</td>
+            <td>Phase 0 close, MVP build, tech team Y1, Clinical Operations Y2 hiring, validation, Y2-Y3 commercial launch</td>
+          </tr>
+          <tr>
+            <td><strong>National public R&amp;D innovation grants</strong></td>
+            <td>~18%</td>
+            <td>CHF 1,000K</td>
+            <td>R&amp;D matching: clinical methodology, XAI architecture, FH Graubünden subcontracting, validation study</td>
+          </tr>
+          <tr>
+            <td><strong>Supranational digital-health / AI grants</strong></td>
+            <td>~25%</td>
+            <td>CHF 1,350K</td>
+            <td>Validation publication, EU AI Act conformity, DACH expansion preparation, scientific dissemination</td>
+          </tr>
+          <tr>
+            <td><strong>Regional / cantonal innovation funds</strong></td>
+            <td>~1%</td>
+            <td>CHF 50K</td>
+            <td>Pilot-specific support; cantonal &amp; municipal innovation funds</td>
+          </tr>
+          <tr>
+            <td><strong>Total</strong></td>
+            <td><strong>100%</strong></td>
+            <td><strong>CHF 5,500K</strong></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin: 2.5rem 0 1rem;">3-year budget overview</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Year 1</th>
+            <th>Year 2</th>
+            <th>Year 3</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Personnel — Tech team</td>
+            <td>CHF 472K</td>
+            <td>CHF 1,064K</td>
+            <td>CHF 1,245K</td>
+            <td><strong>CHF 2,781K</strong></td>
+          </tr>
+          <tr>
+            <td>Personnel — Clinical Operations</td>
+            <td>—</td>
+            <td>CHF 128K</td>
+            <td>CHF 168K</td>
+            <td><strong>CHF 296K</strong></td>
+          </tr>
+          <tr>
+            <td>Personnel — Clinical Leadership</td>
+            <td>CHF 260K</td>
+            <td>CHF 220K</td>
+            <td>CHF 145K</td>
+            <td><strong>CHF 625K</strong></td>
+          </tr>
+          <tr>
+            <td>Infrastructure &amp; tools</td>
+            <td>CHF 85K</td>
+            <td>CHF 110K</td>
+            <td>CHF 130K</td>
+            <td><strong>CHF 325K</strong></td>
+          </tr>
+          <tr>
+            <td>Validation operations + dissemination</td>
+            <td>CHF 40K</td>
+            <td>CHF 120K</td>
+            <td>CHF 50K</td>
+            <td><strong>CHF 210K</strong></td>
+          </tr>
+          <tr>
+            <td>EU AI Act conformity workstream</td>
+            <td>CHF 15K</td>
+            <td>CHF 60K</td>
+            <td>CHF 70K</td>
+            <td><strong>CHF 145K</strong></td>
+          </tr>
+          <tr>
+            <td>Legal &amp; regulatory, patent / IP, other</td>
+            <td>CHF 350K</td>
+            <td>CHF 380K</td>
+            <td>CHF 380K</td>
+            <td><strong>CHF 1,110K</strong></td>
+          </tr>
+          <tr>
+            <td><strong>Total OpEx</strong></td>
+            <td><strong>CHF 1,222K</strong></td>
+            <td><strong>CHF 2,082K</strong></td>
+            <td><strong>CHF 2,188K</strong></td>
+            <td><strong>CHF 5,492K</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── Expected Impact ──────────────────────────────────────────── -->
+<section id="impact" class="section-alt">
+  <div class="inner">
+    <div class="section-header">
+      <p class="label">17 — Expected Impact</p>
+      <h2>Scientific, societal, economic</h2>
+    </div>
+
+    <div class="three-col">
+      <div class="card">
+        <p class="label">Scientific</p>
+        <h3>Two peer-reviewed publications</h3>
+        <p>Methodology paper + validation-study paper. One conference paper at a Tier-1 venue. 1 master / PhD thesis topic supervised. 1 anonymised dataset release. FH Graubünden as European reference centre for child mental-health AI methodology.</p>
+      </div>
+      <div class="card">
+        <p class="label">Societal</p>
+        <h3>Children reaching support 2–4 weeks earlier</h3>
+        <p>Pilot cohort: 300–600 children (Year 2). Year-3 commercial scale: ~10,000 children potentially covered. Year-5 vision: 1M+ children covered across DACH.</p>
+      </div>
+      <div class="card">
+        <p class="label">Economic</p>
+        <h3>Swiss-domiciled deep-tech employment</h3>
+        <p>All funded personnel growth is Swiss-domiciled or Swiss-tax-resident. ~6 FTEs by end of Year 1. ~10 FTEs by end of Year 3. R&amp;D investment in Switzerland ~CHF 1.5M (Y1–Y3).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ─── Contact ──────────────────────────────────────────────────── -->
+<section id="contact">
+  <div class="inner">
+    <div class="section-header" style="margin-bottom: 3rem;">
+      <p class="label">For funder enquiries and follow-up</p>
+      <h2>Get in touch</h2>
+    </div>
+
+    <div class="contact-grid">
+      <div class="contact-block">
+        <p class="label">Founder &amp; CEO</p>
+        <p><strong style="color: var(--white);">Alexandre Maia de Matos</strong></p>
+        <p><a href="mailto:alex@seventyfifty.ch">alex@seventyfifty.ch</a></p>
+        <p><a href="tel:+41762699173">+41 76 269 91 73</a></p>
+      </div>
+      <div class="contact-block">
+        <p class="label">Company</p>
+        <p><strong style="color: var(--white);">Petrus Labs</strong></p>
+        <p>Arosa, Graubünden</p>
+        <p>Switzerland</p>
+      </div>
+      <div class="contact-block">
+        <p class="label">Web &amp; LinkedIn</p>
+        <p><a href="https://www.petrus-labs.com">www.petrus-labs.com</a></p>
+        <p><a href="https://linkedin.com/in/julioalexandrematos" target="_blank" rel="noopener">linkedin.com/in/julioalexandrematos</a></p>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 4rem; padding: 3rem 0; border-top: 1px solid var(--teal-border);">
+      <p style="font-style: italic; font-size: 1.3rem; color: var(--offwhite); max-width: 640px; margin: 0 auto;">
+        "Every child in the system is Pedro getting the window he did not have."
+      </p>
+    </div>
+
+    <div class="disclosure">
+      <p>
+        <strong>Forward-looking statements &amp; disclosures.</strong> This document contains forward-looking projections
+        and theoretical estimates for revenue, market penetration, customer acquisition timelines, and financial outcomes.
+        Except for confirmed components (FH Graubünden signed partnership, Advisory Board lead confirmation, Clinical Lead
+        engagement, completed market research across 33 Swiss institutions), all figures are based on market research,
+        comparable-company analysis, and economic modelling. As of May 2026: zero signed school contracts; pilots in
+        active discussion; product in pre-MVP development; DPIA in progress; EU AI Act conformity assessment planned for
+        2027–2028. This website is for informational purposes only and does not constitute an offer or solicitation of
+        securities. Petrus Labs, Arosa, Switzerland.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Footer ───────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <p>© 2026 Petrus Labs. Arosa, Graubünden, Switzerland.</p>
+    <p>Petrus AI · AI-powered early warning for children's mental health</p>
+  </div>
+</footer>
+
+</body>
+</html>
