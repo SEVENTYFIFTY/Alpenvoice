@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telmo Maia Arquitectos 360 — Da ideia às chaves.</title>
+<meta name="description" content="Arquitectura, renovação, mediação imobiliária e crédito. Tudo num só lugar. 20 anos de atelier. Setúbal · Palmela · Área Metropolitana de Lisboa.">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Epilogue:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #F6F4EF;
+  --bg2:    #EEEAE0;
+  --ink:    #1C1C1A;
+  --ink2:   #4A4840;
+  --ink3:   #8A877E;
+  --line:   #D8D4C8;
+  --green:  #2A4A35;
+  --green2: #3D6B4F;
+  --white:  #FDFCF9;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Epilogue', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.7;
+}
+
+/* ── UTILS ── */
+.container { max-width: 1080px; margin: 0 auto; padding: 0 40px; }
+.mono {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 20px;
+}
+.deco-line {
+  width: 48px;
+  height: 1.5px;
+  background: var(--green);
+  margin: 32px 0;
+}
+.tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  border: 1px solid var(--line);
+  padding: 4px 8px;
+  display: inline-block;
+}
+
+/* ── HEADER / NAV ── */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(253, 252, 249, 0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  transition: box-shadow 0.2s;
+}
+header.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.06); }
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 64px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.3px;
+}
+.nav-logo em { font-style: italic; color: var(--green); }
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+.nav-links a {
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--green); }
+.nav-cta {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--white);
+  background: var(--green);
+  padding: 10px 20px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.nav-cta:hover { background: var(--green2); }
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 1.5px;
+  background: var(--ink);
+  transition: all 0.2s;
+}
+
+/* ── HERO ── */
+#hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  padding-top: 64px;
+  position: relative;
+  overflow: hidden;
+  background: var(--white);
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--white) 60%, var(--bg) 100%);
+}
+.hero-accent {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 38%;
+  height: 100%;
+  background: var(--bg);
+  z-index: 0;
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 80px;
+  align-items: end;
+  padding: 100px 40px 80px;
+  max-width: 1080px;
+  margin: 0 auto;
+  width: 100%;
+}
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(56px, 7vw, 92px);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -2px;
+  color: var(--ink);
+  margin-bottom: 28px;
+}
+.hero-title em { font-style: italic; color: var(--green); }
+.hero-desc {
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--ink2);
+  line-height: 1.8;
+  max-width: 480px;
+  margin-bottom: 40px;
+}
+.hero-founders {
+  display: flex;
+  gap: 32px;
+  margin-top: 40px;
+}
+.hf-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink);
+}
+.hf-role {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-top: 3px;
+}
+.hero-meta {
+  text-align: right;
+  padding-bottom: 6px;
+  min-width: 160px;
+}
+.hero-meta-item {
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  color: var(--ink3);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  line-height: 2.8;
+}
+.hero-meta-item span { color: var(--ink); }
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--white);
+  background: var(--green);
+  padding: 14px 28px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.hero-cta:hover { background: var(--green2); }
+.hero-cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 14px 28px;
+  text-decoration: none;
+  margin-left: 12px;
+  transition: all 0.15s;
+}
+.hero-cta-ghost:hover { border-color: var(--ink); }
+.hero-scroll {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 2;
+}
+.hero-scroll::after {
+  content: '';
+  width: 1px;
+  height: 40px;
+  background: var(--line);
+}
+
+/* ── SECTION BASE ── */
+section { padding: 100px 0; }
+section.tinted { background: var(--bg); }
+section.dark { background: var(--ink); }
+.sec-header {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 0 24px;
+  align-items: start;
+  margin-bottom: 64px;
+}
+.sec-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--green);
+  letter-spacing: 2px;
+  padding-top: 6px;
+}
+.sec-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 10px;
+}
+.sec-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(32px, 4vw, 50px);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--ink);
+  letter-spacing: -0.5px;
+}
+.sec-title em { font-style: italic; color: var(--green); }
+
+/* ── ORIGEM ── */
+#origem .split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+.problem-list { list-style: none; margin-top: 24px; border-top: 1px solid var(--line); }
+.problem-list li {
+  display: flex;
+  gap: 20px;
+  align-items: baseline;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+.problem-list li .arr { color: var(--green); font-weight: 400; flex-shrink: 0; }
+.atelier-track {
+  border-top: 2px solid var(--ink);
+  padding-top: 24px;
+  margin-bottom: 32px;
+}
+.atelier-items {
+  font-size: 13.5px;
+  color: var(--ink2);
+  font-weight: 300;
+  line-height: 2.2;
+  margin-top: 14px;
+}
+.answer-block {
+  border-top: 1px solid var(--line);
+  padding-top: 24px;
+}
+.answer-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--green);
+  font-style: italic;
+  margin-top: 10px;
+}
+
+/* ── SERVIÇOS ── */
+#servicos { background: var(--white); }
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.service-card {
+  background: var(--white);
+  padding: 44px 40px;
+  transition: background 0.15s;
+}
+.service-card:hover { background: var(--bg); }
+.sc-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 16px;
+}
+.sc-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+.sc-body {
+  font-size: 13.5px;
+  font-weight: 300;
+  color: var(--ink2);
+  line-height: 1.75;
+}
+.sc-price {
+  margin-top: 20px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  color: var(--green);
+  letter-spacing: 1px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+/* ── EQUIPA ── */
+#equipa { background: var(--bg); }
+.team-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+.team-card {
+  border-top: 2px solid var(--ink);
+  padding-top: 28px;
+}
+.tc-role-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 14px;
+}
+.tc-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+.tc-desc {
+  font-size: 13.5px;
+  font-weight: 300;
+  color: var(--ink2);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+.tc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+.partner-block {
+  border-top: 1px solid var(--line);
+  padding-top: 36px;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+.partner-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 8px;
+}
+.partner-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--ink);
+}
+.partner-desc {
+  font-size: 13.5px;
+  font-weight: 300;
+  color: var(--ink2);
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+
+/* ── MERCADO ── */
+#mercado { background: var(--white); }
+.market-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-bottom: 64px;
+}
+.mg-cell {
+  background: var(--white);
+  padding: 32px 24px;
+}
+.mg-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 12px;
+}
+.mg-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.mg-val em { font-style: normal; color: var(--green); }
+.mg-sub {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--ink3);
+  line-height: 1.5;
+}
+.market-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+.zones-list {
+  list-style: none;
+  margin-top: 12px;
+}
+.zones-list li {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ink2);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.zones-list li::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+}
+
+/* ── INVESTIDOR ── */
+#investidor { background: var(--ink); }
+#investidor .sec-title { color: var(--white); }
+#investidor .sec-title em { color: #8FBA9F; }
+#investidor .sec-label { color: #555; }
+#investidor .sec-num { color: var(--green2); }
+.inv-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+.inv-card {
+  border-top: 2px solid #333;
+  padding-top: 28px;
+}
+.inv-card.highlight { border-top-color: var(--green2); }
+.ic-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--green2);
+  margin-bottom: 14px;
+}
+.ic-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--white);
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+.ic-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid #2A2A28;
+  font-size: 13px;
+}
+.ic-row .key { color: #666; font-weight: 300; }
+.ic-row .val { color: #CCC; font-weight: 400; }
+.ic-row .val.accent { color: #8FBA9F; font-weight: 500; }
+
+/* ── FINANCEIRO ── */
+#financeiro { background: var(--bg); }
+.fin-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-bottom: 64px;
+}
+.fk {
+  background: var(--white);
+  padding: 32px 24px;
+}
+.fk-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 40px;
+  font-weight: 300;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+}
+.fk-val em { font-style: normal; color: var(--green); }
+.fk-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  line-height: 1.6;
+}
+.rev-table { border-top: 1px solid var(--line); }
+.rev-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13.5px;
+}
+.rev-line .rl-name { color: var(--ink2); font-weight: 300; }
+.rev-line .rl-val { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink); }
+.rev-line.total .rl-name { color: var(--ink); font-weight: 500; }
+.rev-line.total .rl-val { color: var(--green); }
+.fin-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+}
+.callout {
+  border-left: 2px solid var(--green);
+  padding: 18px 24px;
+  background: var(--white);
+  margin-top: 16px;
+}
+.callout p {
+  font-size: 13.5px;
+  font-weight: 300;
+  color: var(--ink2);
+  line-height: 1.75;
+}
+.callout strong { color: var(--green); }
+
+/* ── ROADMAP ── */
+#roadmap { background: var(--white); }
+.steps { border-top: 1px solid var(--line); }
+.step {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 40px;
+  align-items: start;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+.step-period {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green);
+  padding-top: 3px;
+  line-height: 1.6;
+}
+.step-body {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ink2);
+  line-height: 1.75;
+}
+.step-body strong { color: var(--ink); font-weight: 500; }
+
+/* ── CONTACTO / CTA ── */
+#contacto { background: var(--green); padding: 120px 0; }
+.contact-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.contact-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -1.5px;
+  color: var(--white);
+  margin-bottom: 24px;
+}
+.contact-title em { font-style: italic; color: #8FBA9F; }
+.contact-sub {
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(253,252,249,0.7);
+  line-height: 1.8;
+}
+.contact-info { display: flex; flex-direction: column; gap: 28px; }
+.contact-item {}
+.contact-item-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(253,252,249,0.5);
+  margin-bottom: 6px;
+}
+.contact-item-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--white);
+}
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green);
+  background: var(--white);
+  padding: 14px 28px;
+  text-decoration: none;
+  margin-top: 32px;
+  transition: opacity 0.15s;
+}
+.contact-btn:hover { opacity: 0.9; }
+.contact-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--white);
+  border: 1px solid rgba(253,252,249,0.4);
+  padding: 14px 28px;
+  text-decoration: none;
+  margin-top: 12px;
+  transition: border-color 0.15s;
+}
+.contact-btn-outline:hover { border-color: var(--white); }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--ink);
+  padding: 56px 40px;
+}
+.footer-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--white);
+  font-style: italic;
+}
+.footer-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+.footer-links a {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #555;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.footer-links a:hover { color: var(--green2); }
+.footer-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: #444;
+  letter-spacing: 1px;
+  text-align: right;
+  line-height: 2;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .nav-links, .nav-cta { display: none; }
+  .hamburger { display: flex; }
+  .hero-content { grid-template-columns: 1fr; gap: 40px; padding: 80px 24px 60px; }
+  .hero-meta { text-align: left; }
+  .hero-founders { flex-wrap: wrap; }
+  .container { padding: 0 24px; }
+  section { padding: 72px 0; }
+  .sec-header { grid-template-columns: 40px 1fr; gap: 0 16px; }
+  #origem .split, .team-grid, .market-split, .inv-cards, .fin-split, .contact-inner { grid-template-columns: 1fr; gap: 40px; }
+  .market-grid { grid-template-columns: 1fr 1fr; }
+  .fin-kpis { grid-template-columns: 1fr 1fr; }
+  .services-grid { grid-template-columns: 1fr; }
+  .step { grid-template-columns: 1fr; gap: 8px; }
+  .partner-block { grid-template-columns: 1fr; gap: 24px; }
+  .footer-inner { flex-direction: column; gap: 32px; text-align: center; }
+  .footer-links { flex-wrap: wrap; justify-content: center; }
+  .footer-meta { text-align: center; }
+}
+
+/* ── MOBILE NAV MENU ── */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--white);
+  z-index: 200;
+  flex-direction: column;
+  padding: 80px 40px 40px;
+  gap: 32px;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--ink);
+  text-decoration: none;
+}
+.mobile-menu a:hover { color: var(--green); }
+.mobile-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: 'DM Mono', monospace;
+}
+</style>
+</head>
+<body>
+
+<!-- ── MOBILE MENU ── -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" onclick="closeMobileMenu()">✕</button>
+  <a href="#origem" onclick="closeMobileMenu()">A Origem</a>
+  <a href="#servicos" onclick="closeMobileMenu()">Serviços</a>
+  <a href="#equipa" onclick="closeMobileMenu()">Equipa</a>
+  <a href="#mercado" onclick="closeMobileMenu()">Mercado</a>
+  <a href="#investidor" onclick="closeMobileMenu()">Investidor</a>
+  <a href="#contacto" onclick="closeMobileMenu()">Contacto</a>
+</div>
+
+<!-- ── HEADER ── -->
+<header id="siteHeader">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo">Telmo Maia <em>Arquitectos 360</em></a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="#origem">A Origem</a></li>
+        <li><a href="#servicos">Serviços</a></li>
+        <li><a href="#equipa">Equipa</a></li>
+        <li><a href="#mercado">Mercado</a></li>
+        <li><a href="#investidor">Investidor</a></li>
+        <li><a href="#financeiro">Financeiro</a></li>
+      </ul>
+    </nav>
+    <a href="#contacto" class="nav-cta">Contactar</a>
+    <button class="hamburger" onclick="openMobileMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="hero-accent"></div>
+  <div class="hero-content">
+    <div>
+      <div class="eyebrow">20 Anos de Atelier · Agora, Tudo num Só Lugar · 2026</div>
+      <h1 class="hero-title">Telmo Maia<br><em>Arquitectos 360</em></h1>
+      <p class="hero-desc">
+        Arquitectura. Renovação. Mediação imobiliária. Intermediação de crédito. Promoção imobiliária.<br>
+        <strong style="color:var(--ink);font-weight:400;">Tudo tratado por nós — da ideia às chaves.</strong>
+      </p>
+      <div>
+        <a href="#servicos" class="hero-cta">Conhecer os serviços</a>
+        <a href="#contacto" class="hero-cta-ghost">Falar connosco</a>
+      </div>
+      <div class="hero-founders">
+        <div>
+          <div class="hf-name">Julio Alexandre<br>Ferreira de Matos</div>
+          <div class="hf-role">Co-Fundador</div>
+        </div>
+        <div>
+          <div class="hf-name">Telmo Maia</div>
+          <div class="hf-role">Co-Fundador · Arquitecto</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-item">Atelier activo <span>20 anos</span></div>
+      <div class="hero-meta-item">Mercado <span>Portugal</span></div>
+      <div class="hero-meta-item">Zona <span>Setúbal · Palmela · AML</span></div>
+      <div class="hero-meta-item">Fundação <span>2026</span></div>
+    </div>
+  </div>
+  <div class="hero-scroll">Scroll</div>
+</section>
+
+<!-- ── A ORIGEM ── -->
+<section id="origem" class="tinted">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-num">01</div>
+      <div>
+        <div class="sec-label">A Origem</div>
+        <h2 class="sec-title">20 anos de atelier.<br><em>Uma pergunta recorrente.</em></h2>
+      </div>
+    </div>
+    <div class="split">
+      <div>
+        <p style="font-size:15px;font-weight:300;color:var(--ink2);line-height:1.8;max-width:460px;">
+          Ao longo de 20 anos, os clientes do Atelier Telmo Maia colocaram sempre as mesmas perguntas depois do projecto estar feito:
+        </p>
+        <ul class="problem-list">
+          <li><span class="arr">→</span><em>"E agora, quem trata do crédito?"</em></li>
+          <li><span class="arr">→</span><em>"Conhecem alguém de confiança para a mediação?"</em></li>
+          <li><span class="arr">→</span><em>"Podem recomendar um empreiteiro que não me deixe mal?"</em></li>
+          <li><span class="arr">→</span><em>"Podiam tratar de tudo vocês?"</em></li>
+        </ul>
+      </div>
+      <div>
+        <div class="atelier-track">
+          <div class="mono" style="color:var(--ink3);">O Atelier — 20 Anos de Historial</div>
+          <div class="atelier-items">
+            Habitação unifamiliar<br>
+            Edifícios multifamiliares<br>
+            Espaços comerciais e escritórios<br>
+            Renovações residenciais<br>
+            Licenciamentos e regularizações
+          </div>
+        </div>
+        <div class="answer-block">
+          <div class="mono" style="color:var(--ink3);">A Resposta — 2026</div>
+          <div class="answer-text">"Sim. Tratamos de tudo."</div>
+        </div>
+        <div class="deco-line" style="margin-top:28px;"></div>
+        <p style="font-size:13.5px;font-weight:300;color:var(--ink2);line-height:1.75;max-width:400px;">
+          A Telmo Maia Arquitectos 360 nasce de 20 anos de actividade real — com carteira de clientes, projectos documentados e reputação construída. O "360" não é marketing: é a extensão lógica do que os clientes já pediam.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SERVIÇOS ── -->
+<section id="servicos">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-num">02</div>
+      <div>
+        <div class="sec-label">Portfólio de Serviços</div>
+        <h2 class="sec-title">Quatro linhas.<br><em>Receita integrada.</em></h2>
+      </div>
+    </div>
+  </div>
+  <div style="max-width:1080px;margin:0 auto;padding:0 40px;">
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="sc-num">Linha 01</div>
+        <div class="sc-name">Arquitectura<br>&amp; Renovações</div>
+        <div class="sc-body">
+          Projecto técnico completo, licenciamento, gestão de empreitada e entrega turnkey. Renovações ligeiras, integrais e Fix &amp; Flip para conta própria ou de investidores. 20 anos de carteira activa em habitação, edifícios multifamiliares e espaços comerciais.
+        </div>
+        <div class="sc-price">Honorários arquitectura: 8.000–25.000 € / projecto · Margem renovação: 15–22%</div>
+      </div>
+      <div class="service-card">
+        <div class="sc-num">Linha 02</div>
+        <div class="sc-name">Mediação<br>Imobiliária</div>
+        <div class="sc-body">
+          Via parceria exclusiva com licença AMI. Angariação em exclusividade, venda com estratégia de marketing diferenciada, acompanhamento de compra e consultoria de investimento. Para o cliente, o serviço é apresentado de forma integrada e transparente.
+        </div>
+        <div class="sc-price">Comissão: 3–5% + IVA · Ticket médio Palmela: 323.500 € · Mínimo: 5.000 € + IVA</div>
+      </div>
+      <div class="service-card">
+        <div class="sc-num">Linha 03</div>
+        <div class="sc-name">Intermediação<br>de Crédito</div>
+        <div class="sc-body">
+          Via parceria exclusiva com intermediário de crédito autorizado. Crédito habitação, crédito para obras e crédito para investidores. Acesso a condições negociadas com múltiplas entidades bancárias. Acompanhamento completo até aprovação.
+        </div>
+        <div class="sc-price">Comissão bancária: 0,5–1,5% do capital · Linha acessória de valor acrescentado</div>
+      </div>
+      <div class="service-card">
+        <div class="sc-num">Linha 04</div>
+        <div class="sc-name">Promoção<br>Imobiliária</div>
+        <div class="sc-body">
+          Desenvolvimento de loteamentos e construção nova em parceria com investidor externo. A empresa gere o processo completo: análise de viabilidade, licenciamentos, projecto, gestão de obra, marketing e comercialização das fracções.
+        </div>
+        <div class="sc-price">Margem bruta: 25–35% · Horizonte típico: 18–36 meses · Parcerias com terrenos em profit sharing</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── EQUIPA ── -->
+<section id="equipa" class="tinted">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-num">03</div>
+      <div>
+        <div class="sec-label">Equipa &amp; Parceiros</div>
+        <h2 class="sec-title">Dois fundadores.<br><em>Um parceiro estratégico.</em></h2>
+      </div>
+    </div>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="tc-role-badge">Co-Fundador</div>
+        <div class="tc-name">Julio Alexandre<br>Ferreira de Matos</div>
+        <div class="tc-desc">
+          Operações · Marketing · Prospeção · Relação com Investidores<br>
+          30 anos de experiência internacional em múltiplos sectores e países. Responsável pela estrutura de gestão, crescimento e relação com investidores da empresa.
+        </div>
+        <div class="tc-tags">
+          <span class="tag">30 anos exp.</span>
+          <span class="tag">Internacional</span>
+          <span class="tag">Gestão e Escala</span>
+          <span class="tag">Investidores</span>
+        </div>
+      </div>
+      <div class="team-card">
+        <div class="tc-role-badge">Co-Fundador · Arquitecto · Atelier activo há 20 anos</div>
+        <div class="tc-name">Telmo Maia</div>
+        <div class="tc-desc">
+          Arquitecto · Director Técnico · Projecto · Licenciamentos · Supervisão de Obra<br>
+          20 anos de atelier activo com carteira real de clientes e casos documentados em habitação unifamiliar, edifícios multifamiliares, espaços comerciais e renovações residenciais.
+        </div>
+        <div class="tc-tags">
+          <span class="tag">20 anos atelier</span>
+          <span class="tag">Arquitectura</span>
+          <span class="tag">Licenciamentos</span>
+          <span class="tag">Supervisão obra</span>
+        </div>
+      </div>
+    </div>
+    <div class="partner-block">
+      <div>
+        <div class="partner-label">Parceiro Estratégico Exclusivo</div>
+        <div class="partner-name">Rui Diogo</div>
+        <div class="tc-tags" style="margin-top:12px;">
+          <span class="tag">Licença AMI</span>
+          <span class="tag">Crédito Habitação</span>
+          <span class="tag">Parceria B2B</span>
+        </div>
+      </div>
+      <div>
+        <div class="partner-desc">
+          Empresa própria de mediação AMI e intermediação de crédito. Parceria exclusiva com a Telmo Maia Arquitectos 360 para as linhas de mediação imobiliária e crédito habitação. Para o cliente, o serviço é apresentado de forma integrada e transparente — a parceria é transparente ao nível empresarial, não ao nível do cliente.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MERCADO ── -->
+<section id="mercado">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-num">04</div>
+      <div>
+        <div class="sec-label">Mercado &amp; Historial</div>
+        <h2 class="sec-title">Presença real.<br><em>Crescimento natural.</em></h2>
+      </div>
+    </div>
+    <div class="market-grid">
+      <div class="mg-cell">
+        <div class="mg-label">Atelier activo</div>
+        <div class="mg-val"><em>20</em> anos</div>
+        <div class="mg-sub">Presença e reputação estabelecidas</div>
+      </div>
+      <div class="mg-cell">
+        <div class="mg-label">Tipos de projecto</div>
+        <div class="mg-val"><em>5</em> áreas</div>
+        <div class="mg-sub">Hab. · Multi. · Comercial · Renov. · Lic.</div>
+      </div>
+      <div class="mg-cell">
+        <div class="mg-label">Ticket médio Palmela</div>
+        <div class="mg-val"><em>323</em>K€</div>
+        <div class="mg-sub">Preço mediano imóveis 2026</div>
+      </div>
+      <div class="mg-cell">
+        <div class="mg-label">Promoção imobiliária</div>
+        <div class="mg-val"><em>25–35</em>%</div>
+        <div class="mg-sub">Margem bruta indicativa</div>
+      </div>
+    </div>
+    <div class="market-split">
+      <div>
+        <div class="eyebrow">Zonas de Actuação</div>
+        <ul class="zones-list">
+          <li>Quinta do Anjo · Cabanas · Palmela</li>
+          <li>Setúbal</li>
+          <li>Barreiro · Montijo · Moita</li>
+          <li>Almada</li>
+          <li>Área Metropolitana de Lisboa</li>
+        </ul>
+      </div>
+      <div>
+        <div class="eyebrow">A Nossa Vantagem</div>
+        <p style="font-size:14px;font-weight:300;color:var(--ink2);line-height:1.8;margin-top:8px;">
+          Não chegamos como empresa nova — chegamos com 20 anos de reputação, uma carteira de clientes activa e relações estabelecidas com empreiteiros, promotores e entidades locais.
+        </p>
+        <div class="deco-line"></div>
+        <p style="font-size:14px;font-weight:300;color:var(--ink2);line-height:1.8;">
+          A expansão 360° acontece num mercado que já nos conhece — o que elimina o principal risco de qualquer startup: a credibilidade.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── INVESTIDOR ── -->
+<section id="investidor" class="dark">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-num">05</div>
+      <div>
+        <div class="sec-label" style="color:#555;">Proposta ao Investidor</div>
+        <h2 class="sec-title" style="color:var(--white);">Capital com <em style="color:#8FBA9F;">retorno real</em></h2>
+      </div>
+    </div>
+    <div class="inv-cards">
+      <div class="inv-card">
+        <div class="ic-badge">Modelo A</div>
+        <div class="ic-title">Fix &amp; Flip<br>Operações Recorrentes</div>
+        <div class="ic-row"><span class="key">Capital por operação</span><span class="val">220 – 280.000 €</span></div>
+        <div class="ic-row"><span class="key">Gestão</span><span class="val">Integralmente pela empresa</span></div>
+        <div class="ic-row"><span class="key">Partilha de lucro</span><span class="val accent">50 / 50</span></div>
+        <div class="ic-row"><span class="key">Retorno esperado</span><span class="val accent">15 – 25% ROI</span></div>
+        <div class="ic-row"><span class="key">Horizonte</span><span class="val">5 – 8 meses</span></div>
+        <div class="ic-row"><span class="key">Garantia</span><span class="val">Imóvel como colateral</span></div>
+      </div>
+      <div class="inv-card highlight">
+        <div class="ic-badge">Modelo B — Destaque</div>
+        <div class="ic-title">Promoção Imobiliária<br>Quinta do Anjo · 10 Fogos</div>
+        <div class="ic-row"><span class="key">Capital necessário</span><span class="val">500K – 1M € (partilhável)</span></div>
+        <div class="ic-row"><span class="key">Receita total de venda</span><span class="val">6.000.000 €</span></div>
+        <div class="ic-row"><span class="key">Lucro bruto estimado</span><span class="val accent">~2.000.000 €</span></div>
+        <div class="ic-row"><span class="key">Retorno sobre capital</span><span class="val accent">30 – 35%</span></div>
+        <div class="ic-row"><span class="key">Horizonte</span><span class="val">24 – 36 meses</span></div>
+        <div class="ic-row"><span class="key">Garantia</span><span class="val">Escritura + hipoteca terreno</span></div>
+      </div>
+    </div>
+    <div style="margin-top:48px;padding-top:48px;border-top:1px solid #2A2A28;">
+      <p style="font-size:13.5px;font-weight:300;color:#666;line-height:1.75;max-width:600px;">
+        Cada operação é avaliada individualmente antes de qualquer compromisso. A empresa gere integralmente o processo — o investidor obtém retorno sem gestão operacional.
+      </p>
+      <a href="#contacto" style="display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--white);border:1px solid #444;padding:13px 24px;text-decoration:none;margin-top:24px;transition:border-color 0.15s;" onmouseover="this.style.borderColor='#8FBA9F'" onmouseout="this.style.borderColor='#444'">
+        Falar com a equipa
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINANCEIRO ── -->
+<section id="financeiro" class="tinted">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-num">06</div>
+      <div>
+        <div class="sec-label">Modelo Financeiro</div>
+        <h2 class="sec-title">Ano 1 —<br><em>Projecção</em></h2>
+      </div>
+    </div>
+    <div class="fin-kpis">
+      <div class="fk">
+        <div class="fk-val">125–<em>298</em>K</div>
+        <div class="fk-label">Receita estimada<br>Ano 1</div>
+      </div>
+      <div class="fk">
+        <div class="fk-val">~<em>40</em>%</div>
+        <div class="fk-label">Margem bruta<br>estimada</div>
+      </div>
+      <div class="fk">
+        <div class="fk-val">M<em>8</em></div>
+        <div class="fk-label">Breakeven<br>previsto</div>
+      </div>
+      <div class="fk">
+        <div class="fk-val">~<em>8</em>K</div>
+        <div class="fk-label">Investimento<br>de arranque</div>
+      </div>
+    </div>
+    <div class="fin-split">
+      <div>
+        <div class="eyebrow" style="margin-bottom:16px;">Receitas Estimadas — Ano 1</div>
+        <div class="rev-table">
+          <div class="rev-line"><span class="rl-name">Honorários de Arquitectura</span><span class="rl-val">15 – 40K €</span></div>
+          <div class="rev-line"><span class="rl-name">Renovações para terceiros</span><span class="rl-val">30 – 78K €</span></div>
+          <div class="rev-line"><span class="rl-name">Mediação imobiliária</span><span class="rl-val">40 – 90K €</span></div>
+          <div class="rev-line"><span class="rl-name">Intermediação de crédito</span><span class="rl-val">20 – 40K €</span></div>
+          <div class="rev-line"><span class="rl-name">Fix &amp; Flip (1 operação)</span><span class="rl-val">20 – 50K €</span></div>
+          <div class="rev-line total"><span class="rl-name">Total Ano 1</span><span class="rl-val">125 – 298K €</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="eyebrow" style="margin-bottom:16px;">Ciclo de Valor Integrado</div>
+        <p style="font-size:14px;font-weight:300;color:var(--ink2);line-height:1.8;margin-bottom:20px;">
+          Cada serviço alimenta os restantes. O cliente de mediação torna-se cliente de crédito. O cliente de renovação torna-se cliente de mediação. O ciclo é contínuo.
+        </p>
+        <div class="callout">
+          <p><strong>Modelo capital-light.</strong> Os custos de renovação e Fix &amp; Flip são financiados por capital de investidor. O investimento de arranque cobre apenas a estrutura operacional — estimado em 5.853 € a 13.361 €.</p>
+        </div>
+        <div style="margin-top:24px;">
+          <a href="plano_financeiro.html" style="display:inline-flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--green);border:1px solid var(--line);padding:12px 20px;text-decoration:none;transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--line)'">
+            Ver plano financeiro completo →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ROADMAP ── -->
+<section id="roadmap">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-num">07</div>
+      <div>
+        <div class="sec-label">Implementação</div>
+        <h2 class="sec-title">90 dias para<br><em>operar a pleno</em></h2>
+      </div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-period">Semana 1 – 2</div>
+        <div class="step-body"><strong>Lançamento</strong> — base de dados de clientes do atelier, Google My Business, Instagram, WhatsApp Business, primeiros contactos directos.</div>
+      </div>
+      <div class="step">
+        <div class="step-period">Semana 3 – 4</div>
+        <div class="step-body"><strong>Digital</strong> — website activo, CRM configurado, templates de proposta profissionais, primeiros imóveis nos portais (Idealista, Imovirtual).</div>
+      </div>
+      <div class="step">
+        <div class="step-period">Mês 2</div>
+        <div class="step-body"><strong>Primeiros negócios</strong> — 1 renovação contratada, 1 mediação em curso, 2 processos de crédito iniciados; Google Ads &amp; Meta Ads activos.</div>
+      </div>
+      <div class="step">
+        <div class="step-period">Mês 3</div>
+        <div class="step-body"><strong>Aceleração</strong> — primeiro Fix &amp; Flip com investidor contratado; primeiro caso de estudo publicado; referências activas de clientes do atelier.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTACTO ── -->
+<section id="contacto" style="background:var(--green);padding:120px 0;">
+  <div class="container">
+    <div class="contact-inner">
+      <div>
+        <div class="eyebrow" style="color:rgba(253,252,249,0.5);">Vamos Falar</div>
+        <h2 class="contact-title">"Da ideia<br><em>às chaves."</em></h2>
+        <p class="contact-sub">
+          Seja um projecto de arquitectura, uma renovação, a venda do seu imóvel, um processo de crédito ou uma oportunidade de investimento — a equipa está disponível.
+        </p>
+        <div style="margin-top:32px;display:flex;flex-direction:column;gap:10px;">
+          <a href="mailto:geral@telmomaia360.pt" class="contact-btn">Enviar email</a>
+          <a href="apresentacao.html" class="contact-btn-outline">Ver apresentação →</a>
+        </div>
+      </div>
+      <div class="contact-info">
+        <div class="contact-item">
+          <div class="contact-item-label">Zona de actuação</div>
+          <div class="contact-item-val">Setúbal · Palmela · AML</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-label">Co-Fundadores</div>
+          <div class="contact-item-val">Julio Alexandre Ferreira de Matos<br>Telmo Maia</div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-label">Serviços</div>
+          <div class="contact-item-val" style="font-size:14px;font-family:'Epilogue',sans-serif;font-weight:300;line-height:1.9;">
+            Arquitectura &amp; Renovação<br>
+            Mediação Imobiliária<br>
+            Intermediação de Crédito<br>
+            Promoção Imobiliária
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-label">Website</div>
+          <div class="contact-item-val" style="font-family:'DM Mono',monospace;font-size:13px;letter-spacing:1px;">telmomaia360.pt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-title">Telmo Maia Arquitectos 360</div>
+    <ul class="footer-links">
+      <li><a href="#servicos">Serviços</a></li>
+      <li><a href="#equipa">Equipa</a></li>
+      <li><a href="#investidor">Investidor</a></li>
+      <li><a href="apresentacao.html">Apresentação</a></li>
+      <li><a href="plano_financeiro.html">Plano Financeiro</a></li>
+    </ul>
+    <div class="footer-meta">
+      Setúbal · Palmela · AML<br>
+      © 2026 Telmo Maia Arquitectos 360
+    </div>
+  </div>
+</footer>
+
+<script>
+// Sticky header shadow on scroll
+const header = document.getElementById('siteHeader');
+window.addEventListener('scroll', () => {
+  header.classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// Mobile menu
+function openMobileMenu() {
+  document.getElementById('mobileMenu').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMobileMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
+</body>
+</html>

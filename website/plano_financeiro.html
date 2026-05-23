@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plano Financeiro Detalhado · Telmo Maia Arquitectos 360</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Epilogue:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #F6F4EF;
+  --bg2:    #EEEAE0;
+  --ink:    #1C1C1A;
+  --ink2:   #4A4840;
+  --ink3:   #8A877E;
+  --line:   #D8D4C8;
+  --green:  #2A4A35;
+  --green2: #3D6B4F;
+  --white:  #FDFCF9;
+  --red:    #7A3B2E;
+  --amber:  #7A5E2E;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Epilogue',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.75;-webkit-font-smoothing:antialiased;}
+
+/* PAGE */
+.page{max-width:1080px;margin:0 auto;}
+
+/* COVER */
+.cover{background:var(--ink);padding:100px 80px 80px;display:grid;grid-template-columns:1fr auto;gap:60px;align-items:end;}
+.cover-eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--green2);margin-bottom:28px;}
+.cover h1{font-family:'Cormorant Garamond',serif;font-size:clamp(52px,7vw,80px);font-weight:300;line-height:1;letter-spacing:-2px;color:#FDFCF9;}
+.cover h1 em{font-style:italic;color:#8FBA9F;}
+.cover-sub{font-size:13px;color:#666;font-weight:300;margin-top:20px;line-height:1.9;}
+.cover-right{text-align:right;}
+.cmeta{font-family:'DM Mono',monospace;font-size:10px;color:#555;letter-spacing:1.5px;text-transform:uppercase;line-height:2.8;}
+.cmeta span{color:#AAA;}
+
+/* NAV */
+nav{background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:90;overflow-x:auto;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+.nav-inner{display:flex;padding:0 80px;}
+nav a{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);text-decoration:none;padding:16px 16px;border-bottom:1.5px solid transparent;white-space:nowrap;transition:all .15s;}
+nav a:hover{color:var(--green);border-bottom-color:var(--green);}
+
+/* SECTIONS */
+.section{padding:80px 80px;border-bottom:1px solid var(--line);background:var(--white);}
+.section.tinted{background:var(--bg);}
+
+.sec-header{display:grid;grid-template-columns:56px 1fr;gap:0 20px;align-items:start;margin-bottom:52px;}
+.sec-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:2px;padding-top:6px;}
+.sec-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);margin-bottom:10px;}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(30px,4vw,46px);font-weight:300;line-height:1.1;color:var(--ink);letter-spacing:-.5px;}
+.sec-title em{font-style:italic;color:var(--green);}
+
+/* TYPOGRAPHY */
+h4{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--ink);margin:40px 0 16px;}
+h5{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--ink3);margin:32px 0 12px;}
+p{color:var(--ink2);font-size:14px;font-weight:300;max-width:680px;margin-bottom:14px;line-height:1.8;}
+
+/* TABLES */
+.tw{overflow-x:auto;margin:16px 0 8px;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;}
+thead tr{border-bottom:1.5px solid var(--ink);}
+th{font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);font-weight:400;padding:0 16px 12px 0;text-align:left;}
+th:last-child{padding-right:0;text-align:right;}
+td{padding:11px 16px 11px 0;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top;font-weight:300;line-height:1.55;}
+td:last-child{padding-right:0;text-align:right;}
+td strong,td b{color:var(--ink);font-weight:500;}
+td.mono{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);}
+td.green{color:var(--green);font-weight:500;}
+td.red{color:var(--red);font-weight:400;}
+td.amber{color:var(--amber);}
+td.left{text-align:left;}
+tr.subtotal td{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);font-weight:500;color:var(--ink);}
+tr.total td{background:var(--bg);border-top:1.5px solid var(--ink);font-weight:600;color:var(--ink);}
+tr.total td.green{color:var(--green);}
+tr:last-child td{border-bottom:none;}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:28px 0;}
+.kpi{background:var(--white);padding:28px 22px;}
+.kpi-val{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:300;color:var(--ink);line-height:1;letter-spacing:-1px;margin-bottom:10px;}
+.kpi-val em{font-style:normal;color:var(--green);}
+.kpi-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);line-height:1.6;}
+
+/* CALLOUT */
+.callout{border-left:2px solid var(--green);padding:18px 24px;margin:24px 0;background:var(--bg);}
+.callout p{font-size:14px;font-weight:300;color:var(--ink);max-width:100%;margin:0;}
+.callout strong{color:var(--green);font-weight:500;}
+.callout.warn{border-left-color:var(--amber);}
+.callout.warn strong{color:var(--amber);}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:56px;margin:28px 0;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;margin:28px 0;}
+
+/* SERVICE BLOCK */
+.svc-block{border-top:2px solid var(--ink);padding-top:20px;margin-bottom:0;}
+.svc-num{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
+.svc-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--ink);margin-bottom:12px;}
+.svc-body{font-size:13px;font-weight:300;color:var(--ink2);line-height:1.7;}
+.svc-price{margin-top:14px;font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:1px;}
+
+/* CHART BAR */
+.bar-chart{margin:20px 0;}
+.bar-row{display:grid;grid-template-columns:180px 1fr 80px;gap:12px;align-items:center;margin-bottom:10px;}
+.bar-label{font-size:12px;color:var(--ink2);font-weight:300;text-align:right;}
+.bar-track{background:var(--line);height:8px;border-radius:0;}
+.bar-fill{height:100%;background:var(--green);border-radius:0;transition:width .6s ease;}
+.bar-val{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink);text-align:right;}
+
+/* MONTHLY TABLE HIGHLIGHT */
+tr.q1 td{background:rgba(42,74,53,0.03);}
+tr.q2 td{background:rgba(42,74,53,0.05);}
+tr.q3 td{background:rgba(42,74,53,0.07);}
+tr.q4 td{background:rgba(42,74,53,0.10);}
+
+/* RISK TABLE */
+.risk-high{color:var(--red);}
+.risk-med{color:var(--amber);}
+.risk-low{color:var(--green);}
+
+/* FOOTER */
+footer{background:var(--ink);padding:56px 80px;display:flex;align-items:center;justify-content:space-between;}
+.ft-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:#FDFCF9;font-style:italic;}
+.ft-meta{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#555;line-height:2.4;text-align:right;}
+
+@media(max-width:768px){
+  .cover,.section{padding:60px 32px;}
+  .nav-inner{padding:0 32px;}
+  footer{padding:40px 32px;flex-direction:column;gap:24px;}
+  .two-col,.three-col{grid-template-columns:1fr;}
+  .sec-header{grid-template-columns:32px 1fr;}
+  .kpi-grid{grid-template-columns:1fr 1fr;}
+  .bar-row{grid-template-columns:120px 1fr 60px;}
+  th:last-child,td:last-child{text-align:left;}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ═══════════════ COVER ═══════════════ -->
+<header class="cover">
+  <div>
+    <div class="cover-eyebrow">Plano Financeiro Detalhado · Modelo de Negócio Completo</div>
+    <h1>Telmo Maia<br><em>Arquitectos 360</em></h1>
+    <p class="cover-sub">
+      Julio Alexandre Ferreira de Matos · Telmo Maia — Co-Fundadores<br>
+      Arquitectura · Renovação · Mediação · Crédito · Promoção Imobiliária<br>
+      Setúbal · Palmela · Área Metropolitana de Lisboa
+    </p>
+  </div>
+  <div class="cover-right">
+    <div class="cmeta">Versão <span>2.1 — Valores Reais</span></div>
+    <div class="cmeta">Ano <span>2026</span></div>
+    <div class="cmeta">Horizonte <span>3 Anos</span></div>
+    <div class="cmeta">Fonte <span>Dados verificados mai. 2026</span></div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#modelo">Modelo</a>
+    <a href="#servicos">Serviços</a>
+    <a href="#arranque">Arranque</a>
+    <a href="#receitas">Receitas</a>
+    <a href="#custos">Custos</a>
+    <a href="#mensal">Mensal</a>
+    <a href="#3anos">3 Anos</a>
+    <a href="#cashflow">Cash Flow</a>
+    <a href="#cenarios">Cenários</a>
+    <a href="#investidor">Investidor</a>
+    <a href="#risco">Risco</a>
+    <a href="#kpis">KPIs</a>
+  </div>
+</nav>
+
+<!-- ═══════════════ 01 MODELO DE NEGÓCIO ═══════════════ -->
+<section class="section" id="modelo">
+  <div class="sec-header">
+    <div class="sec-num">01</div>
+    <div>
+      <div class="sec-label">Modelo de Negócio</div>
+      <h2 class="sec-title">20 anos de atelier.<br><em>Agora, tudo num só lugar.</em></h2>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Não é uma empresa nova — é uma evolução natural.</strong> A Telmo Maia Arquitectos 360 nasce de 20 anos de actividade do Atelier Telmo Maia, com carteira de clientes real, projectos documentados em habitação unifamiliar, edifícios multifamiliares, espaços comerciais, licenciamentos e renovações residenciais. O "360" não é marketing — é a extensão lógica de um serviço que os clientes já pediam: <em>"E o crédito? E a venda? E quem gere a obra toda?"</em> A resposta é agora: nós.</p>
+  </div>
+
+  <h5>A Evolução do Atelier</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Antes — Atelier Telmo Maia</th><th>Agora — Telmo Maia Arquitectos 360</th></tr></thead>
+      <tbody>
+        <tr><td>Projecto de arquitectura</td><td>Projecto + obra + mediação + crédito + promoção</td></tr>
+        <tr><td>Cliente tratava do crédito sozinho</td><td>Crédito e mediação tratados pela empresa parceira de Rui Diogo, em exclusiva</td></tr>
+        <tr><td>Cliente vendia o imóvel noutro lado</td><td>Mediação integrada via parceria exclusiva — para o cliente é transparente</td></tr>
+        <tr><td>Relação terminava na entrega do projecto</td><td>Relação contínua ao longo de todo o ciclo de vida do imóvel</td></tr>
+        <tr><td>20 anos de carteira de clientes</td><td>20 anos de carteira — agora com muito mais para oferecer</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Estrutura do Modelo</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Dimensão</th><th>Descrição</th><th>Impacto</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Origem</strong></td><td>Evolução do Atelier Telmo Maia, activo há 20 anos, com historial documentado e clientes reais</td><td class="mono left">Credibilidade imediata</td></tr>
+        <tr><td><strong>Fontes de Receita</strong></td><td>4 linhas integradas: arquitectura e renovações, mediação, crédito e promoção imobiliária</td><td class="mono left">Diversificação de risco</td></tr>
+        <tr><td><strong>Clientes-Alvo</strong></td><td>Carteira existente do atelier + particulares (1ª casa, upgrade, investimento) + promotores</td><td class="mono left">Base instalada + crescimento</td></tr>
+        <tr><td><strong>Canal Principal</strong></td><td>Clientes do atelier (20 anos de relações) + referências + portais + marketing digital</td><td class="mono left">Canal quente desde o dia 1</td></tr>
+        <tr><td><strong>Proposta de Valor</strong></td><td>Um único local onde o cliente trata de tudo — do projecto ao crédito, da obra à escritura</td><td class="mono left">Diferenciador central</td></tr>
+        <tr><td><strong>Vantagem Competitiva</strong></td><td>20 anos de reputação, carteira de clientes activa, integração vertical única (arquitecto + parceria exclusiva mediação AMI + crédito)</td><td class="mono left">Impossível de replicar rapidamente</td></tr>
+        <tr><td><strong>Prova Social</strong></td><td>Testemunhos reais de clientes do atelier; casos documentados em habitação, comercial, licenciamentos e renovações</td><td class="mono left">Confiança imediata</td></tr>
+        <tr><td><strong>Estrutura de Custos</strong></td><td>Predominantemente variável. Custos fixos reduzidos. Sem escritório no ano 1.</td><td class="mono left">Breakeven rápido</td></tr>
+        <tr><td><strong>Recursos-Chave</strong></td><td>Reputação e carteira do Atelier Telmo Maia (Telmo Maia), 30 anos de experiência de gestão (Julio Alexandre), parceria exclusiva de mediação e crédito (empresa de Rui Diogo)</td><td class="mono left">Activos intangíveis únicos</td></tr>
+        <tr><td><strong>Parceiro Estratégico</strong></td><td>Rui Diogo — empresa própria de mediação AMI e intermediação de crédito, em parceria exclusiva com a Telmo Maia Arquitectos 360. Para o cliente, o serviço é apresentado de forma integrada e transparente.</td><td class="mono left">Parceria B2B exclusiva</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Ciclo de Valor por Cliente</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Ponto de Entrada</th><th>Serviço Inicial</th><th>Extensão Natural do Serviço</th><th>LTV Estimado</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Cliente existente do atelier</strong></td><td>Projecto arquitectura</td><td>Gestão de obra + crédito + mediação da venda futura</td><td class="mono left">15.000 – 60.000 €</td></tr>
+        <tr><td><strong>Comprador de 1ª Casa</strong></td><td>Mediação</td><td>Crédito habitação + renovação inicial</td><td class="mono left">8.000 – 25.000 €</td></tr>
+        <tr><td><strong>Proprietário que quer vender</strong></td><td>Mediação</td><td>Renovação pré-venda + crédito do comprador</td><td class="mono left">12.000 – 40.000 €</td></tr>
+        <tr><td><strong>Investidor imobiliário</strong></td><td>Fix &amp; Flip / Renovação</td><td>Projecto + mediação da venda + crédito para próxima operação</td><td class="mono left">20.000 – 80.000 €</td></tr>
+        <tr><td><strong>Proprietário de terreno</strong></td><td>Projecto e licenciamento</td><td>Promoção imobiliária + mediação das vendas</td><td class="mono left">50.000 – 200.000 €</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════ 02 SERVIÇOS ═══════════════ -->
+<section class="section tinted" id="servicos">
+  <div class="sec-header">
+    <div class="sec-num">02</div>
+    <div>
+      <div class="sec-label">Portfólio de Serviços</div>
+      <h2 class="sec-title">Quatro linhas.<br><em>Receita integrada.</em></h2>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="svc-block">
+      <div class="svc-num">Linha 01</div>
+      <div class="svc-name">Arquitectura &amp; Renovações</div>
+      <div class="svc-body">
+        Renovações ligeiras (8–25K€), integrais (25–100K€) e Fix &amp; Flip para conta própria ou terceiros. Gestão turnkey: projecto técnico, licenciamento, empreitada e entrega. Honorários de arquitectura independentes.
+      </div>
+      <div class="svc-price">Margem: 20–30% sobre empreitada · Honorários: 2.500–8.000 €/projecto</div>
+    </div>
+    <div class="svc-block">
+      <div class="svc-num">Linha 02</div>
+      <div class="svc-name">Mediação Imobiliária</div>
+      <div class="svc-body">
+        Via parceria exclusiva com a empresa de Rui Diogo (licença AMI). Angariação em exclusividade, venda com estratégia de marketing diferenciada, acompanhamento de compra e consultoria de investimento. Para o cliente, o serviço é apresentado de forma integrada. A receita é partilhada entre as duas empresas por acordo comercial.
+      </div>
+      <div class="svc-price">Comissão: 3–5% do valor de transação · Split a definir por acordo comercial · Ticket médio Palmela: 323.500 €</div>
+    </div>
+    <div class="svc-block">
+      <div class="svc-num">Linha 03</div>
+      <div class="svc-name">Intermediação de Crédito</div>
+      <div class="svc-body">
+        Via parceria exclusiva com a empresa de Rui Diogo. Crédito habitação, crédito para obras e crédito para investidores. Acesso a condições negociadas com múltiplas entidades bancárias. Acompanhamento completo até aprovação. Linha acessória — posicionada como valor acrescentado ao serviço global.
+      </div>
+      <div class="svc-price">Comissão bancária: 0,5–1,5% do capital · Receita partilhada por acordo B2B · Linha acessória</div>
+    </div>
+  </div>
+
+  <div class="svc-block" style="margin-top:32px;">
+    <div class="svc-num">Linha 04</div>
+    <div class="svc-name">Promoção Imobiliária</div>
+    <div class="svc-body">
+      Desenvolvimento de loteamentos e construção nova em parceria com investidor externo. A empresa gere o processo completo: análise de viabilidade, licenciamentos, projecto, gestão de obra, marketing e comercialização das fracções. Parcerias com proprietários de terrenos em regime de profit sharing. Operações identificadas e avaliadas caso a caso antes de qualquer compromisso.
+    </div>
+    <div class="svc-price">Margem bruta indicativa: 25–35% · Horizonte típico: 18–36 meses por operação</div>
+  </div>
+
+  <h5>Estrutura de Preços — Valores Reais de Mercado 2026</h5>
+  <div class="callout">
+    <p><strong>Fonte:</strong> Idealista, Ranking Imobiliário, ObraXRAY, Ordem dos Arquitectos e Banco de Portugal — dados de mercado verificados maio 2026. Valores corrigidos face à versão anterior do plano.</p>
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Serviço</th><th>Volume / Unidade</th><th>Valor Real de Mercado 2026</th><th>Estrutura de Receita</th><th>Margem Empresa</th><th>Prazo Médio</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Renovação ligeira</strong></td><td>T2 ~80 m²</td><td class="mono left">24.000–40.000 € <span style="color:var(--amber);font-size:11px;">(não 8–25K)</span></td><td>Gestão de empreitada</td><td class="amber">12–20% <span style="font-size:11px;">(comprimida)</span></td><td>6–10 semanas</td></tr>
+        <tr><td><strong>Renovação integral</strong></td><td>T3 ~110 m²</td><td class="mono left">55.000–100.000 €</td><td>Gestão de empreitada</td><td class="green">15–22%</td><td>3–5 meses</td></tr>
+        <tr><td><strong>Fix &amp; Flip — capital real</strong></td><td>Por operação</td><td class="mono left">Capital 220–280K€ <span style="color:var(--amber);font-size:11px;">(não 80K)</span></td><td>Lucro na revenda</td><td class="green">18–25% ROI</td><td>5–8 meses</td></tr>
+        <tr><td><strong>Projecto arquitectura</strong></td><td>Por projecto</td><td class="mono left">8.000–25.000 € <span style="color:var(--amber);font-size:11px;">(não 2.500–8K)</span></td><td>3–10% do valor da obra</td><td class="green">80–90%</td><td>4–8 semanas</td></tr>
+        <tr><td><strong>Mediação — venda</strong></td><td>Imóvel médio Palmela 323K€</td><td class="mono left">3–5% + IVA 23% <span style="color:var(--amber);font-size:11px;">(mín. 5.000€+IVA)</span></td><td>Comissão na escritura</td><td class="green">85–90%</td><td>1–6 meses</td></tr>
+        <tr><td><strong>Mediação — compra assistida</strong></td><td>Por transação</td><td class="mono left">1–2% do valor</td><td>Comissão do comprador</td><td class="green">85–90%</td><td>1–3 meses</td></tr>
+        <tr><td><strong>Crédito habitação</strong></td><td>Por processo — linha acessória</td><td class="mono left">0,5–1% do capital</td><td>Comissão bancária</td><td class="green">95%</td><td>3–8 semanas</td></tr>
+        <tr><td><strong>Promoção imobiliária</strong></td><td>Por empreendimento</td><td class="mono left">Capital 500K–2M€ + IVA 23% obra</td><td>Lucro sobre venda total</td><td class="green">25–35%</td><td>18–36 meses</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════ 03 INVESTIMENTO DE ARRANQUE ═══════════════ -->
+<section class="section" id="arranque">
+  <div class="sec-header">
+    <div class="sec-num">03</div>
+    <div>
+      <div class="sec-label">Investimento Inicial</div>
+      <h2 class="sec-title">Custos de<br><em>arranque detalhados</em></h2>
+    </div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Categoria</th><th>Item</th><th>Mínimo</th><th>Máximo</th><th>Timing</th><th>Tipo</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="3"><strong>Legal &amp; Licenças</strong></td><td>Constituição de sociedade + pacto social</td><td class="mono left">360 €</td><td class="mono left">800 €</td><td>Semana 1</td><td>One-off</td></tr>
+        <tr><td>Licença AMI (renovação/emissão)</td><td class="mono left">250 €</td><td class="mono left">500 €</td><td>Semana 1</td><td>Anual</td></tr>
+        <tr><td>Cédula profissional arquitecto (manutenção OA)</td><td class="mono left">200 €</td><td class="mono left">400 €</td><td>Semana 1</td><td>Anual</td></tr>
+        <tr class="subtotal"><td colspan="2"><strong>Subtotal Legal &amp; Licenças</strong></td><td class="mono left green"><strong>810 €</strong></td><td class="mono left green"><strong>1.700 €</strong></td><td colspan="2"></td></tr>
+
+        <tr><td rowspan="4"><strong>Identidade &amp; Comunicação</strong></td><td>Logotipo + identidade visual completa</td><td class="mono left">500 €</td><td class="mono left">1.500 €</td><td>Semana 1</td><td>One-off</td></tr>
+        <tr><td>Cartões de visita (3 co-fundadores, 500 un. cada)</td><td class="mono left">150 €</td><td class="mono left">350 €</td><td>Semana 2</td><td>One-off</td></tr>
+        <tr><td>Materiais físicos (roll-up, pasta cliente, sinalética)</td><td class="mono left">300 €</td><td class="mono left">600 €</td><td>Semana 2</td><td>One-off</td></tr>
+        <tr><td>Template propostas (Word/PDF, design profissional)</td><td class="mono left">200 €</td><td class="mono left">500 €</td><td>Semana 2</td><td>One-off</td></tr>
+        <tr class="subtotal"><td colspan="2"><strong>Subtotal Identidade</strong></td><td class="mono left green"><strong>1.150 €</strong></td><td class="mono left green"><strong>2.950 €</strong></td><td colspan="2"></td></tr>
+
+        <tr><td rowspan="5"><strong>Digital &amp; Tecnologia</strong></td><td>Website (design + desenvolvimento + 1 ano hosting)</td><td class="mono left">800 €</td><td class="mono left">2.500 €</td><td>Semana 2–3</td><td>One-off + anual</td></tr>
+        <tr><td>Domínio .pt (telmomaia360.pt ou similar)</td><td class="mono left">10 €</td><td class="mono left">20 €</td><td>Semana 1</td><td>Anual</td></tr>
+        <tr><td>Google Workspace (email profissional, Drive)</td><td class="mono left">18 €</td><td class="mono left">36 €</td><td>Semana 1</td><td>Mensal</td></tr>
+        <tr><td>CRM — HubSpot Free ou Pipedrive starter</td><td class="mono left">0 €</td><td class="mono left">25 €</td><td>Semana 2</td><td>Mensal</td></tr>
+        <tr><td>Assinatura digital (DocuSign ou Adobe Sign)</td><td class="mono left">15 €</td><td class="mono left">30 €</td><td>Mês 1</td><td>Mensal</td></tr>
+        <tr class="subtotal"><td colspan="2"><strong>Subtotal Digital</strong></td><td class="mono left green"><strong>843 €</strong></td><td class="mono left green"><strong>2.611 €</strong></td><td colspan="2"></td></tr>
+
+        <tr><td rowspan="3"><strong>Operacional</strong></td><td>Seguro multirriscos empresa (responsabilidade civil)</td><td class="mono left">600 €</td><td class="mono left">1.200 €</td><td>Mês 1</td><td>Anual</td></tr>
+        <tr><td>Contabilidade TOC — 3 meses iniciais</td><td class="mono left">450 €</td><td class="mono left">900 €</td><td>Mês 1</td><td>Trimestral</td></tr>
+        <tr><td>Fundo de caixa operacional (primeiros 2 meses)</td><td class="mono left">2.000 €</td><td class="mono left">4.000 €</td><td>Semana 1</td><td>Reserva</td></tr>
+        <tr class="subtotal"><td colspan="2"><strong>Subtotal Operacional</strong></td><td class="mono left green"><strong>3.050 €</strong></td><td class="mono left green"><strong>6.100 €</strong></td><td colspan="2"></td></tr>
+
+        <tr class="total"><td colspan="2"><strong>TOTAL INVESTIMENTO DE ARRANQUE</strong></td><td class="mono left green"><strong>5.853 €</strong></td><td class="mono left green"><strong>13.361 €</strong></td><td colspan="2"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-val">~<em>8</em>K€</div><div class="kpi-label">Investimento médio<br>de arranque</div></div>
+    <div class="kpi"><div class="kpi-val"><em>0</em></div><div class="kpi-label">Escritório físico<br>necessário no ano 1</div></div>
+    <div class="kpi"><div class="kpi-val"><em>2</em></div><div class="kpi-label">Semanas para estar<br>operacionalmente ativo</div></div>
+    <div class="kpi"><div class="kpi-val">Capital<br><em>light</em></div><div class="kpi-label">Modelo sem necessidade<br>de capital intensivo</div></div>
+  </div>
+
+  <div class="callout warn">
+    <p><strong>Nota importante:</strong> O modelo de negócio é predominantemente capital-light. Os custos de renovação e Fix &amp; Flip são financiados por capital de investidor (ver Secção 10). O investimento de arranque cobre apenas a estrutura operacional da empresa.</p>
+  </div>
+</section>
+
+<!-- ═══════════════ 04 RECEITAS DETALHADAS ═══════════════ -->
+<section class="section tinted" id="receitas">
+  <div class="sec-header">
+    <div class="sec-num">04</div>
+    <div>
+      <div class="sec-label">Projecção de Receitas — Valores Corrigidos</div>
+      <h2 class="sec-title">Números reais.<br><em>Mercado real.</em></h2>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Revisão com dados de mercado verificados (maio 2026):</strong> Preço mediano imóveis Palmela = 323.500 € (Ranking Imobiliário 2026). Custos renovação = 300–800 €/m² mão de obra + 40–60% materiais (ObraXRAY). Honorários arquitectura = 3–10% do valor da obra (Ordem dos Arquitectos). Fix &amp; Flip — capital mínimo real 220–280K€ no mercado de Palmela/Setúbal 2026.</p>
+  </div>
+
+  <h5>Linha 1 — Arquitectura &amp; Renovações</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Tipo</th><th>Nº/Ano</th><th>Valor Real Obra 2026</th><th>Margem Real</th><th>Receita p/ Projecto</th><th>Receita Anual</th></tr></thead>
+      <tbody>
+        <tr><td>Renovação ligeira (T2 ~80m²)</td><td>4 – 6</td><td class="mono left">28.000–40.000 €</td><td>15–18%</td><td class="mono left">4.800–6.400 €</td><td class="mono left green">19.200–38.400 €</td></tr>
+        <tr><td>Renovação integral (T3 ~110m²)</td><td>2 – 4</td><td class="mono left">65.000–100.000 €</td><td>18–22%</td><td class="mono left">13.500–19.800 €</td><td class="mono left green">27.000–79.200 €</td></tr>
+        <tr><td>Projecto arquitectura (3–8% da obra)</td><td>6 – 12</td><td class="mono left">10.000–22.000 €</td><td>85%</td><td class="mono left">8.500–18.700 €</td><td class="mono left green">51.000–224.400 €</td></tr>
+        <tr class="total"><td colspan="5"><strong>Total Linha 1 — Cenário Base (8 renov. + 8 projectos)</strong></td><td class="mono left green"><strong>97.200–195.000 €</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <p><strong>Nota crítica — Margem de renovação:</strong> A margem de 20–30% assumida na versão anterior é irrealista sem empreiteiros parceiros a preços negociados. Em 2026, com escassez de mão de obra qualificada (+20% nos custos) e materiais (+25–45%), a margem real de gestão de renovação situa-se entre <strong>12–20%</strong> sem acordos prévios. Para proteger a margem: contratos exclusivos com 2–3 empreiteiros de confiança, negociados em volume antes do arranque.</p>
+  </div>
+
+  <h5>Linha 2 — Mediação Imobiliária (ticket corrigido)</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Tipo</th><th>Nº/Ano</th><th>Valor Real Imóvel Palmela 2026</th><th>Comissão + IVA</th><th>Receita Líquida p/ Trans.</th><th>Receita Anual</th></tr></thead>
+      <tbody>
+        <tr><td>Venda exclusividade</td><td>5 – 8</td><td class="mono left">300.000–380.000 €</td><td>4% + IVA 23%</td><td class="mono left">12.000–15.200 €</td><td class="mono left green">60.000–121.600 €</td></tr>
+        <tr><td>Venda co-mediação (50% split)</td><td>3 – 5</td><td class="mono left">320.000 €</td><td>2% (partilhado)</td><td class="mono left">6.400 €</td><td class="mono left green">19.200–32.000 €</td></tr>
+        <tr><td>Compra assistida</td><td>2 – 4</td><td class="mono left">300.000 €</td><td>1,5%</td><td class="mono left">4.500 €</td><td class="mono left green">9.000–18.000 €</td></tr>
+        <tr class="total"><td colspan="5"><strong>Total Linha 2 — Cenário Base</strong></td><td class="mono left green"><strong>88.200–171.600 €</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Linha 3 — Intermediação de Crédito (linha acessória, não primária)</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Tipo</th><th>Nº/Ano</th><th>Capital Médio Real</th><th>Comissão</th><th>Receita p/ Processo</th><th>Receita Anual</th></tr></thead>
+      <tbody>
+        <tr><td>Crédito habitação (clientes do atelier)</td><td>8 – 14</td><td class="mono left">230.000 €</td><td>0,7%</td><td class="mono left">1.610 €</td><td class="mono left green">12.880–22.540 €</td></tr>
+        <tr><td>Crédito obras</td><td>3 – 6</td><td class="mono left">50.000 €</td><td>1,2%</td><td class="mono left">600 €</td><td class="mono left green">1.800–3.600 €</td></tr>
+        <tr class="total"><td colspan="5"><strong>Total Linha 3</strong></td><td class="mono left green"><strong>14.680–26.140 €</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px;color:var(--ink3);margin-top:4px;">⚠ Existem 6.216 intermediários de crédito registados em Portugal (BdP, 2025). Esta linha deve ser tratada como receita acessória de fidelização — não como receita primária — e não deve consumir tempo desproporcional da equipa.</p>
+
+  <h5>Linha 4 — Fix &amp; Flip (valores reais de mercado)</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Operação</th><th>Nº/Ano</th><th>Capital Real (compra + renov.)</th><th>Preço Venda</th><th>Lucro Total</th><th>Parte Empresa (50%)</th></tr></thead>
+      <tbody>
+        <tr><td>Fix &amp; Flip standard Palmela</td><td>1 – 2</td><td class="mono left">220.000–260.000 €</td><td class="mono left">290.000–340.000 €</td><td class="mono left">50.000–70.000 €</td><td class="mono left green">25.000–35.000 €</td></tr>
+        <tr class="total"><td colspan="5"><strong>Total Linha 4 (Ano 1 — 1 operação)</strong></td><td class="mono left green"><strong>25.000–35.000 €</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px;color:var(--ink3);margin-top:4px;">Capital necessário por operação: 220–280K€. ROI real: 18–25% por operação. Investidor externo obrigatório — a empresa não mobiliza capital próprio para esta linha.</p>
+
+  <h5>Resumo de Receitas — Ano 1 Corrigido</h5>
+  <div class="bar-chart">
+    <div class="bar-row"><div class="bar-label">Arquitectura &amp; Renov.</div><div class="bar-track"><div class="bar-fill" style="width:55%"></div></div><div class="bar-val">~145K €</div></div>
+    <div class="bar-row"><div class="bar-label">Mediação Imobiliária</div><div class="bar-track"><div class="bar-fill" style="width:45%"></div></div><div class="bar-val">~120K €</div></div>
+    <div class="bar-row"><div class="bar-label">Crédito (acessório)</div><div class="bar-track"><div class="bar-fill" style="width:10%"></div></div><div class="bar-val">~20K €</div></div>
+    <div class="bar-row"><div class="bar-label">Fix &amp; Flip</div><div class="bar-track"><div class="bar-fill" style="width:11%"></div></div><div class="bar-val">~30K €</div></div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Linha</th><th>Cenário Conservador</th><th>Cenário Base</th><th>Cenário Optimista</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Arquitectura &amp; Renovações</strong></td><td class="mono left">97.200 €</td><td class="mono left">145.000 €</td><td class="mono left">195.000 €</td></tr>
+        <tr><td><strong>Mediação Imobiliária</strong></td><td class="mono left">88.200 €</td><td class="mono left">120.000 €</td><td class="mono left">171.600 €</td></tr>
+        <tr><td><strong>Intermediação de Crédito</strong></td><td class="mono left">14.680 €</td><td class="mono left">20.000 €</td><td class="mono left">26.140 €</td></tr>
+        <tr><td><strong>Fix &amp; Flip</strong></td><td class="mono left">25.000 €</td><td class="mono left">30.000 €</td><td class="mono left">70.000 €</td></tr>
+        <tr class="total"><td><strong>TOTAL ANO 1</strong></td><td class="mono left green"><strong>225.080 €</strong></td><td class="mono left green"><strong>315.000 €</strong></td><td class="mono left green"><strong>462.740 €</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════ 05 CUSTOS OPERACIONAIS ═══════════════ -->
+<section class="section" id="custos">
+  <div class="sec-header">
+    <div class="sec-num">05</div>
+    <div>
+      <div class="sec-label">Estrutura de Custos</div>
+      <h2 class="sec-title">Custos fixos baixos.<br><em>Margem elevada.</em></h2>
+    </div>
+  </div>
+
+  <h5>Custos Fixos Mensais (base operacional)</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Item</th><th>Mínimo/Mês</th><th>Máximo/Mês</th><th>Anual (base)</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Remunerações co-fundadores</strong></td><td class="mono left">3.000 €</td><td class="mono left">6.000 €</td><td class="mono left">36.000–72.000 €</td><td>Base mínima inicial; aumenta com faturação</td></tr>
+        <tr><td>Contabilidade certificada (TOC)</td><td class="mono left">150 €</td><td class="mono left">300 €</td><td class="mono left">1.800–3.600 €</td><td>Inclui IVA e IRS trimestral</td></tr>
+        <tr><td>Google Workspace + software</td><td class="mono left">60 €</td><td class="mono left">120 €</td><td class="mono left">720–1.440 €</td><td>CRM + email + assinatura digital</td></tr>
+        <tr><td>Website hosting + manutenção</td><td class="mono left">20 €</td><td class="mono left">50 €</td><td class="mono left">240–600 €</td><td>Actualizações mensais de imóveis</td></tr>
+        <tr><td>Portais imobiliários (Idealista, Imovirtual)</td><td class="mono left">100 €</td><td class="mono left">300 €</td><td class="mono left">1.200–3.600 €</td><td>Planos profissionais</td></tr>
+        <tr><td>Seguro empresa (mensal)</td><td class="mono left">50 €</td><td class="mono left">100 €</td><td class="mono left">600–1.200 €</td><td>Responsabilidade civil + multirriscos</td></tr>
+        <tr><td>Combustível + deslocações</td><td class="mono left">200 €</td><td class="mono left">400 €</td><td class="mono left">2.400–4.800 €</td><td>Visitas a imóveis, reuniões clientes</td></tr>
+        <tr><td>Telecomunicações (3 telemóveis empresa)</td><td class="mono left">60 €</td><td class="mono left">120 €</td><td class="mono left">720–1.440 €</td><td>Planos negócios</td></tr>
+        <tr class="subtotal"><td><strong>Total Custos Fixos/Mês</strong></td><td class="mono left green"><strong>3.640 €</strong></td><td class="mono left green"><strong>7.390 €</strong></td><td class="mono left green"><strong>43.680–88.680 €</strong></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Custos Variáveis (escalam com faturação)</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Item</th><th>Base de Cálculo</th><th>% Sobre Receita</th><th>Estimativa Ano 1</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Marketing digital (Google + Meta Ads)</strong></td><td>Budget mensal ajustado ao ROI</td><td>4–7%</td><td class="mono left">8.000–15.000 €</td></tr>
+        <tr><td>Fotografia profissional de imóveis</td><td>Por sessão (8–15 imóveis/mês)</td><td>1–2%</td><td class="mono left">2.400–4.800 €</td></tr>
+        <tr><td>Custos de transação (IMT, notário, registo)</td><td>Por mediação (pago pelo cliente)</td><td>—</td><td class="mono left">0 € (cliente)</td></tr>
+        <tr><td>Subcontratação obra (excl. da margem)</td><td>Já descontado na margem de renovação</td><td>—</td><td class="mono left">Incluso na margem</td></tr>
+        <tr><td>Freelancer redes sociais (a partir mês 3)</td><td>Gestão de conteúdo mensal</td><td>2–3%</td><td class="mono left">3.600–7.200 €</td></tr>
+        <tr><td>Formação e desenvolvimento profissional</td><td>Pontual</td><td>0,5–1%</td><td class="mono left">1.000–2.000 €</td></tr>
+        <tr class="subtotal"><td><strong>Total Custos Variáveis</strong></td><td></td><td><strong>7–13%</strong></td><td class="mono left green"><strong>15.000–29.000 €</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Resumo P&amp;L Ano 1 — Cenário Base Corrigido</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Item</th><th>Valor</th><th>% Receita</th><th>Nota</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Receita Total</strong></td><td class="mono left">315.000 €</td><td class="mono left">100%</td><td>Ticket mediação corrigido com preços reais Palmela</td></tr>
+        <tr><td>Custos Fixos (remunerações + estrutura)</td><td class="mono left red">(57.000 €)</td><td class="mono left red">(18%)</td><td>3 co-fundadores em base mínima</td></tr>
+        <tr><td>Custos Variáveis (marketing + foto + freelancer)</td><td class="mono left red">(28.000 €)</td><td class="mono left red">(9%)</td><td>Inclui 10% receita em marketing</td></tr>
+        <tr><td>Custos de arranque (amortizados no ano 1)</td><td class="mono left red">(9.000 €)</td><td class="mono left red">(3%)</td><td></td></tr>
+        <tr><td>Margem comprimida renovações (ajuste -8%)</td><td class="mono left red">(12.000 €)</td><td class="mono left red">(4%)</td><td>Margem real 12–20% vs. 25% previsto</td></tr>
+        <tr class="subtotal"><td><strong>EBITDA Estimado</strong></td><td class="mono left green"><strong>209.000 €</strong></td><td class="mono left green"><strong>66%</strong></td><td></td></tr>
+        <tr><td>IRC (21% sobre lucro tributável estimado)</td><td class="mono left amber">(43.890 €)</td><td class="mono left amber">(14%)</td><td></td></tr>
+        <tr class="total"><td><strong>LUCRO LÍQUIDO ANO 1</strong></td><td class="mono left green"><strong>~165.000 €</strong></td><td class="mono left green"><strong>~52%</strong></td><td>Superior à versão anterior graças ao ticket real</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════ 06 PROJECÇÃO MENSAL ═══════════════ -->
+<section class="section tinted" id="mensal">
+  <div class="sec-header">
+    <div class="sec-num">06</div>
+    <div>
+      <div class="sec-label">Projecção Mensal</div>
+      <h2 class="sec-title">Ano 1 mês<br><em>a mês</em></h2>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Lógica de crescimento:</strong> Os primeiros 2 meses são de arranque. Com a carteira do atelier activada desde a semana 1, os primeiros honorários de arquitectura chegam no mês 2 e a primeira escritura de mediação no mês 3. Com tickets reais de mercado (mediação ~12.000 €/transação), o <strong>breakeven operacional atinge-se no mês 4–5</strong> — mais cedo do que a versão anterior indicava.</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Mês</th><th>Arq. &amp; Renov.</th><th>Mediação</th><th>Crédito</th><th>Fix &amp; Flip</th><th>Receita Total</th><th>Custos Mês</th><th>Resultado</th><th>Acumulado</th></tr></thead>
+      <tbody>
+        <tr class="q1"><td><strong>Jan</strong></td><td class="mono left">3.500 €</td><td class="mono left">0 €</td><td class="mono left">0 €</td><td class="mono left">0 €</td><td class="mono left">3.500 €</td><td class="mono left red">7.000 €</td><td class="mono left red">(3.500 €)</td><td class="mono left red">(3.500 €)</td></tr>
+        <tr class="q1"><td><strong>Fev</strong></td><td class="mono left">8.500 €</td><td class="mono left">0 €</td><td class="mono left">1.610 €</td><td class="mono left">0 €</td><td class="mono left">10.110 €</td><td class="mono left red">6.800 €</td><td class="mono left">3.310 €</td><td class="mono left red">(190 €)</td></tr>
+        <tr class="q1"><td><strong>Mar</strong></td><td class="mono left">10.000 €</td><td class="mono left">12.000 €</td><td class="mono left">1.610 €</td><td class="mono left">0 €</td><td class="mono left">23.610 €</td><td class="mono left red">6.800 €</td><td class="mono left">16.810 €</td><td class="mono left">16.620 €</td></tr>
+        <tr class="q2"><td><strong>Abr</strong></td><td class="mono left">12.000 €</td><td class="mono left">12.000 €</td><td class="mono left">1.610 €</td><td class="mono left">0 €</td><td class="mono left">25.610 €</td><td class="mono left red">7.000 €</td><td class="mono left">18.610 €</td><td class="mono left">35.230 €</td></tr>
+        <tr class="q2"><td><strong>Mai</strong></td><td class="mono left">14.000 €</td><td class="mono left">14.400 €</td><td class="mono left">1.610 €</td><td class="mono left">0 €</td><td class="mono left">30.010 €</td><td class="mono left red">7.200 €</td><td class="mono left">22.810 €</td><td class="mono left">58.040 €</td></tr>
+        <tr class="q2"><td><strong>Jun</strong></td><td class="mono left">14.000 €</td><td class="mono left">14.400 €</td><td class="mono left">1.610 €</td><td class="mono left">30.000 €</td><td class="mono left">60.010 €</td><td class="mono left red">7.500 €</td><td class="mono left">52.510 €</td><td class="mono left">110.550 €</td></tr>
+        <tr class="q3"><td><strong>Jul</strong></td><td class="mono left">10.000 €</td><td class="mono left">9.600 €</td><td class="mono left">1.610 €</td><td class="mono left">0 €</td><td class="mono left">21.210 €</td><td class="mono left red">7.000 €</td><td class="mono left">14.210 €</td><td class="mono left">124.760 €</td></tr>
+        <tr class="q3"><td><strong>Ago</strong></td><td class="mono left">7.000 €</td><td class="mono left">6.400 €</td><td class="mono left">800 €</td><td class="mono left">0 €</td><td class="mono left">14.200 €</td><td class="mono left red">6.500 €</td><td class="mono left">7.700 €</td><td class="mono left">132.460 €</td></tr>
+        <tr class="q3"><td><strong>Set</strong></td><td class="mono left">14.000 €</td><td class="mono left">14.400 €</td><td class="mono left">1.610 €</td><td class="mono left">0 €</td><td class="mono left">30.010 €</td><td class="mono left red">7.500 €</td><td class="mono left">22.510 €</td><td class="mono left">154.970 €</td></tr>
+        <tr class="q4"><td><strong>Out</strong></td><td class="mono left">16.000 €</td><td class="mono left">19.200 €</td><td class="mono left">1.610 €</td><td class="mono left">0 €</td><td class="mono left">36.810 €</td><td class="mono left red">8.000 €</td><td class="mono left">28.810 €</td><td class="mono left">183.780 €</td></tr>
+        <tr class="q4"><td><strong>Nov</strong></td><td class="mono left">18.000 €</td><td class="mono left">19.200 €</td><td class="mono left">3.220 €</td><td class="mono left">0 €</td><td class="mono left">40.420 €</td><td class="mono left red">8.500 €</td><td class="mono left">31.920 €</td><td class="mono left">215.700 €</td></tr>
+        <tr class="q4"><td><strong>Dez</strong></td><td class="mono left">16.000 €</td><td class="mono left">12.000 €</td><td class="mono left">3.220 €</td><td class="mono left">0 €</td><td class="mono left">31.220 €</td><td class="mono left red">8.000 €</td><td class="mono left">23.220 €</td><td class="mono left">238.920 €</td></tr>
+        <tr class="total"><td><strong>TOTAL ANO 1</strong></td><td class="mono left">143.000 €</td><td class="mono left">133.600 €</td><td class="mono left">20.120 €</td><td class="mono left">30.000 €</td><td class="mono left green"><strong>326.720 €</strong></td><td class="mono left red">87.800 €</td><td class="mono left green"><strong>238.920 €</strong></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════ 07 PROJECÇÃO 3 ANOS ═══════════════ -->
+<section class="section" id="3anos">
+  <div class="sec-header">
+    <div class="sec-num">07</div>
+    <div>
+      <div class="sec-label">Horizonte a 3 Anos</div>
+      <h2 class="sec-title">Crescimento<br><em>sustentado</em></h2>
+    </div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Linha de Receita</th><th>Ano 1 (2026)</th><th>Ano 2 (2027)</th><th>Ano 3 (2028)</th><th>CAGR</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Arquitectura &amp; Renovações</strong></td><td class="mono left">143.000 €</td><td class="mono left">210.000 €</td><td class="mono left">300.000 €</td><td class="green">+45%</td></tr>
+        <tr><td><strong>Mediação Imobiliária</strong></td><td class="mono left">133.600 €</td><td class="mono left">210.000 €</td><td class="mono left">320.000 €</td><td class="green">+55%</td></tr>
+        <tr><td><strong>Intermediação de Crédito</strong></td><td class="mono left">20.120 €</td><td class="mono left">32.000 €</td><td class="mono left">48.000 €</td><td class="green">+55%</td></tr>
+        <tr><td><strong>Fix &amp; Flip</strong></td><td class="mono left">30.000 €</td><td class="mono left">60.000 €</td><td class="mono left">90.000 €</td><td class="green">+73%</td></tr>
+        <tr><td><strong>Promoção Imobiliária</strong></td><td class="mono left amber">A identificar</td><td class="mono left amber">A identificar</td><td class="mono left amber">A identificar</td><td class="amber">—</td></tr>
+        <tr class="subtotal"><td><strong>Total Receitas (excl. promoção)</strong></td><td class="mono left green"><strong>326.720 €</strong></td><td class="mono left green"><strong>512.000 €</strong></td><td class="mono left green"><strong>758.000 €</strong></td><td class="green"><strong>+52%</strong></td></tr>
+        <tr><td>Custos Totais (fixos + variáveis)</td><td class="mono left red">87.800 €</td><td class="mono left red">145.000 €</td><td class="mono left red">200.000 €</td><td></td></tr>
+        <tr class="total"><td><strong>EBITDA</strong></td><td class="mono left green"><strong>238.920 €</strong></td><td class="mono left green"><strong>367.000 €</strong></td><td class="mono left green"><strong>558.000 €</strong></td><td></td></tr>
+        <tr><td>Margem EBITDA</td><td class="mono left">73%</td><td class="mono left">72%</td><td class="mono left green"><strong>74%</strong></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <p><strong>Nota — Promoção Imobiliária:</strong> Não está incluída nas projecções por não existir ainda nenhuma operação concreta identificada. Quando identificada, será adicionada com análise de viabilidade independente — incluindo IVA a 23% sobre a obra, que representa um custo significativo frequentemente omitido em estimativas preliminares.</p>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-val"><em>327</em>K</div><div class="kpi-label">Receita Ano 1<br>2026 (corrigido)</div></div>
+    <div class="kpi"><div class="kpi-val"><em>512</em>K</div><div class="kpi-label">Receita Ano 2<br>2027</div></div>
+    <div class="kpi"><div class="kpi-val"><em>758</em>K</div><div class="kpi-label">Receita Ano 3<br>2028 (recorrente)</div></div>
+    <div class="kpi"><div class="kpi-val"><em>+52</em>%</div><div class="kpi-label">CAGR médio<br>3 anos</div></div>
+  </div>
+</section>
+
+<!-- ═══════════════ 08 CASH FLOW ═══════════════ -->
+<section class="section tinted" id="cashflow">
+  <div class="sec-header">
+    <div class="sec-num">08</div>
+    <div>
+      <div class="sec-label">Cash Flow</div>
+      <h2 class="sec-title">Liquidez e<br><em>gestão de tesouraria</em></h2>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <p><strong>Atenção ao timing:</strong> A mediação e o Fix &amp; Flip têm recebimento diferido (escritura). O crédito tem recebimento rápido (2–4 semanas após aprovação). As renovações têm pagamentos parcelados (sinal + entrega). A gestão de tesouraria é crítica nos primeiros 3 meses.</p>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Serviço</th><th>Timing de Recebimento</th><th>Risco de Atraso</th><th>Mitigação</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Renovações</strong></td><td>30% sinal + 40% meio obra + 30% entrega</td><td class="amber">Médio</td><td>Contrato com cláusulas de penalização</td></tr>
+        <tr><td><strong>Mediação</strong></td><td>50% CPCV + 50% escritura (30–90 dias depois)</td><td class="amber">Médio</td><td>CPCV obrigatório, seguro de título</td></tr>
+        <tr><td><strong>Crédito</strong></td><td>Pagamento bancário 15–30 dias após escritura</td><td class="green">Baixo</td><td>Acordo prévio com banco</td></tr>
+        <tr><td><strong>Arquitectura</strong></td><td>30% início + 40% entrega projecto + 30% aprovação</td><td class="green">Baixo</td><td>Pagamentos por fases contratuais</td></tr>
+        <tr><td><strong>Fix &amp; Flip</strong></td><td>Recebimento total na escritura de venda</td><td class="red">Elevado</td><td>Reserva de caixa + pré-comercialização</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Regras de Tesouraria</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Regra</th><th>Valor</th><th>Objectivo</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Reserva mínima de caixa</strong></td><td class="mono left">3 meses de custos fixos (~20.000 €)</td><td>Cobrir atrasos e imprevistos</td></tr>
+        <tr><td><strong>Fundo de investimento (Fix &amp; Flip)</strong></td><td class="mono left">Capital do investidor externo</td><td>Nunca misturar com tesouraria operacional</td></tr>
+        <tr><td><strong>Distribuição de resultados</strong></td><td class="mono left">Trimestral — após reserva mínima assegurada</td><td>Proteger liquidez da empresa</td></tr>
+        <tr><td><strong>Reinvestimento em marketing</strong></td><td class="mono left">10% da faturação mensal</td><td>Manter crescimento de leads</td></tr>
+        <tr><td><strong>Fundo de reserva</strong></td><td class="mono left">15% de cada faturação retida</td><td>Contingências e expansão</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════ 09 CENÁRIOS ═══════════════ -->
+<section class="section" id="cenarios">
+  <div class="sec-header">
+    <div class="sec-num">09</div>
+    <div>
+      <div class="sec-label">Análise de Cenários</div>
+      <h2 class="sec-title">Conservador, base<br><em>e optimista</em></h2>
+    </div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Métrica</th><th>Conservador</th><th>Base (mais provável)</th><th>Optimista</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Receita Ano 1</strong></td><td class="mono left">225.000 €</td><td class="mono left green">315.000–327.000 €</td><td class="mono left">462.000 €</td></tr>
+        <tr><td><strong>Ticket médio mediação</strong></td><td class="mono left">270.000 €</td><td class="mono left green">323.500 € (mediana real)</td><td class="mono left">380.000 €</td></tr>
+        <tr><td><strong>Nº Transações Mediação/Ano</strong></td><td class="mono left">7 transações</td><td class="mono left green">12 transações</td><td class="mono left">20 transações</td></tr>
+        <tr><td><strong>Nº Projectos Arquitectura/Ano</strong></td><td class="mono left">5 projectos</td><td class="mono left green">8–10 projectos</td><td class="mono left">15 projectos</td></tr>
+        <tr><td><strong>Nº Renovações/Ano</strong></td><td class="mono left">4 obras</td><td class="mono left green">7 obras</td><td class="mono left">12 obras</td></tr>
+        <tr><td><strong>Margem renovações</strong></td><td class="mono left red">12% (sem parceiros)</td><td class="mono left green">16% (parceiros negociados)</td><td class="mono left">20% (volume)</td></tr>
+        <tr><td><strong>Capital Fix &amp; Flip (por op.)</strong></td><td class="mono left">220.000 €</td><td class="mono left green">240.000 €</td><td class="mono left">280.000 €</td></tr>
+        <tr><td><strong>Breakeven</strong></td><td class="mono left">Mês 6</td><td class="mono left green">Mês 4–5</td><td class="mono left">Mês 3</td></tr>
+        <tr><td><strong>EBITDA Ano 1</strong></td><td class="mono left">148.000 €</td><td class="mono left green">238.000 €</td><td class="mono left">340.000 €</td></tr>
+        <tr><td><strong>Margem EBITDA</strong></td><td class="mono left">66%</td><td class="mono left green">73%</td><td class="mono left">74%</td></tr>
+        <tr><td><strong>Contratação adicional</strong></td><td class="mono left">Apenas freelancers</td><td class="mono left green">1 assistente (M5–6)</td><td class="mono left">2 assistentes (M3+M5)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Pressupostos do Cenário Base — Verificados com Dados Reais de Mercado 2026</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Pressuposto</th><th>Valor Verificado</th><th>Fonte</th></tr></thead>
+      <tbody>
+        <tr><td>Activação da carteira do Atelier Telmo Maia</td><td class="green">10+ leads qualificados no mês 1</td><td>20 anos de relações de confiança</td></tr>
+        <tr><td>Preço mediano imóvel Palmela</td><td class="green">323.500 € (apartamentos 305K, moradias 610K)</td><td>Ranking Imobiliário, 2026</td></tr>
+        <tr><td>Preço m² Palmela (2026)</td><td class="green">2.725–2.900 €/m²</td><td>Idealista / Propriedades PT, mar. 2026</td></tr>
+        <tr><td>Valorização anual Palmela</td><td class="green">+28,9% num ano</td><td>Idealista, fev. 2026</td></tr>
+        <tr><td>Comissão mediação mercado</td><td class="green">3–5% + IVA 23% (mín. 5.000€+IVA)</td><td>BoaVenda / Lusoland, 2026</td></tr>
+        <tr><td>Custo renovação real (mão de obra + mat.)</td><td class="amber">300–700 €/m² (total 500–1.000 €/m²)</td><td>ObraXRAY / calcify.cc, 2026</td></tr>
+        <tr><td>Honorários arquitectura</td><td class="green">3–10% do valor da obra (sem tabela fixa)</td><td>Ordem dos Arquitectos, 2025</td></tr>
+        <tr><td>Capital mínimo Fix &amp; Flip (Palmela)</td><td class="amber">220.000–280.000 € (não 80.000 €)</td><td>Análise mercado Palmela, 2026</td></tr>
+        <tr><td>Custo construção nova + IVA 23%</td><td class="amber">950–1.500 €/m² + IVA (custo real total)</td><td>ObraXRAY / engIobra, 2026</td></tr>
+        <tr><td>Sazonalidade mercado imobiliário PT</td><td>Jul–Ago −30%, Set–Nov +20%</td><td>Padrão histórico</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════ 10 INVESTIDOR ═══════════════ -->
+<section class="section tinted" id="investidor">
+  <div class="sec-header">
+    <div class="sec-num">10</div>
+    <div>
+      <div class="sec-label">Plano do Investidor Externo</div>
+      <h2 class="sec-title">Capital com<br><em>retorno estruturado</em></h2>
+    </div>
+  </div>
+
+  <h5>Modelo A — Fix &amp; Flip — Capital Real de Mercado Palmela 2026</h5>
+  <div class="callout warn">
+    <p><strong>Correcção crítica:</strong> O mercado de Palmela/Setúbal em 2026 tem preço mediano de 323.500 € (Ranking Imobiliário). Um imóvel degradado para Fix &amp; Flip custa tipicamente 160.000–200.000 € — não 55.000 € como assumido anteriormente. O capital mínimo real por operação é <strong>220.000–280.000 €</strong>.</p>
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Parâmetro</th><th>Operação Standard Palmela</th><th>Operação Média AML</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Capital do Investidor</strong></td><td class="mono left">220.000–250.000 €</td><td class="mono left">260.000–300.000 €</td></tr>
+        <tr><td>Custo de compra (imóvel degradado)</td><td class="mono left">160.000–180.000 €</td><td class="mono left">190.000–220.000 €</td></tr>
+        <tr><td>Custo de renovação integral (500–700€/m² × 100m²)</td><td class="mono left">50.000–70.000 €</td><td class="mono left">60.000–80.000 €</td></tr>
+        <tr><td>Custos transação, IMT, notário, registo</td><td class="mono left">10.000–15.000 €</td><td class="mono left">12.000–18.000 €</td></tr>
+        <tr><td>Preço de venda estimado (2.700 €/m² × 110m²)</td><td class="mono left">280.000–320.000 €</td><td class="mono left">320.000–380.000 €</td></tr>
+        <tr><td><strong>Lucro total da operação</strong></td><td class="mono left">40.000–65.000 €</td><td class="mono left">50.000–80.000 €</td></tr>
+        <tr><td>Parte do Investidor (50%)</td><td class="mono left green">20.000–32.500 €</td><td class="mono left green">25.000–40.000 €</td></tr>
+        <tr><td>Parte da Empresa (50%)</td><td class="mono left green">20.000–32.500 €</td><td class="mono left green">25.000–40.000 €</td></tr>
+        <tr class="subtotal"><td><strong>ROI Investidor sobre capital</strong></td><td class="mono left green"><strong>9–15%</strong></td><td class="mono left green"><strong>10–15%</strong></td></tr>
+        <tr><td>Horizonte temporal</td><td class="mono left">5–8 meses</td><td class="mono left">6–9 meses</td></tr>
+        <tr><td><strong>ROI Anualizado</strong></td><td class="mono left green"><strong>15–30%</strong></td><td class="mono left green"><strong>14–28%</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px;color:var(--ink3);margin-top:6px;">Nota: ROI por operação é mais baixo que na versão anterior (9–15% vs. 22% assumido), mas o ROI anualizado mantém-se atractivo (15–30%) dado o prazo mais curto. O argumento ao investidor deve focar o ROI anualizado, não o ROI por operação.</p>
+
+  <h5>Modelo B — Promoção Imobiliária (operação tipo, a identificar)</h5>
+  <div class="callout warn">
+    <p><strong>Nota:</strong> Não existe ainda nenhum projecto concreto de promoção identificado. A tabela abaixo apresenta uma operação tipo ilustrativa — os valores reais serão definidos após identificação e análise de viabilidade de uma oportunidade concreta.</p>
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Item</th><th>Valor Indicativo</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Terreno (exemplo: 9.000–12.000 m²)</strong></td><td class="mono left">350.000 – 700.000 €</td><td>Depende da zona e área bruta de construção</td></tr>
+        <tr><td>Projectos + licenciamentos + taxas municipais</td><td class="mono left">100.000 – 180.000 €</td><td>Varia com município e complexidade</td></tr>
+        <tr><td>Construção (8–12 fogos × 180 m² × 1.600 €/m²)</td><td class="mono left">2.300.000 – 3.460.000 €</td><td>Preço de construção de mercado 2026</td></tr>
+        <tr><td>Infraestruturas + zonas comuns</td><td class="mono left">250.000 – 400.000 €</td><td>Arruamentos, saneamento, espaços comuns</td></tr>
+        <tr><td>Marketing + comercialização + comissões</td><td class="mono left">3–4% sobre vendas</td><td>A calcular sobre receita final</td></tr>
+        <tr><td>Contingências (8%)</td><td class="mono left">~280.000 €</td><td>Imprevistos de obra e mercado</td></tr>
+        <tr class="subtotal"><td><strong>TOTAL INVESTIMENTO INDICATIVO</strong></td><td class="mono left amber"><strong>~3.280.000 – 4.740.000 €</strong></td><td>A confirmar por projecto concreto</td></tr>
+        <tr><td>Margem bruta estimada</td><td class="mono left green">25 – 35%</td><td>Depende do preço de venda e terreno</td></tr>
+        <tr><td>Partilha com investidor</td><td class="mono left green">Proporcional ao capital aportado</td><td>A definir por contrato</td></tr>
+        <tr><td>ROI indicativo do investidor</td><td class="mono left green">25 – 35%</td><td>Em 24–36 meses</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h5>Estrutura de Garantias ao Investidor</h5>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Garantia</th><th>Modelo A</th><th>Modelo B</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Contrato de parceria formal</strong></td><td class="green">✓</td><td class="green">✓</td></tr>
+        <tr><td>Imóvel registado como colateral</td><td class="green">✓</td><td class="green">✓</td></tr>
+        <tr><td>Hipoteca sobre terreno</td><td>—</td><td class="green">✓</td></tr>
+        <tr><td>Seguro todo-o-risco de obras</td><td class="green">✓</td><td class="green">✓</td></tr>
+        <tr><td>Relatórios mensais de progresso</td><td class="green">✓</td><td class="green">✓</td></tr>
+        <tr><td>Acesso a toda documentação do projecto</td><td class="green">✓</td><td class="green">✓</td></tr>
+        <tr><td>Conta bancária separada por projecto</td><td class="green">✓</td><td class="green">✓</td></tr>
+        <tr><td>Aprovação do investidor em despesas &gt;10% orçamento</td><td class="green">✓</td><td class="green">✓</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════ 11 ANÁLISE DE RISCO ═══════════════ -->
+<section class="section" id="risco">
+  <div class="sec-header">
+    <div class="sec-num">11</div>
+    <div>
+      <div class="sec-label">Análise de Risco</div>
+      <h2 class="sec-title">Riscos identificados<br><em>e mitigações</em></h2>
+    </div>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Risco</th><th>Probabilidade</th><th>Impacto</th><th>Mitigação</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Abrandamento do mercado imobiliário</strong></td><td class="amber">Médio</td><td class="red">Alto</td><td>Diversificação de serviços — crédito e renovações mantêm-se em mercado descendente</td></tr>
+        <tr><td><strong>Demora no arranque de clientes</strong></td><td class="amber">Médio</td><td class="amber">Médio</td><td>Base de dados existente garante leads imediatos; fundo de caixa cobre 3 meses</td></tr>
+        <tr><td><strong>Atraso em obra Fix &amp; Flip</strong></td><td class="amber">Médio</td><td class="amber">Médio</td><td>Orçamentos com contingência, contratos com penalizações, supervisão semanal por Telmo Maia</td></tr>
+        <tr><td><strong>Subida das taxas de juro</strong></td><td class="green">Baixo</td><td class="amber">Médio</td><td>Crédito com spread negociado; diversificação para zonas mais acessíveis</td></tr>
+        <tr><td><strong>Saída de um co-fundador</strong></td><td class="green">Baixo</td><td class="red">Alto</td><td>Pacto social com cláusulas de não-concorrência e lock-in de 3 anos</td></tr>
+        <tr><td><strong>Atraso em licenciamento (promoção imobiliária)</strong></td><td class="amber">Médio</td><td class="amber">Médio</td><td>Análise prévia de viabilidade urbanística antes de qualquer compromisso; buffer de 6 meses em todos os planos de promoção</td></tr>
+        <tr><td><strong>Concorrência de agências estabelecidas</strong></td><td class="green">Baixo</td><td class="green">Baixo</td><td>Diferenciação pela integração de serviços; não competimos em volume, competimos em valor</td></tr>
+        <tr><td><strong>Incumprimento de clientes (mediação)</strong></td><td class="green">Baixo</td><td class="green">Baixo</td><td>CPCV com sinal como garantia; parceria com advogado para documentação</td></tr>
+        <tr><td><strong>Flutuação nos custos de construção</strong></td><td class="amber">Médio</td><td class="amber">Médio</td><td>Orçamentos fechados com empreiteiros; cláusula de revisão de preços limitada a 5%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══════════════ 12 KPIs ═══════════════ -->
+<section class="section tinted" id="kpis">
+  <div class="sec-header">
+    <div class="sec-num">12</div>
+    <div>
+      <div class="sec-label">Indicadores de Desempenho</div>
+      <h2 class="sec-title">O que medir<br><em>e como decidir</em></h2>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h5>KPIs Operacionais — Frequência Semanal</h5>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Indicador</th><th>Meta Mês 3</th><th>Meta Mês 6</th><th>Responsável</th></tr></thead>
+          <tbody>
+            <tr><td>Leads novos / semana</td><td class="mono left">5+</td><td class="mono left">10+</td><td>Julio Alexandre</td></tr>
+            <tr><td>Taxa conv. lead → reunião</td><td class="mono left">40%</td><td class="mono left">50%</td><td>Todos</td></tr>
+            <tr><td>Taxa conv. reunião → proposta</td><td class="mono left">60%</td><td class="mono left">70%</td><td>Todos</td></tr>
+            <tr><td>Taxa conv. proposta → cliente</td><td class="mono left">30%</td><td class="mono left">40%</td><td>Todos</td></tr>
+            <tr><td>Imóveis em angariação activa</td><td class="mono left">5+</td><td class="mono left">12+</td><td>Parceiro mediador</td></tr>
+            <tr><td>Propostas renovação entregues</td><td class="mono left">2/mês</td><td class="mono left">4/mês</td><td>Telmo Maia</td></tr>
+            <tr><td>Processos crédito em curso</td><td class="mono left">3+</td><td class="mono left">6+</td><td>Parceiro mediador</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <h5>KPIs Financeiros — Frequência Mensal</h5>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Indicador</th><th>Meta Mês 6</th><th>Meta Mês 12</th></tr></thead>
+          <tbody>
+            <tr><td>Faturação mensal</td><td class="mono left green">30.000 €</td><td class="mono left green">50.000 €</td></tr>
+            <tr><td>Margem bruta média</td><td class="mono left">62%+</td><td class="mono left">70%+</td></tr>
+            <tr><td>Custo aquisição cliente (CAC)</td><td class="mono left">&lt;600 €</td><td class="mono left">&lt;400 €</td></tr>
+            <tr><td>LTV médio por cliente</td><td class="mono left">15.000 €+</td><td class="mono left">28.000 €+</td></tr>
+            <tr><td>Rácio LTV/CAC</td><td class="mono left green">25×+</td><td class="mono left green">70×+</td></tr>
+            <tr><td>Ticket médio mediação</td><td class="mono left green">≥ 323.500 €</td><td class="mono left green">≥ 350.000 €</td></tr>
+            <tr><td>Margem renovações (com parceiros)</td><td class="mono left">≥ 15%</td><td class="mono left">≥ 18%</td></tr>
+            <tr><td>Dias médios a receber</td><td class="mono left">&lt;45 dias</td><td class="mono left">&lt;30 dias</td></tr>
+            <tr><td>Reserva de caixa</td><td class="mono left green">25.000 €+</td><td class="mono left green">50.000 €+</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h5>KPIs de Marketing — Frequência Mensal</h5>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Indicador</th><th>Meta Mês 3</th><th>Meta Mês 12</th></tr></thead>
+          <tbody>
+            <tr><td>Seguidores Instagram</td><td class="mono left">500+</td><td class="mono left">2.500+</td></tr>
+            <tr><td>Reviews Google (5★)</td><td class="mono left">10+</td><td class="mono left">40+</td></tr>
+            <tr><td>Visitas website/mês</td><td class="mono left">300+</td><td class="mono left">1.200+</td></tr>
+            <tr><td>Leads digitais/mês</td><td class="mono left">8+</td><td class="mono left">25+</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Regra de decisão:</strong> Se faturação acumulada estiver abaixo de 60.000 € no final do mês 3, activar imediatamente: (1) dobrar orçamento de Google Ads, (2) reunião de parceria com 3 novos notários/advogados, (3) campanha de reactivação da carteira do atelier com oferta especial de avaliação gratuita. Não esperar pelo mês 6 para reagir. O indicador mais crítico do mês 1–3 é o número de visitas a imóveis por semana — proxy directo de receita futura de mediação.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-title">Telmo Maia Arquitectos 360</div>
+  <div class="ft-meta">
+    <div>Julio Alexandre Ferreira de Matos — Co-Fundador</div>
+    <div>Telmo Maia — Co-Fundador</div>
+    
+    <div style="margin-top:8px;color:#333;">Plano Financeiro v2.0 · Confidencial · 2026</div>
+  </div>
+</footer>
+
+</div>
+</body>
+</html>
