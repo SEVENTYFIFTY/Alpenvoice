@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petrus AI — AI-Powered Support for Children's Mental Health | by Seventy Fifty</title>
+<meta name="description" content="Early detection, structured screening, and decision support tools designed for Swiss schools and child psychiatry services. Validated by institutional research. There is always a window.">
+<meta property="og:title" content="Petrus AI — There is always a window.">
+<meta property="og:description" content="Swiss research-validated AI platform for early detection of children's mental health risks.">
+<meta property="og:url" content="https://www.petrus-labs.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&family=Fraunces:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+</head>
+<body>
+
+<!-- ===== 3D BACKGROUND CANVAS (fixed, scroll-reactive) ===== -->
+<canvas id="bg3d" aria-hidden="true"></canvas>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ===== NAVIGATION ===== -->
+<header class="nav" id="nav">
+  <a class="nav__brand" href="#top">
+    <span class="nav__logo">P</span>
+    <span class="nav__name">Petrus <em>AI</em><small>by Seventy Fifty</small></span>
+  </a>
+  <nav class="nav__links" id="navLinks">
+    <a href="#challenge">The Challenge</a>
+    <a href="#solution">Our Solution</a>
+    <a href="#research">Research</a>
+    <a href="#investors">Investors</a>
+    <a href="#vision">Vision Board</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <a href="#contact" class="btn btn--small btn--primary nav__cta">Get in Touch</a>
+  <button class="nav__burger" id="navBurger" aria-label="Menu"><span></span><span></span><span></span></button>
+</header>
+
+<main id="top">
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="hero">
+  <div class="hero__inner">
+    <div class="hero__badge reveal"><span class="pulse-dot"></span> Swiss Research-Validated Solution</div>
+    <h1 class="hero__title reveal">AI-Powered Support for <span class="grad-text">Children's Mental Health</span></h1>
+    <p class="hero__quote reveal">“There is always a window.”</p>
+    <p class="hero__sub reveal">Early detection, structured screening, and decision support tools designed for Swiss schools and child psychiatry services. Validated by institutional research.</p>
+    <div class="hero__actions reveal">
+      <a href="#solution" class="btn btn--primary">Learn More</a>
+      <a href="#research" class="btn btn--ghost">View Research</a>
+    </div>
+    <div class="hero__chips reveal">
+      <span class="chip">FH Graubünden Research</span>
+      <span class="chip">33 Institutions Surveyed</span>
+      <span class="chip">8 Swiss Cantons</span>
+    </div>
+  </div>
+  <div class="hero__scrollhint"><span></span></div>
+</section>
+
+<!-- ===== RESEARCH-BACKED INSIGHTS ===== -->
+<section class="section" id="insights">
+  <div class="container">
+    <p class="kicker reveal">Research-Backed Insights</p>
+    <h2 class="reveal">Our platform is built on extensive market research conducted with Swiss educational and healthcare institutions.</h2>
+    <div class="grid grid--4 stats">
+      <div class="card stat tilt reveal">
+        <div class="stat__num grad-text" data-count="146000" data-suffix="+">0</div>
+        <h3>Affected Youth</h3><p>Children aged 11–18 with mental health burdens in Switzerland</p>
+      </div>
+      <div class="card stat tilt reveal">
+        <div class="stat__num grad-text" data-count="33">0</div>
+        <h3>Institutions Surveyed</h3><p>Schools and psychiatric services across 8 Swiss cantons</p>
+      </div>
+      <div class="card stat tilt reveal">
+        <div class="stat__num grad-text" data-count="93" data-prefix="89–" data-suffix="%">0</div>
+        <h3>Report Overload</h3><p>Of professionals report capacity constraints in their work</p>
+      </div>
+      <div class="card stat tilt reveal">
+        <div class="stat__num grad-text" data-count="4.7" data-decimals="1" data-suffix="/5">0</div>
+        <h3>Priority Rating</h3><p>Early detection ranked as most important feature need</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CRISIS IN NUMBERS ===== -->
+<section class="section section--alt" id="crisis">
+  <div class="container">
+    <p class="kicker reveal">The Crisis in Numbers</p>
+    <h2 class="reveal">DACH Region Mental Health Statistics</h2>
+    <p class="lead reveal">Comprehensive data on child and adolescent mental health challenges across Germany, Austria, and Switzerland — highlighting the urgent need for early intervention.</p>
+    <div class="grid grid--4">
+      <div class="card stat tilt reveal">
+        <div class="stat__num" data-count="11.2" data-decimals="1" data-suffix="M">0</div>
+        <h3>Children in Europe Affected</h3><p>Children ages 6–18 suffering from diagnosable mental health conditions across Europe</p>
+        <small class="src">Source: UNICEF, WHO, Eurostat 2023–2024</small>
+      </div>
+      <div class="card stat tilt reveal">
+        <div class="stat__num" data-count="12.3" data-decimals="1" data-suffix="M">0</div>
+        <h3>DACH Region Children</h3><p>Total children ages 6–18 in Germany, Austria, and Switzerland combined</p>
+        <small class="src">Source: National Statistics Offices</small>
+      </div>
+      <div class="card stat tilt reveal">
+        <div class="stat__num">2.5–3.7M</div>
+        <h3>Mental Health Challenges</h3><p>20–30% of DACH children experiencing psychological burden or low emotional well-being</p>
+        <small class="src">Source: Regional Health Reports</small>
+      </div>
+      <div class="card stat stat--alert tilt reveal">
+        <div class="stat__num">#2</div>
+        <h3>Cause of Death</h3><p>Suicide is the second leading cause of death for children aged 10–19 in Europe</p>
+        <small class="src">Source: WHO Europe 2024</small>
+      </div>
+    </div>
+
+    <div class="card card--wide abuse reveal">
+      <h3>Child Sexual Abuse in Europe</h3>
+      <p>These statistics represent children who will experience abuse before turning 18</p>
+      <div class="abuse__bars">
+        <div class="abuse__row">
+          <div class="abuse__label"><strong>14.5%</strong> Girls Affected — nearly 1 in 7 girls experience sexual violence before age 18</div>
+          <div class="bar"><span style="--w:14.5%"></span></div>
+        </div>
+        <div class="abuse__row">
+          <div class="abuse__label"><strong>6.4%</strong> Boys Affected — more than 1 in 15 boys experience sexual violence before age 18</div>
+          <div class="bar"><span style="--w:6.4%"></span></div>
+        </div>
+      </div>
+      <small class="src">Source: European Parliament — Combating Child Sexual Abuse Briefing • Based on CIIVISE France Report &amp; EU prevalence studies (January 2024)</small>
+    </div>
+
+    <!-- Country tabs -->
+    <h3 class="subhead reveal">Country-Specific Statistics</h3>
+    <p class="lead reveal">Compare mental health data across the DACH region</p>
+    <div class="tabs reveal" id="countryTabs">
+      <button class="tab is-active" data-tab="ch">🇨🇭 Switzerland</button>
+      <button class="tab" data-tab="de">🇩🇪 Germany</button>
+      <button class="tab" data-tab="at">🇦🇹 Austria</button>
+    </div>
+
+    <div class="tabpanel is-active" data-panel="ch">
+      <div class="country-head reveal"><span class="flag">🇨🇭</span><div><h4>Switzerland</h4><p>Population: 8.8M</p></div></div>
+      <div class="grid grid--3 mini-stats reveal">
+        <div class="mini"><strong>1.4M</strong><span>Children (6–18)</span></div>
+        <div class="mini"><strong>20–30%</strong><span>Affected Rate</span></div>
+        <div class="mini"><strong>146K–219K</strong><span>Affected Youth (11–18)</span></div>
+      </div>
+      <div class="grid grid--3">
+        <div class="card stat--sm reveal"><strong>20–30%</strong><h5>Psychological Burden</h5><p>Swiss children with low emotional well-being</p></div>
+        <div class="card stat--sm reveal"><strong>89–93%</strong><h5>Professional Overload</h5><p>Mental health professionals reporting capacity constraints</p></div>
+        <div class="card stat--sm reveal"><strong>78%</strong><h5>Late Detection</h5><p>Cases where issues are detected too late</p></div>
+        <div class="card stat--sm reveal"><strong>33%</strong><h5>Depression Rise</h5><p>Increase in youth depression diagnoses since 2019</p></div>
+        <div class="card stat--sm reveal"><strong>25%</strong><h5>School Stress</h5><p>Students reporting high academic pressure affecting mental health</p></div>
+        <div class="card stat--sm card--highlight reveal"><strong>70%</strong><h5>Begin in Childhood</h5><p>Of adult mental health disorders begin in childhood — early detection is critical</p></div>
+      </div>
+    </div>
+
+    <div class="tabpanel" data-panel="de">
+      <div class="country-head"><span class="flag">🇩🇪</span><div><h4>Germany</h4><p>Population: 84.4M</p></div></div>
+      <div class="grid grid--3 mini-stats">
+        <div class="mini"><strong>10.2M</strong><span>Children (6–18)</span></div>
+        <div class="mini"><strong>20–30%</strong><span>Affected Rate</span></div>
+        <div class="mini"><strong>2.0–3.1M</strong><span>Affected Youth</span></div>
+      </div>
+      <div class="grid grid--3">
+        <div class="card stat--sm"><strong>~35,000</strong><h5>K–12 Schools</h5><p>Largest addressable education market in the DACH region</p></div>
+        <div class="card stat--sm"><strong>+62%</strong><h5>Depression Surge</h5><p>Increase in adolescent depression diagnoses since 2019</p></div>
+        <div class="card stat--sm"><strong>+47%</strong><h5>Anxiety Increase</h5><p>Rise in youth anxiety disorders since 2019</p></div>
+      </div>
+    </div>
+
+    <div class="tabpanel" data-panel="at">
+      <div class="country-head"><span class="flag">🇦🇹</span><div><h4>Austria</h4><p>Population: 9.1M</p></div></div>
+      <div class="grid grid--3 mini-stats">
+        <div class="mini"><strong>1.1M</strong><span>Children (6–18)</span></div>
+        <div class="mini"><strong>20–30%</strong><span>Affected Rate</span></div>
+        <div class="mini"><strong>220K–330K</strong><span>Affected Youth</span></div>
+      </div>
+      <div class="grid grid--3">
+        <div class="card stat--sm"><strong>~6,000</strong><h5>K–12 Schools</h5><p>Addressable education institutions across nine federal states</p></div>
+        <div class="card stat--sm"><strong>40%</strong><h5>Bullying Rate</h5><p>Students experiencing bullying in schools</p></div>
+        <div class="card stat--sm"><strong>1 in 7</strong><h5>Abuse Victims</h5><p>Children affected by some form of abuse</p></div>
+      </div>
+    </div>
+
+    <div class="banner reveal">Market growing at <strong>24% CAGR</strong> — projected to reach <strong>€7B by 2030</strong></div>
+  </div>
+</section>
+
+<!-- ===== DATA VISUALIZATION ===== -->
+<section class="section" id="dataviz">
+  <div class="container">
+    <p class="kicker reveal">Data Visualization</p>
+    <h2 class="reveal">Mental Health Condition Breakdown</h2>
+    <p class="lead reveal">Interactive visualizations of youth mental health data across the DACH region, showing condition prevalence, age distribution, and gender differences.</p>
+    <div class="grid grid--4">
+      <div class="card stat tilt reveal"><div class="stat__num grad-text">+47%</div><h3>Anxiety Increase</h3><p>Rise in youth anxiety since 2019</p></div>
+      <div class="card stat tilt reveal"><div class="stat__num grad-text">+62%</div><h3>Depression Surge</h3><p>Increase in adolescent depression diagnoses</p></div>
+      <div class="card stat tilt reveal"><div class="stat__num grad-text">40%</div><h3>Bullying Rate</h3><p>Students experiencing bullying in schools</p></div>
+      <div class="card stat tilt reveal"><div class="stat__num grad-text">1 in 7</div><h3>Abuse Victims</h3><p>Children affected by some form of abuse</p></div>
+    </div>
+
+    <div class="split reveal">
+      <div class="card chart-card">
+        <h3>Mental Health Conditions Distribution</h3>
+        <div class="chart-wrap"><canvas id="conditionsChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Condition Details</h3>
+        <div class="cond"><div class="cond__top"><span>Anxiety Disorders</span><strong>32%</strong></div><div class="bar"><span style="--w:32%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>Depression</span><strong>28%</strong></div><div class="bar"><span style="--w:28%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>Bullying Impact</span><strong>22%</strong></div><div class="bar"><span style="--w:22%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>Abuse Trauma</span><strong>12%</strong></div><div class="bar"><span style="--w:12%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>Other Conditions</span><strong>6%</strong></div><div class="bar"><span style="--w:6%"></span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== THE CHALLENGE ===== -->
+<section class="section section--alt" id="challenge">
+  <div class="container">
+    <p class="kicker reveal">The Challenge</p>
+    <h2 class="reveal">Swiss Youth Mental Health is Under <span class="grad-text--warm">Unprecedented Strain</span></h2>
+    <p class="lead reveal">The mental health of children and adolescents has become a priority topic in Switzerland. Increasing levels of psychological distress, capacity constraints in care provision, and pressure on educational and healthcare institutions highlight the urgent need for complementary support mechanisms.</p>
+    <blockquote class="quote reveal">
+      “Preventive, early-intervention and low-threshold services remain underdeveloped, while the system continues to be predominantly curative.”
+      <cite>— Swiss Health Report 2025</cite>
+    </blockquote>
+    <div class="grid grid--4">
+      <div class="card tilt reveal"><div class="icon">📈</div><h3>Rising Mental Health Burdens</h3><p>20–30% of Swiss children and adolescents experience low emotional well-being or medium to high psychological burden.</p></div>
+      <div class="card tilt reveal"><div class="icon">⏳</div><h3>Long Waiting Times</h3><p>Several months for assessments and treatment have become common, in some cases extending well beyond this.</p></div>
+      <div class="card tilt reveal"><div class="icon">🧑‍⚕️</div><h3>Professional Shortages</h3><p>A persistent shortage affects psychiatrists, psychologists, and therapeutic specialists across Switzerland.</p></div>
+      <div class="card tilt reveal"><div class="icon">🔍</div><h3>Late Detection</h3><p>Too late recognition of issues and communication problems between stakeholders are the most reported challenges.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== OUR SOLUTION ===== -->
+<section class="section" id="solution">
+  <div class="container">
+    <p class="kicker reveal">Our Solution</p>
+    <h2 class="reveal">Petrus <span class="grad-text">AI</span></h2>
+    <p class="lead reveal">A low-threshold, AI-supported digital platform designed to complement existing care structures and support early intervention for children's mental health in Switzerland.</p>
+    <div class="grid grid--4">
+      <div class="card tilt reveal"><div class="icon">🛰️</div><h3>Early Detection</h3><p>AI-powered screening tools help identify signs of psychological distress before they escalate.</p><span class="rating">4.7/5 importance rating</span></div>
+      <div class="card tilt reveal"><div class="icon">📊</div><h3>Progress Tracking</h3><p>Document and monitor emotional well-being over time with structured assessment tools.</p><span class="rating">4.4/5 importance rating</span></div>
+      <div class="card tilt reveal"><div class="icon">🤝</div><h3>Communication Support</h3><p>Facilitate better communication between teachers, parents, and mental health professionals.</p><span class="rating">4.6/5 importance rating</span></div>
+      <div class="card tilt reveal"><div class="icon">🧭</div><h3>Decision Support</h3><p>Clear recommendations for next steps, helping professionals take informed action quickly.</p><span class="rating">4.5/5 importance rating</span></div>
+    </div>
+
+    <div class="split">
+      <div class="card card--feature reveal">
+        <h3>Built Against Bias from Day One</h3>
+        <p>Petrus AI never compares a child to other children. Every signal is measured against that child's <strong>own personal baseline</strong> over the previous four weeks.</p>
+        <p>A naturally quiet child is not flagged for being quiet — they are only flagged if they become significantly quieter than their own usual pattern.</p>
+        <p>This architectural decision means the system does not penalise children who are simply different from the average. A Portuguese child in a German-speaking school, a reserved child in an expressive classroom — their baseline is their own.</p>
+      </div>
+      <div class="card card--feature reveal">
+        <h3>The Human Gate — Non-Negotiable by Design</h3>
+        <p><strong>No alert ever reaches a parent, teacher, or family directly from the system.</strong></p>
+        <p>Every alert passes through a school psychologist first. She reviews it. She decides whether it warrants action. If she considers it a false alarm, it is dismissed — the family never knows, the child never knows.</p>
+        <p class="motto">The system proposes. The professional decides. <em>Always.</em></p>
+      </div>
+    </div>
+
+    <h3 class="subhead reveal">Four-Level Alert Architecture</h3>
+    <div class="alerts">
+      <div class="alert alert--green reveal">
+        <header><span class="alert__name">GREEN</span><span class="alert__score">Score 0.00–0.35</span></header>
+        <p>No action. Pattern logged for baseline tracking.</p>
+        <ul><li><strong>Visible to:</strong> System only</li><li><strong>Family notified:</strong> Never</li></ul>
+      </div>
+      <div class="alert alert--yellow reveal">
+        <header><span class="alert__name">YELLOW</span><span class="alert__score">Score 0.35–0.55</span></header>
+        <p>Early monitoring indicator. Psychologist notified for review.</p>
+        <ul><li><strong>Visible to:</strong> School psychologist</li><li><strong>Family notified:</strong> Never</li></ul>
+      </div>
+      <div class="alert alert--orange reveal">
+        <header><span class="alert__name">ORANGE</span><span class="alert__score">Score 0.55–0.75</span></header>
+        <p>Psychologist reviews and schedules observation.</p>
+        <ul><li><strong>Visible to:</strong> Psychologist + school head</li><li><strong>Family notified:</strong> Only if psychologist confirms</li></ul>
+      </div>
+      <div class="alert alert--red reveal">
+        <header><span class="alert__name">RED</span><span class="alert__score">Score 0.75–1.00</span></header>
+        <p>Psychologist contacts parents. Clinical referral pathway opens.</p>
+        <ul><li><strong>Visible to:</strong> Full care team</li><li><strong>Family notified:</strong> Yes — psychologist-mediated only</li></ul>
+      </div>
+    </div>
+    <p class="note reveal"><strong>Minimum session threshold:</strong> A child with fewer than 20 sessions cannot receive an ORANGE or RED alert regardless of score. The system requires sufficient baseline history before issuing a serious flag.</p>
+
+    <div class="card card--wide compliance reveal">
+      <h3>Privacy &amp; Regulatory Compliance</h3>
+      <p>Designed for <strong>EU AI Act Article 13</strong> compliance — transparency obligations for high-risk AI systems — ahead of 2026 enforcement, not as a retrofit.</p>
+      <p>Petrus AI is designed to <strong>inform, explain, normalize, and refer</strong> — not to diagnose or treat. This positioning minimizes regulatory complexity while maximizing value for institutions.</p>
+      <ul class="checklist">
+        <li>Inform, explain, and normalize mental health topics</li>
+        <li>Refer to appropriate professionals when needed</li>
+        <li>No diagnosis or treatment — minimal liability</li>
+        <li>Age-appropriate design for 6–11, 12–14, and 15–18 year olds</li>
+        <li>Data residency: Azure Switzerland North (Zürich), failover to Azure Switzerland West (Geneva)</li>
+        <li>Pseudonymisation: Petrus AI cannot re-identify a child — the re-identification key is held exclusively by the institution</li>
+        <li>Breach notification: 72 hours to Swiss FDPIC per nFADP Art. 24</li>
+        <li>Swiss nFADP, GDPR, and EU AI Act Article 13 (high-risk AI transparency) compliant — built-in from day one, not as a retrofit</li>
+      </ul>
+      <div class="compliance__hours"><strong>400+</strong><span>Hours of Research — combined effort from two student teams</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SURVEY RESULTS ===== -->
+<section class="section section--alt" id="survey">
+  <div class="container">
+    <p class="kicker reveal">Interactive Data</p>
+    <h2 class="reveal">Survey Results Visualized</h2>
+    <p class="lead reveal">Explore the key findings from our institutional survey with 33 responses across 8 Swiss cantons.</p>
+    <div class="split reveal">
+      <div class="card chart-card">
+        <h3>Feature Importance Radar</h3>
+        <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <h3>Average Ratings (out of 5)</h3>
+        <div class="chart-wrap"><canvas id="ratingsChart"></canvas></div>
+      </div>
+    </div>
+    <small class="src reveal">Data source: Market Research Survey, FH Graubünden • January 2026 • n=33 institutional responses</small>
+  </div>
+</section>
+
+<!-- ===== COMPETITIVE ADVANTAGE ===== -->
+<section class="section" id="competitive">
+  <div class="container">
+    <p class="kicker reveal">Competitive Advantage</p>
+    <h2 class="reveal">Why Petrus AI Stands Apart</h2>
+    <p class="lead reveal">A purpose-built solution for children's mental health in institutional settings, filling the gap between generic wellness apps and clinical treatment.</p>
+    <div class="grid grid--4">
+      <div class="card tilt reveal"><div class="icon">🧠</div><h3>AI-First Early Detection</h3><p>Unlike wellness apps focused on meditation, Petrus AI uses behavioral analysis to identify risks before they escalate to crisis.</p></div>
+      <div class="card tilt reveal"><div class="icon">🏫</div><h3>Institutional Integration</h3><p>Built specifically for schools and clinics, not retrofitted consumer apps. Direct integration with existing educational workflows.</p></div>
+      <div class="card tilt reveal"><div class="icon">🎯</div><h3>Age-Adaptive Design</h3><p>Three distinct UX modes (6–11, 12–14, 15–18) ensuring developmentally appropriate interactions at every age.</p></div>
+      <div class="card tilt reveal"><div class="icon">🛡️</div><h3>Swiss &amp; EU Compliance — Built In</h3><p>nFADP, GDPR, and EU AI Act Article 13 compliant from day one. Swiss data residency with pseudonymisation by design.</p></div>
+    </div>
+
+    <h3 class="subhead reveal">Market Landscape</h3>
+    <p class="lead reveal">Key players in the European children's mental health and EdTech space</p>
+    <div class="grid grid--4">
+      <div class="card competitor reveal"><span class="competitor__geo">🇩🇪 Germany</span><h4>Aumio</h4><span class="tag">B2C App</span><p><strong>Target:</strong> Children &amp; Parents<br><strong>Focus:</strong> Gamified mindfulness &amp; sleep stories</p></div>
+      <div class="card competitor reveal"><span class="competitor__geo">🇩🇪 Germany</span><h4>HelloBetter</h4><span class="tag">DiGA Platform</span><p><strong>Target:</strong> Adults 18+<br><strong>Focus:</strong> Prescription-based digital therapy</p></div>
+      <div class="card competitor reveal"><span class="competitor__geo">🇦🇹 Austria</span><h4>SchoolFox</h4><span class="tag">School SaaS</span><p><strong>Target:</strong> Schools K–12<br><strong>Focus:</strong> Communication &amp; administration</p></div>
+      <div class="card competitor reveal"><span class="competitor__geo">🌍 Global</span><h4>Generic Wellness Apps</h4><span class="tag">B2C Apps</span><p><strong>Target:</strong> General population<br><strong>Focus:</strong> Meditation &amp; stress relief</p></div>
+    </div>
+
+    <h3 class="subhead reveal">Feature Comparison</h3>
+    <p class="lead reveal">How Petrus AI compares across critical capabilities</p>
+    <div class="legend reveal"><span><i class="dot dot--full"></i> Full support</span><span><i class="dot dot--part"></i> Partial</span><span><i class="dot dot--none"></i> Not available</span></div>
+    <div class="table-wrap reveal">
+      <table class="cmp" id="cmpTable">
+        <thead><tr><th>Feature</th><th class="cmp__us">Petrus AI</th><th>Aumio</th><th>HelloBetter</th><th>SchoolFox</th><th>Generic Apps</th></tr></thead>
+        <tbody>
+          <tr><td><strong>AI-Powered Early Detection</strong><small>Identifies mental health risks before crisis through behavioral analysis</small></td><td class="cmp__us">●</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+          <tr><td><strong>Age-Adaptive UX (6–18)</strong><small>Interface adapts to developmental stage with age-appropriate interactions</small></td><td class="cmp__us">●</td><td>◐</td><td>○</td><td>○</td><td>○</td></tr>
+          <tr><td><strong>School Integration</strong><small>Direct integration with educational institutions and counselors</small></td><td class="cmp__us">●</td><td>○</td><td>○</td><td>●</td><td>○</td></tr>
+          <tr><td><strong>Structured Detection &amp; Referral Pathway</strong><small>Nightly behavioral analysis delivers alerts to the school psychologist's queue each morning — with a mandatory human review before any stakeholder is notified</small></td><td class="cmp__us">●</td><td>○</td><td>◐</td><td>○</td><td>○</td></tr>
+          <tr><td><strong>Multi-Language Support</strong><small>Swiss 4-language support (DE/FR/IT/EN) built-in</small></td><td class="cmp__us">●</td><td>◐</td><td>◐</td><td>●</td><td>◐</td></tr>
+          <tr><td><strong>GDPR/nFADP/EU AI Act Compliance</strong><small>Swiss nFADP, GDPR, and EU AI Act Article 13 compliant. Data residency: Azure Switzerland. Pseudonymisation by design</small></td><td class="cmp__us">●</td><td>◐</td><td>●</td><td>◐</td><td>○</td></tr>
+          <tr><td><strong>Clinical Validation</strong><small>Evidence-based approach with academic research partnerships</small></td><td class="cmp__us">●</td><td>○</td><td>●</td><td>○</td><td>○</td></tr>
+          <tr><td><strong>Institutional Dashboard</strong><small>Analytics for schools/clinics to monitor population mental health</small></td><td class="cmp__us">●</td><td>○</td><td>○</td><td>◐</td><td>○</td></tr>
+          <tr><td><strong>Low-Threshold Access</strong><small>No prescription or diagnosis required to start using</small></td><td class="cmp__us">●</td><td>●</td><td>○</td><td>●</td><td>●</td></tr>
+          <tr><td><strong>24/7 Child Platform Access</strong><small>Always-available child platform. Alert processing runs nightly — results delivered to the psychologist queue each morning. An early-warning tool, not an emergency response system</small></td><td class="cmp__us">●</td><td>●</td><td>◐</td><td>○</td><td>●</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scorebar reveal">
+      <div class="scorebar__win"><strong>Petrus AI: 10/10 Features</strong><span>The only solution with full coverage across all critical capabilities</span></div>
+      <div class="scorebar__vals"><div><em>3–5</em><span>Competitor avg</span></div><div class="scorebar__us"><em>10</em><span>Petrus AI</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TEAM ===== -->
+<section class="section section--alt" id="team">
+  <div class="container">
+    <p class="kicker reveal">Our Team</p>
+    <h2 class="reveal">The People Behind Petrus AI</h2>
+    <p class="lead reveal">A collaboration between industry leaders and academic researchers, combining entrepreneurial vision with rigorous scientific methodology.</p>
+
+    <h3 class="subhead reveal">Leadership Team</h3>
+    <div class="grid grid--2">
+      <div class="card person tilt reveal">
+        <div class="person__avatar">AM</div>
+        <h4>Alexandre Matos</h4><span class="person__role">Co-Founder &amp; CEO</span>
+        <span class="person__org">Petrus AI • Arosa, Graubünden, Switzerland</span>
+        <p>AI Venture Builder and Co-founder of Motiaa (EU Migration Platform). Expert in Business Analytics &amp; Marketing Strategy, delivering AI Automation solutions for Hotels &amp; SMEs.</p>
+        <span class="person__edu">Cambridge Judge Business School</span>
+        <div class="tags"><span class="tag">AI Venture Builder</span><span class="tag">Business Analytics</span><span class="tag">Marketing Strategy</span></div>
+      </div>
+      <div class="card person tilt reveal">
+        <div class="person__avatar">MS</div>
+        <h4>Mikkel Solnado</h4><span class="person__role">Co-Founder &amp; CTO</span>
+        <span class="person__org">Nodel.app • Oeiras, Lisbon, Portugal</span>
+        <p>AI Enablement Lead and Founder of Nodel.app. Building calm, fast AI-native teams. Creator of TheAISolopreneur community.</p>
+        <span class="person__edu">AI-Native Team Building Specialist</span>
+        <div class="tags"><span class="tag">AI Enablement</span><span class="tag">Nodel.app Founder</span><span class="tag">TheAISolopreneur</span></div>
+      </div>
+    </div>
+
+    <h3 class="subhead reveal">FH Graubünden Research Teams</h3>
+    <div class="split">
+      <div class="card reveal">
+        <h4>Market Research Team</h4>
+        <p class="muted">Conducted 400+ hours of primary research with 33 institutional responses across 8 Swiss cantons.</p>
+        <div class="mini-person"><span class="person__avatar person__avatar--sm">RR</span><div><strong>Rahavi Rames</strong> — Project Manager<p>Led the market research initiative, coordinated survey collection, and delivered comprehensive findings.</p></div></div>
+        <div class="mini-person"><span class="person__avatar person__avatar--sm">CL</span><div><strong>Charunga Lenadson</strong> — Deputy Manager<p>Supported project management and contributed to problem context analysis.</p></div></div>
+        <div class="mini-person"><span class="person__avatar person__avatar--sm">JD</span><div><strong>Jasmin Dünser</strong> — Research Analyst<p>Market size analysis and customer survey design and implementation.</p></div></div>
+        <div class="mini-person"><span class="person__avatar person__avatar--sm">EC</span><div><strong>Elia Cadisch</strong> — Research Analyst<p>Data collection and interpretation, strategic recommendations.</p></div></div>
+      </div>
+      <div class="card reveal">
+        <h4>Communication Plan Team</h4>
+        <p class="muted">Developed legal compliance framework, UX/UI requirements, and strategic positioning for Swiss market entry.</p>
+        <div class="mini-person"><span class="person__avatar person__avatar--sm">LM</span><div><strong>Lea Misukic</strong> — Project Manager<p>Led the communication strategy development and legal compliance research.</p></div></div>
+        <div class="mini-person"><span class="person__avatar person__avatar--sm">AG</span><div><strong>Anne Giger</strong> — Compliance Analyst<p>FADP and EU AI Act compliance research and documentation.</p></div></div>
+        <div class="mini-person"><span class="person__avatar person__avatar--sm">SB</span><div><strong>Stephanie Bless</strong> — UX Researcher<p>Age-specific UX requirements and accessibility standards.</p></div></div>
+        <div class="mini-person"><span class="person__avatar person__avatar--sm">AK</span><div><strong>Alexandra Kindlimann</strong> — Strategy Analyst<p>Strategic recommendations and market positioning analysis.</p></div></div>
+      </div>
+    </div>
+
+    <div class="card card--wide supervisor reveal">
+      <div class="person__avatar">IN</div>
+      <div>
+        <h4>Prof. Dr. Ivan Nikitin</h4><span class="person__role">Academic Supervisor — FH Graubünden</span>
+        <p>Supervised the student research project on behalf of the University of Applied Sciences Graubünden, ensuring academic rigor and methodology.</p>
+      </div>
+      <span class="tag">FH University Partner</span>
+    </div>
+
+    <div class="grid grid--4 stats">
+      <div class="card stat reveal"><div class="stat__num grad-text" data-count="8">0</div><h3>Student Researchers</h3></div>
+      <div class="card stat reveal"><div class="stat__num grad-text" data-count="400" data-suffix="+">0</div><h3>Research Hours</h3></div>
+      <div class="card stat reveal"><div class="stat__num grad-text" data-count="2">0</div><h3>Co-Founders</h3></div>
+      <div class="card stat reveal"><div class="stat__num grad-text" data-count="2">0</div><h3>Research Projects</h3></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== RESEARCH FOUNDATION ===== -->
+<section class="section" id="research">
+  <div class="container">
+    <p class="kicker reveal">Research Foundation</p>
+    <h2 class="reveal">Validated by Academic Research</h2>
+    <p class="lead reveal">Our solution is built on rigorous market research conducted in partnership with the University of Applied Sciences Graubünden (FH Graubünden) under Prof. Dr. Ivan Nikitin.</p>
+    <div class="grid grid--4">
+      <div class="card tilt reveal"><div class="icon">⏱️</div><h3>400+ Hours Research</h3><p>Comprehensive documentation covering problem context, market analysis, legal compliance, and UX requirements.</p></div>
+      <div class="card tilt reveal"><div class="icon">🏫</div><h3>33 Institutional Responses</h3><p>Survey data from schools and child/adolescent psychiatry services across Switzerland.</p></div>
+      <div class="card tilt reveal"><div class="icon">🗺️</div><h3>8 Swiss Cantons</h3><p>Geographic coverage including Graubünden, St. Gallen, Zürich, Bern, Ticino, Basel, Thurgau, and Aargau.</p></div>
+      <div class="card tilt reveal"><div class="icon">👥</div><h3>Two Research Teams</h3><p>Market Research team and Communication Plan team from FH Graubünden Business Administration.</p></div>
+    </div>
+
+    <div class="grid grid--4">
+      <div class="card stat--sm reveal"><strong class="grad-text">89–93%</strong><h5>Professional Overload</h5><p>Report capacity constraints in their daily work</p></div>
+      <div class="card stat--sm reveal"><strong class="grad-text">4.7/5</strong><h5>Early Detection Priority</h5><p>Rated as the most important feature need</p></div>
+      <div class="card stat--sm reveal"><strong class="grad-text">4.6/5</strong><h5>Communication Support</h5><p>Between stakeholders rated as critical</p></div>
+      <div class="card stat--sm reveal"><strong class="grad-text">75%+</strong><h5>Open to AI Solutions</h5><p>Institutions willing to adopt digital tools</p></div>
+    </div>
+
+    <div class="split">
+      <div class="card reveal">
+        <h3>Institutional Survey Breakdown</h3>
+        <div class="cond"><div class="cond__top"><span>Primary Schools</span><strong>10 responses</strong></div><div class="bar"><span style="--w:71%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>Secondary Schools</span><strong>8 responses</strong></div><div class="bar"><span style="--w:57%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>Child &amp; Adolescent Psychiatry</span><strong>14 responses</strong></div><div class="bar"><span style="--w:100%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>Other Institutions</span><strong>1 response</strong></div><div class="bar"><span style="--w:7%"></span></div></div>
+        <p class="muted"><strong>Coverage:</strong> 8 Swiss cantons including Graubünden, St. Gallen, Zürich, Basel, Thurgau, Aargau, Schwyz, and Zug.</p>
+      </div>
+      <div class="card chart-card reveal">
+        <h3>Top Reported Challenges</h3>
+        <div class="chart-wrap"><canvas id="challengesChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card card--wide reveal">
+      <h3>Feature Importance Ratings (1–5 Scale)</h3>
+      <div class="table-wrap">
+        <table class="cmp cmp--ratings">
+          <thead><tr><th>Feature</th><th>Schools (Ø)</th><th>Psychiatry (Ø)</th></tr></thead>
+          <tbody>
+            <tr><td>Early Detection</td><td class="cmp__us">4.7</td><td>4.4</td></tr>
+            <tr><td>Decision Support</td><td class="cmp__us">4.4</td><td>4.2</td></tr>
+            <tr><td>Communication Support</td><td class="cmp__us">4.6</td><td>4.2</td></tr>
+            <tr><td>Progress Tracking</td><td class="cmp__us">4.0</td><td>3.7</td></tr>
+            <tr><td>Standardized Screening</td><td class="cmp__us">3.3</td><td>3.6</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="banner banner--soft reveal">Research conducted in partnership with <strong>FH Graubünden — University of Applied Sciences</strong> • Supervised by Prof. Dr. Ivan Nikitin</div>
+  </div>
+</section>
+
+<!-- ===== ROADMAP ===== -->
+<section class="section section--alt" id="roadmap">
+  <div class="container">
+    <p class="kicker reveal">Development Roadmap</p>
+    <h2 class="reveal">From Development to Institutional Pilots</h2>
+    <p class="lead reveal">Our 3-year roadmap: 2026 dedicated to product development and clinical validation design, Q1 2027 first paid pilot, scaling to 10–20 institutions by 2028.</p>
+
+    <div class="timeline">
+      <div class="tl reveal is-next">
+        <span class="tl__dot"></span>
+        <div class="tl__body">
+          <span class="tl__when">Q1–Q2 2026 <em class="tag tag--next">NEXT</em></span>
+          <h3>Foundation &amp; Clinical Validation Design</h3>
+          <p class="tl__sub">Build MVP &amp; Define Methodology • <strong>CHF 200K</strong></p>
+          <div class="tl__cols">
+            <div><h5>Key Objectives</h5><ul><li>Complete alpha version with core detection features</li><li>Establish clinical validation methodology with FH Graubünden</li><li>Define psychologist assessment protocol for labeled training data</li><li>Privacy framework &amp; nFADP compliance documentation</li></ul></div>
+            <div><h5>Deliverables</h5><ul><li>Working MVP for ages 6–9</li><li>Clinical validation protocol defined</li><li>Core engineering team assembled</li><li>Advisory board fully operational (4+ advisors)</li></ul></div>
+          </div>
+          <div class="tl__metrics"><span><strong>Team Size</strong> 2 → 4</span><span><strong>Investment Used</strong> CHF 200K</span><span><strong>Product Stage</strong> Alpha → Beta</span></div>
+        </div>
+      </div>
+      <div class="tl reveal"><span class="tl__dot"></span><div class="tl__body"><span class="tl__when">Q3–Q4 2026</span><h3>Beta Program</h3><p>Deploy beta with 1–2 partner schools under research agreement. Collect first real-world behavioral data. Refine workflows. No revenue. Full data partnership.</p></div></div>
+      <div class="tl reveal"><span class="tl__dot"></span><div class="tl__body"><span class="tl__when">Q1–Q2 2027</span><h3>First Paid Pilot</h3><p>Convert beta partner(s) to paid contract. Launch first institutional agreements. Psychologist workflow fully operational. First CHF invoiced.</p></div></div>
+      <div class="tl reveal"><span class="tl__dot"></span><div class="tl__body"><span class="tl__when">Q3–Q4 2027</span><h3>Expand Pilots</h3><p>Scale to 5–8 paying institutions across schools and child psychiatric services. Clinical validation data accumulating.</p></div></div>
+      <div class="tl reveal"><span class="tl__dot"></span><div class="tl__body"><span class="tl__when">2028</span><h3>Multi-Institution Scale</h3><p>10–20 paying institutions. Clinical validation milestone reached. Revenue: CHF 100K–170K. Series A preparation begins.</p></div></div>
+    </div>
+
+    <h3 class="subhead reveal">3-Year Revenue Trajectory</h3>
+    <div class="traj reveal">
+      <div class="traj__step"><strong>2026</strong><span>Product Dev (CHF 0)</span></div>
+      <div class="traj__arrow">→</div>
+      <div class="traj__step"><strong>2027</strong><span>First Pilots (First CHF)</span></div>
+      <div class="traj__arrow">→</div>
+      <div class="traj__step traj__step--hot"><strong>2028</strong><span>CHF 100K–170K • Scale</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INVESTORS ===== -->
+<section class="section" id="investors">
+  <div class="container">
+    <p class="kicker reveal">Investment Opportunity</p>
+    <h2 class="reveal">Join the <span class="grad-text">Seed Round</span></h2>
+    <p class="lead reveal">We're raising <strong>CHF 750,000</strong> in seed funding at a <strong>CHF 5–7M pre-money valuation</strong>. The funding is structured in four tranches: CHF 150K initial deployment upon closing, two CHF 250K tranches upon milestone achievements, and a final CHF 100K tranche upon research completion.</p>
+
+    <div class="card card--wide reveal">
+      <h3>Funding Structure — CHF 750K Total Seed Round <span class="muted">(Pre-money: CHF 5–7M)</span></h3>
+      <div class="tranches">
+        <div class="tranche"><span class="tranche__tag">START</span><strong>CHF 150K</strong><span>Initial — Upon closing</span></div>
+        <div class="tranche"><span class="tranche__tag">M1</span><strong>CHF 250K</strong><span>Tranche 2 — Pilot Agreements</span></div>
+        <div class="tranche"><span class="tranche__tag">M2</span><strong>CHF 250K</strong><span>Tranche 3 — User Engagement</span></div>
+        <div class="tranche"><span class="tranche__tag">M3</span><strong>CHF 100K</strong><span>Final — Research Completion</span></div>
+      </div>
+      <div class="milestones">
+        <h5>Milestone-Based Release Triggers</h5>
+        <ul class="checklist">
+          <li><strong>Pilot Agreements</strong> — Signed contracts with pilot schools</li>
+          <li><strong>User Engagement</strong> — Target thresholds achieved</li>
+          <li><strong>Research Completion</strong> — Clinical validation milestones</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid grid--3">
+      <div class="card stat tilt reveal"><div class="stat__num grad-text">CHF 750K</div><h3>Seed Round</h3><p>Currently raising</p></div>
+      <div class="card stat tilt reveal"><div class="stat__num grad-text">CHF 5–7M</div><h3>Pre-Money Valuation</h3><p>Seed round valuation</p></div>
+      <div class="card stat tilt reveal"><div class="stat__num grad-text">CHF 168K</div><h3>3-Year Revenue</h3><p>First pilot-validated income</p></div>
+    </div>
+
+    <div class="card card--wide reveal">
+      <h3>Exit Scenario Analysis</h3>
+      <p class="muted">Based on comparable European health/edtech SaaS acquisitions (2021–2024). Revenue base: CHF 33.6M ARR targeted by 2031 across DACH institutions.</p>
+      <div class="table-wrap">
+        <table class="cmp cmp--ratings">
+          <thead><tr><th>Scenario</th><th>Multiple</th><th>Exit Value</th><th>Return @ 10%</th><th>Return @ 13%</th></tr></thead>
+          <tbody>
+            <tr><td>Conservative</td><td>4× ARR</td><td>CHF 134M</td><td>13.4×</td><td>17.4×</td></tr>
+            <tr><td class="cmp__us">Base Case</td><td>6× ARR</td><td>CHF 202M</td><td>20.2×</td><td>26.3×</td></tr>
+            <tr><td>Optimistic</td><td>8× ARR</td><td>CHF 269M</td><td>26.9×</td><td>34.9×</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <small class="src">These are scenario projections, not guarantees. Exit multiples derived from comparable European health/edtech SaaS transactions.</small>
+    </div>
+
+    <div class="split">
+      <div class="card chart-card reveal">
+        <h3>3-Year Revenue Projection</h3>
+        <p class="muted">Conservative estimates aligned with our pilot-focused roadmap</p>
+        <div class="chart-wrap"><canvas id="revenue3yChart"></canvas></div>
+        <small class="src">All revenue projections in CHF. CHF/EUR rate applied: ~1.05 (March 2026). €160K ≈ CHF 168K.</small>
+      </div>
+      <div class="card reveal">
+        <h3>Revenue Model — Unit Economics</h3>
+        <div class="cond"><div class="cond__top"><span>Schools (≤500 students)</span><strong>CHF 6,000 / yr</strong></div><div class="bar"><span style="--w:25%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>Schools (500–1,500 students)</span><strong>CHF 12,000 / yr</strong></div><div class="bar"><span style="--w:50%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>Psychiatric clinics</span><strong>CHF 18,000 / yr</strong></div><div class="bar"><span style="--w:75%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>Hospital departments</span><strong>CHF 24,000 / yr</strong></div><div class="bar"><span style="--w:100%"></span></div></div>
+        <p class="note"><strong>Average contract value (blended):</strong> CHF ~10,000 / year</p>
+        <h5>Institution Targets</h5>
+        <div class="targets">
+          <span><strong>2028</strong> 15–20 Swiss pilots converted</span>
+          <span><strong>2029</strong> 180–220 DACH market entry</span>
+          <span><strong>2030</strong> 750–900 DACH scale</span>
+          <span><strong>2031+</strong> 3,000–3,500 — 7% DACH penetration</span>
+        </div>
+        <p class="muted"><strong>DACH Total Addressable:</strong> ~45,500 schools (35K Germany + 6K Austria + 4.5K Switzerland) + ~2,500 child/adolescent psychiatric institutions = ~48,000 addressable institutions. 3,000–3,500 institutions = 6–7% market penetration by 2031.</p>
+      </div>
+    </div>
+
+    <h3 class="subhead reveal">Current Traction</h3>
+    <div class="grid grid--4">
+      <div class="card stat--sm reveal"><strong>2 Co-Founders</strong><p>Technical Leadership</p></div>
+      <div class="card stat--sm reveal"><strong>CHF 750K</strong><p>Seed Round — Currently Raising</p></div>
+      <div class="card stat--sm reveal"><strong>400+ Hours</strong><p>Research Hours</p></div>
+      <div class="card stat--sm reveal"><strong>33 Responses</strong><p>Institutional Data</p></div>
+    </div>
+    <p class="note reveal"><strong>Survey Validated:</strong> 14 child/adolescent psychiatric services across Switzerland ranked early detection as their highest-priority unmet need (FH Graubünden Research, 2025).</p>
+    <p class="note reveal">Clinical validation — the funded deliverable of this seed round — will be conducted with a minimum of <strong>500 enrolled children</strong>, labeled by school psychologist assessments. Pre-deployment validation targets (not measured performance): <strong>85% sensitivity, 90% specificity</strong>. No production deployment before independent clinical review.</p>
+
+    <div class="card card--wide reveal">
+      <h3>Use of Funds</h3>
+      <div class="funds">
+        <div class="fund"><div class="fund__head"><span>Product Development</span><strong>45% • CHF 337K</strong></div><div class="bar bar--lg"><span style="--w:45%"></span></div></div>
+        <div class="fund">
+          <div class="fund__head"><span>Clinical Validation</span><strong>20% • CHF 150K</strong></div><div class="bar bar--lg"><span style="--w:20%"></span></div>
+          <ul class="fund__detail">
+            <li>Minimum 500 enrolled children, 20+ sessions each</li>
+            <li>School psychologist labeling and assessment partnership</li>
+            <li>Independent audit before any production deployment</li>
+            <li>Fairness/bias audit across demographic subgroups</li>
+            <li>Pre-deployment validation targets (not measured performance): 85% sensitivity, 90% specificity, AUC 0.91</li>
+          </ul>
+        </div>
+        <div class="fund"><div class="fund__head"><span>Market Entry</span><strong>20% • CHF 150K</strong></div><div class="bar bar--lg"><span style="--w:20%"></span></div></div>
+        <div class="fund"><div class="fund__head"><span>Operations</span><strong>15% • CHF 113K</strong></div><div class="bar bar--lg"><span style="--w:15%"></span></div></div>
+      </div>
+    </div>
+
+    <h3 class="subhead reveal">Investment Milestones</h3>
+    <div class="grid grid--4">
+      <div class="card mstone reveal"><span class="mstone__n">1</span><span class="mstone__when">2025–2026</span><h4>Build &amp; Validate</h4><p>MVP + clinical methodology + beta partner agreement</p></div>
+      <div class="card mstone reveal"><span class="mstone__n">2</span><span class="mstone__when">Q1–Q2 2027</span><h4>First Paid Pilot</h4><p>1–3 institutions, first revenue</p></div>
+      <div class="card mstone reveal"><span class="mstone__n">3</span><span class="mstone__when">Q3–Q4 2027</span><h4>Expand Pilots</h4><p>5–8 institutions, clinical validation accumulating</p></div>
+      <div class="card mstone reveal"><span class="mstone__n">4</span><span class="mstone__when">2028</span><h4>Multi-Institution Scale</h4><p>10–20 institutions • CHF 100K–170K revenue • Series A prep</p></div>
+    </div>
+    <div class="cta-row reveal">
+      <a class="btn btn--primary" href="mailto:info@seventyfifty.ch?subject=Investor%20Deck%20Request%20—%20Petrus%20AI">Request Investor Deck</a>
+      <a class="btn btn--ghost" href="mailto:info@seventyfifty.ch?subject=Schedule%20a%20Call%20—%20Petrus%20AI">Schedule a Call</a>
+      <span class="muted">Contact: info@seventyfifty.ch</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VISION BOARD ===== -->
+<section class="section section--alt" id="vision">
+  <div class="container">
+    <p class="kicker reveal">Vision Board</p>
+    <h2 class="reveal">Our First 3 Years</h2>
+    <p class="lead reveal">From product development to multi-institution pilots — building, validating, and proving Petrus AI across schools, psychiatric services, and cantonal authorities.</p>
+
+    <div class="grid grid--3 vision-cards">
+      <div class="card vcard tilt reveal">
+        <span class="vcard__when">Q1–Q2 2026 <em class="tag tag--live">In Progress</em></span>
+        <h4>Foundation &amp; Clinical Validation Design</h4><span class="vcard__sub">Build &amp; Validate</span>
+        <p>Build MVP. Establish clinical validation methodology with FH Graubünden. Define psychologist assessment protocol for labeled training data.</p>
+        <ul class="checklist"><li>AI screening engine for ages 6–18</li><li>Clinical validation methodology defined</li><li>Privacy-first, multilingual architecture</li></ul>
+      </div>
+      <div class="card vcard tilt reveal">
+        <span class="vcard__when">Q3–Q4 2026</span>
+        <h4>Beta Program</h4><span class="vcard__sub">1–2 Partner Institutions (Unpaid)</span>
+        <p>Deploy beta with 1–2 partner schools under research agreement. Collect first real-world behavioral data. Refine workflows. No revenue. Full data partnership.</p>
+        <ul class="checklist"><li>1–2 partner schools (research agreement)</li><li>First real-world behavioral data</li><li>Workflow refinement &amp; iteration</li></ul>
+      </div>
+      <div class="card vcard tilt reveal">
+        <span class="vcard__when">Q1–Q2 2027</span>
+        <h4>First Paid Pilot</h4><span class="vcard__sub">1–3 Institutions</span>
+        <p>Convert beta partner(s) to paid contract. Launch first institutional agreements. Psychologist workflow fully operational. First CHF invoiced.</p>
+        <ul class="checklist"><li>1–3 paying institutions</li><li>First revenue invoiced</li><li>Psychologist workflow operational</li></ul>
+      </div>
+      <div class="card vcard tilt reveal">
+        <span class="vcard__when">Q3–Q4 2027</span>
+        <h4>Expand Pilots</h4><span class="vcard__sub">5–8 Institutions</span>
+        <p>Scale to 5–8 paying institutions across schools and child psychiatric services. Clinical validation data accumulating.</p>
+        <ul class="checklist"><li>5–8 paying institutions</li><li>Schools + psychiatric services</li><li>Clinical validation accumulating</li></ul>
+      </div>
+      <div class="card vcard tilt reveal">
+        <span class="vcard__when">2028</span>
+        <h4>Multi-Institution Scale</h4><span class="vcard__sub">10–20 Institutions</span>
+        <p>10–20 paying institutions. Clinical validation milestone reached. Revenue: CHF 100K–170K. Series A preparation begins.</p>
+        <ul class="checklist"><li>10–20 paying institutions</li><li>CHF 100K–170K revenue</li><li>Series A preparation</li></ul>
+      </div>
+      <div class="card vcard vcard--summary reveal">
+        <div class="grid grid--2">
+          <div class="mini"><strong>3</strong><span>Pilot Sectors</span></div>
+          <div class="mini"><strong>10–20</strong><span>Institutions Targeted</span></div>
+          <div class="mini"><strong>3</strong><span>Year Roadmap</span></div>
+          <div class="mini"><strong>4</strong><span>Swiss Language Regions</span></div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="subhead reveal">Pilot Sectors</h3>
+    <p class="lead reveal">Our first 3 years focus on proving Petrus AI across three core institution types before broader expansion.</p>
+    <div class="grid grid--3">
+      <div class="card tilt reveal"><div class="icon">🏫</div><h3>Schools (Primary &amp; Secondary)</h3>
+        <p>Public and private schools deploying Petrus AI as their standard early detection tool for students aged 6–18.</p>
+        <ul class="kv"><li><strong>Impact Target</strong> Systematic early detection before crisis</li><li><strong>Research Base</strong> 18 schools surveyed across 8 Swiss cantons</li><li><strong>Timeline</strong> First pilots: Q1–Q2 2027</li></ul></div>
+      <div class="card tilt reveal"><div class="icon">🏥</div><h3>Child &amp; Adolescent Psychiatric Services</h3>
+        <p>Specialist clinics integrating Petrus AI to complement clinical assessment with longitudinal behavioral data.</p>
+        <ul class="kv"><li><strong>Impact Target</strong> Faster triage, better-informed intake assessments</li><li><strong>Research Base</strong> 14 psychiatric services surveyed</li><li><strong>Timeline</strong> First pilots: Q3–Q4 2027</li></ul></div>
+      <div class="card tilt reveal"><div class="icon">🏛️</div><h3>Cantonal Health &amp; Education Authorities</h3>
+        <p>Cantonal bodies using aggregate (anonymised) population data to inform resource allocation and early intervention planning.</p>
+        <ul class="kv"><li><strong>Impact Target</strong> System-level visibility into institutional burden</li><li><strong>Research Base</strong> Entry point: 2028 onward</li><li><strong>Timeline</strong> Following pilot validation</li></ul></div>
+    </div>
+
+    <!-- Beyond 2028 -->
+    <h3 class="subhead reveal" id="beyond">Beyond 2028 — 5-Year Growth Vision</h3>
+    <p class="lead reveal">With clinical evidence proven in Switzerland, we scale across the DACH region and beyond — targeting CHF 33.6M+ annual revenue and market leadership.</p>
+    <div class="grid grid--3">
+      <div class="card vcard tilt reveal">
+        <span class="vcard__when">2029</span><h4>DACH Market Entry</h4><span class="vcard__sub">Regional Expansion</span>
+        <p>Leverage Swiss clinical evidence to enter Germany and Austria. Establish partnerships with education ministries and healthcare networks across the DACH region.</p>
+        <ul class="checklist"><li>Germany &amp; Austria market entry</li><li>Government &amp; ministry partnerships</li><li>Localised regulatory compliance</li></ul>
+        <div class="tl__metrics"><span><strong>Revenue</strong> CHF 2.1M+</span><span><strong>Team</strong> 15–25</span></div>
+        <small class="src">Series A funded (targeted Q4 2028 / Q1 2029). Growth funded by Series A, not operational cashflow.</small>
+      </div>
+      <div class="card vcard tilt reveal">
+        <span class="vcard__when">2030</span><h4>Full DACH Scale</h4><span class="vcard__sub">Market Leadership</span>
+        <p>Scale to hundreds of institutions across Switzerland, Germany, and Austria. Establish Petrus AI as the standard for child mental health screening in the DACH region.</p>
+        <ul class="checklist"><li>500+ institutions across DACH</li><li>Hospital child/adolescent psychiatry expansion</li><li>Profitability target: ~CHF 6M ARR threshold</li></ul>
+        <div class="tl__metrics"><span><strong>Revenue</strong> CHF 8.4M+</span><span><strong>Team</strong> 40–60</span></div>
+        <small class="src">Full profitability achieved at ~CHF 6M ARR threshold.</small>
+      </div>
+      <div class="card vcard tilt reveal">
+        <span class="vcard__when">2031+</span><h4>European Expansion</h4><span class="vcard__sub">Continental Vision</span>
+        <p>Expand beyond DACH into broader European markets. Adapt the platform for new languages, regulatory environments, and healthcare systems.</p>
+        <ul class="checklist"><li>Pan-European rollout</li><li>CHF 33.6M+ annual revenue target</li><li>100M+ addressable population</li></ul>
+        <div class="tl__metrics"><span><strong>Revenue</strong> CHF 33.6M+</span><span><strong>Team</strong> 100+</span></div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="card chart-card reveal">
+        <h3>Revenue Trajectory</h3>
+        <p class="muted">From first revenue to full DACH market scale</p>
+        <div class="chart-wrap"><canvas id="trajectoryChart"></canvas></div>
+      </div>
+      <div class="card reveal">
+        <h3>Team Scaling Plan</h3>
+        <p class="muted">Growing from founding team to full DACH organisation</p>
+        <div class="cond"><div class="cond__top"><span>2028 — Core Product</span><strong>5–8</strong></div><div class="bar"><span style="--w:8%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>2029 — Sales &amp; Ops (Series A)</span><strong>15–25</strong></div><div class="bar"><span style="--w:25%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>2030 — DACH Teams</span><strong>40–60</strong></div><div class="bar"><span style="--w:60%"></span></div></div>
+        <div class="cond"><div class="cond__top"><span>2031+ — Full Org</span><strong>100+</strong></div><div class="bar"><span style="--w:100%"></span></div></div>
+        <p class="note">Revenue beyond 2028 is contingent on a Series A raise (targeted Q4 2028 / Q1 2029) to fund DACH sales and localisation. The CHF 750K seed round funds Switzerland validation only. Post-2028 projections assume additional capital deployed into Germany and Austria market entry. Profitability target: 2030 at ~CHF 6M ARR threshold.</p>
+      </div>
+    </div>
+
+    <h3 class="subhead reveal">Target Verticals — DACH Addressable Market</h3>
+    <div class="grid grid--3">
+      <div class="card tilt reveal"><div class="icon">🎓</div><h3>Education</h3><p class="muted">K–12 Schools (Primary + Secondary)</p>
+        <ul class="kv"><li>Germany: ~35,000 schools</li><li>Austria: ~6,000 schools</li><li>Switzerland: ~4,500 schools</li></ul>
+        <p class="note"><strong>Addressable (B2B):</strong> ~45,500 schools • 13.1M children aged 6–18</p></div>
+      <div class="card tilt reveal"><div class="icon">⚕️</div><h3>Healthcare</h3><p class="muted">Child &amp; Adolescent Psychiatric Services</p>
+        <ul class="kv"><li>Specialist clinics: ~550 institutions</li><li>Hospital child departments: ~2,000</li><li>Total addressable: ~2,500</li></ul>
+        <p class="note"><strong>Addressable (B2B):</strong> ~2,500 institutions • Specialist + hospital depts</p></div>
+      <div class="card tilt reveal"><div class="icon">🏛️</div><h3>Public Sector</h3><p class="muted">Cantonal &amp; Federal Authorities</p>
+        <ul class="kv"><li>Switzerland: 26 cantons</li><li>Germany: 16 states</li><li>Austria: 9 states</li></ul>
+        <p class="note"><strong>Addressable (B2B):</strong> 51 government bodies • Entry point: 2030+ (long sales cycle) • Primary revenue driver: 2031+</p></div>
+    </div>
+
+    <div class="card card--wide finale reveal">
+      <h3>Built to Prove, Then Scale</h3>
+      <p>Our 3-year plan is deliberately focused: build a clinically validated product, pilot it in real institutions, and gather the evidence that early AI-powered screening makes a measurable difference for children's mental health.</p>
+      <p><strong>Beyond 2028:</strong> With clinical evidence proven, the path opens to scale across the DACH region (Germany, Austria, Switzerland) — a combined market of 100M+ people — targeting €32M+ annual revenue and full profitability.</p>
+      <div class="tags"><span class="tag">Evidence-Driven</span><span class="tag">Clinically Validated</span><span class="tag">Privacy-First</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="section" id="faq">
+  <div class="container container--narrow">
+    <p class="kicker reveal">Frequently Asked Questions</p>
+    <h2 class="reveal">Everything You Need to Know</h2>
+    <p class="lead reveal">Answers to common questions from investors, schools, and institutional partners about Petrus AI and our mission.</p>
+
+    <h3 class="subhead reveal">Product &amp; Technology</h3>
+    <div class="faq reveal">
+      <details><summary>What is Petrus AI and how does it work?</summary><p>Petrus AI is a low-threshold, AI-supported digital platform for early detection of children's mental health risks. Nightly behavioral analysis measures each child against their own four-week personal baseline — never against other children — and delivers alerts to a school psychologist's queue each morning. A mandatory human review precedes any stakeholder notification.</p></details>
+      <details><summary>What age groups does Petrus AI support?</summary><p>Children and adolescents aged 6–18, through three distinct age-adaptive UX modes: 6–11, 12–14, and 15–18 — ensuring developmentally appropriate interactions at every age.</p></details>
+      <details><summary>How is Petrus AI different from existing mental health apps?</summary><p>Unlike wellness apps focused on meditation or adult-only prescription platforms, Petrus AI is purpose-built for institutions: AI-first early detection, school integration, a structured psychologist-gated referral pathway, Swiss 4-language support, and built-in Swiss/EU compliance — 10/10 critical capabilities versus a competitor average of 3–5.</p></details>
+      <details><summary>What features do institutions rate as most important?</summary><p>Early detection leads with 4.7/5, followed by communication support (4.6/5), decision support (4.5/5), and progress tracking (4.4/5) — based on our 33-institution survey across 8 Swiss cantons.</p></details>
+    </div>
+
+    <h3 class="subhead reveal">For Schools &amp; Institutions</h3>
+    <div class="faq reveal">
+      <details><summary>How can my school participate in the pilot program?</summary><p>We're partnering with 1–2 beta schools under research agreements in Q3–Q4 2026, with first paid pilots launching Q1–Q2 2027. Contact us at info@seventyfifty.ch to discuss participation.</p></details>
+      <details><summary>What challenges do institutions report most frequently?</summary><p>Professional overload (94% of schools, 89% of psychiatry services), late detection (56% / 64%), communication problems (61% / 57%), and time constraints (44% / 71%).</p></details>
+      <details><summary>What does implementation look like for a school?</summary><p>The child-facing platform is available 24/7. Alert processing runs nightly with results delivered to the school psychologist's queue each morning. Every alert passes through the psychologist before any family or teacher is notified — the system proposes, the professional decides.</p></details>
+      <details><summary>How is the platform priced for institutions?</summary><p>Annual contracts: CHF 6,000 for schools up to 500 students, CHF 12,000 for schools of 500–1,500 students, CHF 18,000 for psychiatric clinics, and CHF 24,000 for hospital departments. Blended average contract value is roughly CHF 10,000 per year.</p></details>
+    </div>
+
+    <h3 class="subhead reveal">Privacy &amp; Compliance</h3>
+    <div class="faq reveal">
+      <details><summary>How does Petrus AI handle data privacy?</summary><p>Data residency is Azure Switzerland North (Zürich) with failover to Azure Switzerland West (Geneva). Pseudonymisation by design means Petrus AI cannot re-identify a child — the re-identification key is held exclusively by the institution. Breach notification to the Swiss FDPIC within 72 hours per nFADP Art. 24.</p></details>
+      <details><summary>Is Petrus AI classified as a medical device?</summary><p>No. Petrus AI is designed to inform, explain, normalize, and refer — not to diagnose or treat. This positioning minimizes regulatory complexity and liability while maximizing value for institutions.</p></details>
+      <details><summary>What about parental consent for children?</summary><p>Deployment runs through institutions with appropriate consent frameworks. Families are only ever contacted through the school psychologist — never directly by the system — and a dismissed false alarm is never visible to the family or the child.</p></details>
+      <details><summary>How does the system avoid false alarms with limited data?</summary><p>A minimum session threshold: a child with fewer than 20 sessions cannot receive an ORANGE or RED alert regardless of score. The system requires sufficient baseline history before issuing a serious flag, and every alert is reviewed by a psychologist first.</p></details>
+      <details><summary>How do you address concerns about AI and children?</summary><p>Three structural safeguards: the personal-baseline architecture (no comparison to other children, built against bias from day one), the non-negotiable human gate (a professional always decides), and EU AI Act Article 13 transparency compliance designed in ahead of 2026 enforcement.</p></details>
+    </div>
+
+    <h3 class="subhead reveal">For Investors</h3>
+    <div class="faq reveal">
+      <details><summary>What are the investment terms?</summary><p>CHF 750,000 seed round at a CHF 5–7M pre-money valuation, structured in four milestone-based tranches: CHF 150K upon closing, two CHF 250K tranches on pilot agreements and user engagement milestones, and a final CHF 100K on research completion.</p></details>
+      <details><summary>What are the expected returns?</summary><p>Scenario analysis based on comparable European health/edtech SaaS acquisitions (4–8× ARR on a targeted CHF 33.6M ARR by 2031) implies exit values of CHF 134M–269M, or 13.4×–34.9× returns depending on stake and scenario. These are projections, not guarantees.</p></details>
+      <details><summary>What is the market size opportunity?</summary><p>~48,000 addressable institutions across DACH (~45,500 schools plus ~2,500 psychiatric institutions) serving 13.1M children aged 6–18. The market is growing at 24% CAGR, projected to reach €7B by 2030.</p></details>
+      <details><summary>What traction do you have so far?</summary><p>Two co-founders with technical leadership, 400+ research hours, 33 institutional survey responses across 8 cantons, and survey validation showing 14 Swiss psychiatric services ranked early detection as their highest-priority unmet need.</p></details>
+      <details><summary>How will the funds be used?</summary><p>45% product development (CHF 337K), 20% clinical validation (CHF 150K — minimum 500 enrolled children with independent audit), 20% market entry (CHF 150K), and 15% operations (CHF 113K).</p></details>
+    </div>
+
+    <h3 class="subhead reveal">Research &amp; Validation</h3>
+    <div class="faq reveal">
+      <details><summary>What research validates Petrus AI?</summary><p>400+ hours of market research conducted with FH Graubünden under Prof. Dr. Ivan Nikitin, covering problem context, market analysis, legal compliance, and UX requirements — with 33 institutional responses across 8 Swiss cantons.</p></details>
+      <details><summary>What did the institutional survey reveal?</summary><p>89–93% of professionals report capacity constraints, early detection rated 4.7/5 as the most important feature need, and 75%+ of institutions open to adopting AI-supported digital tools.</p></details>
+      <details><summary>What's the validation roadmap?</summary><p>2026: clinical validation methodology designed with FH Graubünden and beta deployment. 2027: data accumulation across paid pilots. 2028: clinical validation milestone with a minimum of 500 enrolled children, school psychologist labeling, and independent review before any production deployment.</p></details>
+      <details><summary>How was the research funded?</summary><p>The research was conducted by two FH Graubünden student teams within the university's Project Management module, supervised by Prof. Dr. Ivan Nikitin — combining academic rigor with entrepreneurial sponsorship by Seventy Fifty.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section class="section section--contact" id="contact">
+  <div class="container container--narrow center">
+    <h2 class="reveal">Let's Shape the <span class="grad-text">Future Together</span></h2>
+    <p class="lead reveal">We're building meaningful partnerships with institutions, investors, and collaborators who share our commitment to transforming children's mental health care across the DACH region.</p>
+    <div class="cta-row center reveal">
+      <a class="btn btn--primary" href="mailto:info@seventyfifty.ch?subject=Start%20a%20Conversation%20—%20Petrus%20AI">Start a Conversation</a>
+      <a class="btn btn--ghost" href="mailto:info@seventyfifty.ch?subject=Investor%20Deck%20Request%20—%20Petrus%20AI">Request Investor Deck</a>
+    </div>
+    <div class="contact-meta reveal">
+      <span>✉️ <a href="mailto:info@seventyfifty.ch">info@seventyfifty.ch</a></span>
+      <span>📍 Arosa, Graubünden, Switzerland</span>
+      <span>🌐 <a href="https://www.petrus-labs.com" target="_blank" rel="noopener">www.petrus-labs.com</a></span>
+    </div>
+    <p class="hero__quote reveal">“There is always a window.”</p>
+    <p class="muted reveal">Petrus AI • Committed to privacy, transparency, and meaningful impact in children's mental health</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container footer__grid">
+    <div>
+      <a class="nav__brand" href="#top"><span class="nav__logo">P</span><span class="nav__name">Petrus <em>AI</em><small>by Seventy Fifty</small></span></a>
+      <p class="muted">Arosa, Graubünden, Switzerland</p>
+    </div>
+    <nav class="footer__links">
+      <a href="#challenge">The Challenge</a>
+      <a href="#solution">Solution</a>
+      <a href="#research">Research</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+  <div class="container footer__legal">
+    <p>© 2026 Petrus AI. All rights reserved. <em>“There is always a window.”</em></p>
+    <p class="muted">Research conducted in partnership with FH Graubünden • Project Management Module • January 2026</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script type="module" src="js/three-scene.js"></script>
+<script src="js/charts.js" defer></script>
+<script src="js/main.js" defer></script>
+</body>
+</html>
