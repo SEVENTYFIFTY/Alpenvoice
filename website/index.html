@@ -6,6 +6,7 @@
 <title>M&amp;M Renovations — Renovações de Excelência</title>
 <meta name="description" content="M&amp;M Renovations — renovação de cozinhas, casas de banho, apartamentos e casas. Orçamento gratuito, prazos garantidos, acabamento de excelência.">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Epilogue:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
 <style>
 :root {
   --bg:     #F6F4EF;
@@ -753,6 +754,50 @@ section.dark { background: var(--ink); }
 .contact-info-val a { color: var(--ink); text-decoration: none; }
 .contact-info-val a:hover { color: var(--green); }
 
+/* SERVICE AREA MAP */
+.contact-map {
+  margin-top: 32px;
+  height: 280px;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+}
+.contact-map .maplibregl-canvas { outline: none; }
+.map-marker {
+  width: 14px;
+  height: 14px;
+  background: var(--green);
+  border: 2px solid var(--white);
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(42,74,53,0.15);
+  cursor: pointer;
+}
+.contact-map .maplibregl-popup-content {
+  font-family: 'Epilogue', sans-serif;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 12px 16px;
+}
+.contact-map .maplibregl-popup-tip { border-top-color: var(--line); border-bottom-color: var(--line); }
+.map-popup-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.map-popup-desc {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+.contact-map .maplibregl-ctrl-attrib {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+}
+
 /* FORM */
 .form-grid {
   display: grid;
@@ -890,6 +935,7 @@ footer {
   .services-grid { grid-template-columns: 1fr; }
   .why-grid { grid-template-columns: 1fr 1fr; }
   .circular-gallery { height: 320px; }
+  .contact-map { height: 220px; }
   .step { grid-template-columns: 60px 1fr; gap: 20px; }
   .form-grid { grid-template-columns: 1fr; }
   .footer-inner { flex-direction: column; gap: 32px; text-align: center; }
@@ -1355,6 +1401,7 @@ footer {
           <div class="contact-info-label">Zona de Actuação</div>
           <div class="contact-info-val" style="font-size:14px;font-family:'Epilogue',sans-serif;font-weight:300;">Lisboa · Porto · Setúbal · Todo o País</div>
         </div>
+        <div class="contact-map" id="serviceMap" role="application" aria-label="Mapa da zona de actuação da M&amp;M Renovations"></div>
       </div>
       <div>
         <form id="contactForm" action="https://formspree.io/f/alex@seventyfifty.ch" method="POST">
@@ -1423,6 +1470,7 @@ footer {
   </div>
 </footer>
 
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
 // Sticky header shadow on scroll
 const header = document.getElementById('siteHeader');
@@ -1563,6 +1611,46 @@ contactForm.addEventListener('submit', async (e) => {
     formSubmitBtn.textContent = 'Pedir orçamento gratuito';
   }
 });
+
+// Service area map
+if (typeof maplibregl !== 'undefined' && document.getElementById('serviceMap')) {
+  const serviceAreas = [
+    { name: 'Lisboa', coords: [-9.1393, 38.7223], desc: 'Renovações integrais, cozinhas e casas de banho.' },
+    { name: 'Cascais', coords: [-9.4215, 38.6979], desc: 'Projecto recente — Casa de Banho.' },
+    { name: 'Almada', coords: [-9.1631, 38.6790], desc: 'Projecto recente — Sala &amp; Pavimento.' },
+    { name: 'Oeiras', coords: [-9.3122, 38.6917], desc: 'Projecto recente — Quarto.' },
+    { name: 'Sintra', coords: [-9.3899, 38.8029], desc: 'Projecto recente — Fachada.' },
+    { name: 'Setúbal', coords: [-8.8910, 38.5244], desc: 'Projecto recente — Cozinha.' },
+    { name: 'Porto', coords: [-8.6291, 41.1579], desc: 'Projecto recente — Apartamento T2.' }
+  ];
+
+  const serviceMap = new maplibregl.Map({
+    container: 'serviceMap',
+    style: 'https://tiles.openfreemap.org/styles/liberty',
+    center: [-9.05, 39.7],
+    zoom: 5.4,
+    cooperativeGestures: true,
+    attributionControl: false
+  });
+
+  serviceMap.addControl(new maplibregl.AttributionControl({ compact: true }));
+
+  serviceMap.on('load', () => {
+    const bounds = new maplibregl.LngLatBounds();
+    serviceAreas.forEach((area) => {
+      const el = document.createElement('div');
+      el.className = 'map-marker';
+      const popup = new maplibregl.Popup({ offset: 16, closeButton: false })
+        .setHTML(`<div class="map-popup-title">${area.name}</div><div class="map-popup-desc">${area.desc}</div>`);
+      new maplibregl.Marker({ element: el })
+        .setLngLat(area.coords)
+        .setPopup(popup)
+        .addTo(serviceMap);
+      bounds.extend(area.coords);
+    });
+    serviceMap.fitBounds(bounds, { padding: 40, maxZoom: 8 });
+  });
+}
 </script>
 </body>
 </html>
