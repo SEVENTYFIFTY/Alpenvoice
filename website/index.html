@@ -447,41 +447,74 @@ section.dark { background: var(--ink); }
 
 /* ── TRABALHOS / GALERIA ── */
 #trabalhos { background: var(--bg); }
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-.gallery-item {
-  aspect-ratio: 1;
+
+/* ── CIRCULAR 3D GALLERY ── */
+.circular-gallery {
   position: relative;
+  width: 100%;
+  height: 440px;
+  perspective: 1400px;
+  overflow: hidden;
+}
+.circular-gallery-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.circular-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--cg-item-w, 220px);
+  height: var(--cg-item-h, 290px);
+  margin-left: calc(var(--cg-item-w, 220px) / -2);
+  margin-top: calc(var(--cg-item-h, 290px) / -2);
+  transition: opacity 0.3s linear;
+}
+.circular-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   border: 1px solid var(--line);
 }
-.gallery-item .ph {
+.circular-card.g1 { background: linear-gradient(135deg, #2A4A35 0%, #3D6B4F 60%, #8FBA9F 100%); }
+.circular-card.g2 { background: linear-gradient(135deg, #4A4840 0%, #8A877E 60%, #D8D4C8 100%); }
+.circular-card.g3 { background: linear-gradient(135deg, #1C1C1A 0%, #2A4A35 100%); }
+.circular-card.g4 { background: linear-gradient(135deg, #D8D4C8 0%, #EEEAE0 60%, #F6F4EF 100%); }
+.circular-card.g5 { background: linear-gradient(135deg, #3D6B4F 0%, #1C1C1A 100%); }
+.circular-card.g6 { background: linear-gradient(135deg, #8A877E 0%, #2A4A35 100%); }
+.circular-overlay {
   position: absolute;
   inset: 0;
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
   padding: 20px;
+  background: linear-gradient(to top, rgba(28,28,26,0.78), transparent 65%);
 }
-.gallery-item .ph-tag {
+.circular-overlay h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.2;
+}
+.circular-overlay .circular-loc {
   font-family: 'DM Mono', monospace;
+  font-style: normal;
   font-size: 9px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--white);
-  background: rgba(28,28,26,0.55);
-  padding: 6px 12px;
-  backdrop-filter: blur(4px);
+  color: rgba(253,252,249,0.75);
+  margin-top: 6px;
 }
-.gallery-item.g1 .ph { background: linear-gradient(135deg, #2A4A35 0%, #3D6B4F 60%, #8FBA9F 100%); }
-.gallery-item.g2 .ph { background: linear-gradient(135deg, #4A4840 0%, #8A877E 60%, #D8D4C8 100%); }
-.gallery-item.g3 .ph { background: linear-gradient(135deg, #1C1C1A 0%, #2A4A35 100%); }
-.gallery-item.g4 .ph { background: linear-gradient(135deg, #D8D4C8 0%, #EEEAE0 60%, #F6F4EF 100%); }
-.gallery-item.g5 .ph { background: linear-gradient(135deg, #3D6B4F 0%, #1C1C1A 100%); }
-.gallery-item.g6 .ph { background: linear-gradient(135deg, #8A877E 0%, #2A4A35 100%); }
-.gallery-item.g4 .ph-tag { color: var(--ink); background: rgba(255,255,255,0.6); }
+.circular-caption {
+  margin-top: 14px;
+  text-align: center;
+}
 
 /* ── BEFORE / AFTER COMPARISON SLIDER ── */
 .compare-wrap { margin-bottom: 56px; }
@@ -842,7 +875,6 @@ footer {
 @media (max-width: 900px) {
   .services-grid { grid-template-columns: 1fr 1fr; }
   .why-grid { grid-template-columns: 1fr 1fr; }
-  .gallery-grid { grid-template-columns: 1fr 1fr; }
   .testi-grid { grid-template-columns: 1fr; gap: 32px; }
   .contact-grid { grid-template-columns: 1fr; gap: 48px; }
 }
@@ -857,7 +889,7 @@ footer {
   .sec-header { grid-template-columns: 40px 1fr; gap: 0 16px; }
   .services-grid { grid-template-columns: 1fr; }
   .why-grid { grid-template-columns: 1fr 1fr; }
-  .gallery-grid { grid-template-columns: 1fr 1fr; }
+  .circular-gallery { height: 320px; }
   .step { grid-template-columns: 60px 1fr; gap: 20px; }
   .form-grid { grid-template-columns: 1fr; }
   .footer-inner { flex-direction: column; gap: 32px; text-align: center; }
@@ -1141,14 +1173,59 @@ footer {
       </div>
       <div class="mono compare-caption">Arrasta para comparar · Cozinha, Setúbal</div>
     </div>
-    <div class="gallery-grid">
-      <div class="gallery-item g1"><div class="ph"><span class="ph-tag">Cozinha · Lisboa</span></div></div>
-      <div class="gallery-item g2"><div class="ph"><span class="ph-tag">Casa de Banho · Cascais</span></div></div>
-      <div class="gallery-item g3"><div class="ph"><span class="ph-tag">Apartamento · Porto</span></div></div>
-      <div class="gallery-item g4"><div class="ph"><span class="ph-tag">Sala · Almada</span></div></div>
-      <div class="gallery-item g5"><div class="ph"><span class="ph-tag">Fachada · Sintra</span></div></div>
-      <div class="gallery-item g6"><div class="ph"><span class="ph-tag">Quarto · Oeiras</span></div></div>
+    <div class="circular-gallery" id="circularGallery" role="region" aria-label="Galeria de projectos">
+      <div class="circular-gallery-inner" id="circularGalleryInner">
+        <div class="circular-item">
+          <div class="circular-card g1">
+            <div class="circular-overlay">
+              <h3>Cozinha</h3>
+              <div class="circular-loc">Lisboa · Renovação completa</div>
+            </div>
+          </div>
+        </div>
+        <div class="circular-item">
+          <div class="circular-card g2">
+            <div class="circular-overlay">
+              <h3>Casa de Banho</h3>
+              <div class="circular-loc">Cascais · Duche walk-in</div>
+            </div>
+          </div>
+        </div>
+        <div class="circular-item">
+          <div class="circular-card g3">
+            <div class="circular-overlay">
+              <h3>Apartamento T2</h3>
+              <div class="circular-loc">Porto · Renovação integral</div>
+            </div>
+          </div>
+        </div>
+        <div class="circular-item">
+          <div class="circular-card g4">
+            <div class="circular-overlay">
+              <h3>Sala &amp; Pavimento</h3>
+              <div class="circular-loc">Almada · Soalho flutuante</div>
+            </div>
+          </div>
+        </div>
+        <div class="circular-item">
+          <div class="circular-card g5">
+            <div class="circular-overlay">
+              <h3>Fachada</h3>
+              <div class="circular-loc">Sintra · Isolamento ETICS</div>
+            </div>
+          </div>
+        </div>
+        <div class="circular-item">
+          <div class="circular-card g6">
+            <div class="circular-overlay">
+              <h3>Quarto</h3>
+              <div class="circular-loc">Oeiras · Pintura &amp; acabamentos</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+    <div class="mono circular-caption">Faz scroll para girar a galeria</div>
   </div>
 </section>
 
@@ -1362,6 +1439,63 @@ function closeMobileMenu() {
   document.getElementById('mobileMenu').classList.remove('open');
   document.body.style.overflow = '';
 }
+
+// Circular 3D project gallery
+const circularGallery = document.getElementById('circularGallery');
+const circularInner = document.getElementById('circularGalleryInner');
+const circularItems = circularInner.querySelectorAll('.circular-item');
+const cgAnglePerItem = 360 / circularItems.length;
+const cgAutoRotateSpeed = 0.05;
+let cgRotation = 0;
+let cgScrolling = false;
+let cgScrollTimeout = null;
+
+function sizeCircularGallery() {
+  const w = circularGallery.getBoundingClientRect().width;
+  const itemW = Math.min(240, Math.max(140, w * 0.22));
+  const itemH = itemW * 1.32;
+  const radius = Math.min(w * 0.32, 380);
+  circularGallery.style.setProperty('--cg-item-w', itemW + 'px');
+  circularGallery.style.setProperty('--cg-item-h', itemH + 'px');
+  circularItems.forEach((item, i) => {
+    const angle = i * cgAnglePerItem;
+    item.dataset.angle = angle;
+    item.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+  });
+}
+
+function renderCircularGallery() {
+  circularInner.style.transform = `rotateY(${cgRotation}deg)`;
+  circularItems.forEach((item) => {
+    const itemAngle = parseFloat(item.dataset.angle);
+    const relativeAngle = ((itemAngle + cgRotation) % 360 + 360) % 360;
+    const normalizedAngle = relativeAngle > 180 ? 360 - relativeAngle : relativeAngle;
+    item.style.opacity = Math.max(0.25, 1 - (normalizedAngle / 180));
+  });
+}
+
+function cgAutoRotate() {
+  if (!cgScrolling) {
+    cgRotation += cgAutoRotateSpeed;
+    renderCircularGallery();
+  }
+  requestAnimationFrame(cgAutoRotate);
+}
+
+window.addEventListener('scroll', () => {
+  cgScrolling = true;
+  if (cgScrollTimeout) clearTimeout(cgScrollTimeout);
+  const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
+  cgRotation = progress * 360;
+  renderCircularGallery();
+  cgScrollTimeout = setTimeout(() => { cgScrolling = false; }, 150);
+}, { passive: true });
+
+window.addEventListener('resize', sizeCircularGallery);
+sizeCircularGallery();
+renderCircularGallery();
+requestAnimationFrame(cgAutoRotate);
 
 // Before/after comparison slider
 const compareSlider = document.getElementById('compareSlider');
