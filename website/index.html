@@ -592,6 +592,146 @@ section.dark { background: var(--ink); }
   text-align: center;
 }
 
+/* ── MAPA DE PROJECTOS ── */
+#mapa { background: var(--bg2); }
+.map-intro {
+  max-width: 560px;
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--ink2);
+  line-height: 1.8;
+  margin-bottom: 28px;
+}
+.map-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.map-filter {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink2);
+  background: var(--white);
+  border: 1px solid var(--line);
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.map-filter:hover { border-color: var(--green); color: var(--green); }
+.map-filter.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--white);
+}
+.projects-map {
+  height: 480px;
+  border: 1px solid var(--line);
+  background: var(--white);
+}
+.projects-map .maplibregl-canvas { outline: none; }
+.projects-map .maplibregl-ctrl-attrib {
+  font-size: 9px;
+  font-family: 'DM Mono', monospace;
+}
+.project-marker {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--white);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  transition: transform 0.15s ease;
+}
+.project-marker:hover { transform: scale(1.15); }
+.project-marker.status-obras { background: #C2914B; }
+.project-marker.status-venda { background: var(--green); }
+.project-marker.status-concluido { background: var(--ink3); }
+.project-marker.hidden { display: none; }
+.projects-map .maplibregl-popup-content {
+  font-family: 'Epilogue', sans-serif;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 16px 18px;
+  min-width: 220px;
+}
+.projects-map .maplibregl-popup-tip { border-top-color: var(--line); border-bottom-color: var(--line); }
+.map-popup-badge {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  margin-bottom: 8px;
+  color: var(--white);
+}
+.map-popup-badge.status-obras { background: #C2914B; }
+.map-popup-badge.status-venda { background: var(--green); }
+.map-popup-badge.status-concluido { background: var(--ink3); }
+.map-popup-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.map-popup-loc {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--ink2);
+  margin-bottom: 8px;
+}
+.map-popup-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+.map-popup-link {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+  border-bottom: 1px solid var(--ink);
+  text-decoration: none;
+  padding-bottom: 2px;
+}
+.map-popup-link:hover { color: var(--green); border-color: var(--green); }
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 18px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink2);
+}
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--white);
+  box-shadow: 0 0 0 1px var(--line);
+}
+.legend-dot.dot-obras { background: #C2914B; }
+.legend-dot.dot-venda { background: var(--green); }
+.legend-dot.dot-concluido { background: var(--ink3); }
+
 /* ── SOCIAL CAROUSEL ── */
 #social { background: var(--white); }
 .social-head {
@@ -935,6 +1075,7 @@ footer {
   .services-grid { grid-template-columns: 1fr; }
   .why-grid { grid-template-columns: 1fr 1fr; }
   .circular-gallery { height: 320px; }
+  .projects-map { height: 360px; }
   .contact-map { height: 220px; }
   .step { grid-template-columns: 60px 1fr; gap: 20px; }
   .form-grid { grid-template-columns: 1fr; }
@@ -985,6 +1126,7 @@ footer {
   <a href="#servicos" onclick="closeMobileMenu()">Serviços</a>
   <a href="#processo" onclick="closeMobileMenu()">Processo</a>
   <a href="#trabalhos" onclick="closeMobileMenu()">Trabalhos</a>
+  <a href="#mapa" onclick="closeMobileMenu()">Mapa</a>
   <a href="#testemunhos" onclick="closeMobileMenu()">Testemunhos</a>
   <a href="#contacto" onclick="closeMobileMenu()">Contacto</a>
 </div>
@@ -999,6 +1141,7 @@ footer {
         <li><a href="#porque">Porquê Nós</a></li>
         <li><a href="#processo">Processo</a></li>
         <li><a href="#trabalhos">Trabalhos</a></li>
+        <li><a href="#mapa">Mapa</a></li>
         <li><a href="#testemunhos">Testemunhos</a></li>
       </ul>
     </nav>
@@ -1275,6 +1418,34 @@ footer {
   </div>
 </section>
 
+<!-- ── MAPA DE PROJECTOS ── -->
+<section id="mapa">
+  <div class="container">
+    <div class="sec-header">
+      <div class="sec-num">05</div>
+      <div>
+        <div class="sec-label">Mapa de Projectos</div>
+        <h2 class="sec-title">Obras em curso<br><em>e casas para comprar.</em></h2>
+      </div>
+    </div>
+    <p class="map-intro">
+      Explora os nossos projectos no mapa: obras actualmente em curso, imóveis renovados disponíveis para venda e projectos concluídos. Clica num marcador para ver os detalhes.
+    </p>
+    <div class="map-filters" role="group" aria-label="Filtrar projectos no mapa">
+      <button class="map-filter active" data-filter="todos">Todos</button>
+      <button class="map-filter" data-filter="obras">Em obras</button>
+      <button class="map-filter" data-filter="venda">Para venda</button>
+      <button class="map-filter" data-filter="concluido">Concluídos</button>
+    </div>
+    <div class="projects-map" id="projectsMap" role="application" aria-label="Mapa de projectos da M&amp;M Renovations"></div>
+    <div class="map-legend">
+      <span class="legend-item"><span class="legend-dot dot-obras"></span>Em obras</span>
+      <span class="legend-item"><span class="legend-dot dot-venda"></span>Para venda</span>
+      <span class="legend-item"><span class="legend-dot dot-concluido"></span>Concluído</span>
+    </div>
+  </div>
+</section>
+
 <!-- ── SOCIAL CAROUSEL ── -->
 <section id="social">
   <div class="container">
@@ -1341,7 +1512,7 @@ footer {
 <section id="testemunhos" class="dark">
   <div class="container">
     <div class="sec-header">
-      <div class="sec-num">05</div>
+      <div class="sec-num">06</div>
       <div>
         <div class="sec-label" style="color:#555;">Testemunhos</div>
         <h2 class="sec-title">Clientes que<br><em style="color:#8FBA9F;">recomendam</em></h2>
@@ -1374,7 +1545,7 @@ footer {
 <section id="contacto">
   <div class="container">
     <div class="sec-header">
-      <div class="sec-num">06</div>
+      <div class="sec-num">07</div>
       <div>
         <div class="sec-label">Contacto</div>
         <h2 class="sec-title">Vamos falar<br>sobre a <em>sua obra.</em></h2>
@@ -1460,6 +1631,7 @@ footer {
     <ul class="footer-links">
       <li><a href="#servicos">Serviços</a></li>
       <li><a href="#trabalhos">Trabalhos</a></li>
+      <li><a href="#mapa">Mapa</a></li>
       <li><a href="#testemunhos">Testemunhos</a></li>
       <li><a href="#contacto">Contacto</a></li>
     </ul>
@@ -1649,6 +1821,80 @@ if (typeof maplibregl !== 'undefined' && document.getElementById('serviceMap')) 
       bounds.extend(area.coords);
     });
     serviceMap.fitBounds(bounds, { padding: 40, maxZoom: 8 });
+  });
+}
+
+// Projects map — search "em obras / para venda / concluído"
+if (typeof maplibregl !== 'undefined' && document.getElementById('projectsMap')) {
+  const statusLabels = {
+    obras: 'Em obras',
+    venda: 'Para venda',
+    concluido: 'Concluído'
+  };
+
+  const projects = [
+    { name: 'Cozinha em L com ilha', location: 'Setúbal', status: 'concluido', coords: [-8.8910, 38.5244], desc: 'Renovação completa de cozinha com ilha central, concluída em 4 semanas.' },
+    { name: 'Casa de Banho — Duche Walk-in', location: 'Cascais', status: 'concluido', coords: [-9.4215, 38.6979], desc: 'Substituição de banheira por duche walk-in e revestimento em grés porcelânico.' },
+    { name: 'Apartamento T2 — Renovação Integral', location: 'Porto', status: 'obras', coords: [-8.6291, 41.1579], desc: 'Renovação integral em curso — previsão de conclusão em 6 semanas.' },
+    { name: 'Sala & Pavimento Flutuante', location: 'Almada', status: 'concluido', coords: [-9.1631, 38.6790], desc: 'Aplicação de soalho flutuante em carvalho num espaço de 85 m².' },
+    { name: 'Fachada — Isolamento ETICS', location: 'Sintra', status: 'obras', coords: [-9.3899, 38.8029], desc: 'Isolamento térmico e pintura de fachada — obra em curso.' },
+    { name: 'Quarto — Acabamentos Premium', location: 'Oeiras', status: 'concluido', coords: [-9.3122, 38.6917], desc: 'Pintura e acabamentos em tons neutros, concluído em 3 dias.' },
+    { name: 'T1 Renovado — Pronto a Habitar', location: 'Lisboa', status: 'venda', coords: [-9.1393, 38.7223], price: '€ 185.000', desc: 'Apartamento T1 totalmente renovado pela M&M Renovations, pronto a habitar.' },
+    { name: 'Moradia Renovada com Jardim', location: 'Setúbal', status: 'venda', coords: [-8.8740, 38.5410], price: '€ 295.000', desc: 'Moradia V3 renovada de raiz, com jardim e garagem.' },
+    { name: 'Loft Industrial — Em Construção', location: 'Almada', status: 'obras', coords: [-9.1580, 38.6850], desc: 'Conversão de armazém em loft — obra em curso, entrega prevista em 8 semanas.' }
+  ];
+
+  const projectsMap = new maplibregl.Map({
+    container: 'projectsMap',
+    style: 'https://tiles.openfreemap.org/styles/liberty',
+    center: [-9.05, 39.5],
+    zoom: 5.6,
+    cooperativeGestures: true,
+    attributionControl: false
+  });
+
+  projectsMap.addControl(new maplibregl.AttributionControl({ compact: true }));
+
+  const projectMarkers = [];
+
+  projectsMap.on('load', () => {
+    const bounds = new maplibregl.LngLatBounds();
+    projects.forEach((project) => {
+      const el = document.createElement('div');
+      el.className = `project-marker status-${project.status}`;
+
+      const priceHtml = project.price ? `<div class="map-popup-price">${project.price}</div>` : '';
+      const popup = new maplibregl.Popup({ offset: 16, closeButton: false }).setHTML(`
+        <div class="map-popup-badge status-${project.status}">${statusLabels[project.status]}</div>
+        <div class="map-popup-title">${project.name}</div>
+        <div class="map-popup-loc">${project.location}</div>
+        ${priceHtml}
+        <p style="font-size:12px;font-weight:300;color:var(--ink2);line-height:1.6;margin-bottom:10px;">${project.desc}</p>
+        <a class="map-popup-link" href="#contacto">Pedir informações</a>
+      `);
+
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat(project.coords)
+        .setPopup(popup)
+        .addTo(projectsMap);
+
+      projectMarkers.push({ marker, el, status: project.status });
+      bounds.extend(project.coords);
+    });
+    projectsMap.fitBounds(bounds, { padding: 50, maxZoom: 9 });
+  });
+
+  // Filter buttons
+  const mapFilters = document.querySelectorAll('#mapa .map-filter');
+  mapFilters.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      mapFilters.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      projectMarkers.forEach(({ el, status }) => {
+        el.classList.toggle('hidden', filter !== 'todos' && filter !== status);
+      });
+    });
   });
 }
 </script>
