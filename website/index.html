@@ -483,6 +483,81 @@ section.dark { background: var(--ink); }
 .gallery-item.g6 .ph { background: linear-gradient(135deg, #8A877E 0%, #2A4A35 100%); }
 .gallery-item.g4 .ph-tag { color: var(--ink); background: rgba(255,255,255,0.6); }
 
+/* ── BEFORE / AFTER COMPARISON SLIDER ── */
+.compare-wrap { margin-bottom: 56px; }
+.compare {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  cursor: ew-resize;
+  user-select: none;
+  touch-action: none;
+}
+.compare-img {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 24px;
+}
+.compare-after {
+  background: linear-gradient(135deg, #F6F4EF 0%, #EEEAE0 45%, #D8D4C8 100%);
+  z-index: 1;
+}
+.compare-before {
+  background: linear-gradient(135deg, #8A877E 0%, #4A4840 60%, #1C1C1A 100%);
+  z-index: 2;
+  clip-path: inset(0 50% 0 0);
+}
+.compare-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border: 1px solid currentColor;
+}
+.compare-after .compare-tag { color: var(--ink); }
+.compare-before .compare-tag { color: var(--white); }
+.compare-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: var(--white);
+  z-index: 3;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.compare-grip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: ew-resize;
+  pointer-events: auto;
+}
+.compare-grip svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--ink);
+}
+.compare-caption {
+  margin-top: 14px;
+  text-align: center;
+}
+
 /* ── SOCIAL CAROUSEL ── */
 #social { background: var(--white); }
 .social-head {
@@ -1051,6 +1126,21 @@ footer {
         <h2 class="sec-title">Antes e depois.<br><em>Resultados reais.</em></h2>
       </div>
     </div>
+    <div class="compare-wrap">
+      <div class="compare" id="compareSlider">
+        <div class="compare-img compare-after"><span class="compare-tag">Depois</span></div>
+        <div class="compare-img compare-before" id="compareBefore"><span class="compare-tag">Antes</span></div>
+        <div class="compare-handle" id="compareHandle">
+          <div class="compare-grip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/>
+              <circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="mono compare-caption">Arrasta para comparar · Cozinha, Setúbal</div>
+    </div>
     <div class="gallery-grid">
       <div class="gallery-item g1"><div class="ph"><span class="ph-tag">Cozinha · Lisboa</span></div></div>
       <div class="gallery-item g2"><div class="ph"><span class="ph-tag">Casa de Banho · Cascais</span></div></div>
@@ -1272,6 +1362,29 @@ function closeMobileMenu() {
   document.getElementById('mobileMenu').classList.remove('open');
   document.body.style.overflow = '';
 }
+
+// Before/after comparison slider
+const compareSlider = document.getElementById('compareSlider');
+const compareBefore = document.getElementById('compareBefore');
+const compareHandle = document.getElementById('compareHandle');
+let comparing = false;
+
+function setComparePosition(clientX) {
+  const rect = compareSlider.getBoundingClientRect();
+  const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+  const percent = (x / rect.width) * 100;
+  compareBefore.style.clipPath = `inset(0 ${100 - percent}% 0 0)`;
+  compareHandle.style.left = percent + '%';
+}
+
+compareHandle.addEventListener('mousedown', () => { comparing = true; });
+compareHandle.addEventListener('touchstart', () => { comparing = true; }, { passive: true });
+window.addEventListener('mouseup', () => { comparing = false; });
+window.addEventListener('touchend', () => { comparing = false; });
+compareSlider.addEventListener('mousemove', (e) => { if (comparing) setComparePosition(e.clientX); });
+compareSlider.addEventListener('touchmove', (e) => {
+  if (comparing && e.touches[0]) setComparePosition(e.touches[0].clientX);
+}, { passive: true });
 
 // Social carousel controls
 const socialTrack = document.getElementById('socialTrack');
