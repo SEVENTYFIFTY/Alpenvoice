@@ -706,6 +706,7 @@ section.dark { background: var(--ink); }
   margin-top: 24px;
 }
 .form-success.show { display: block; }
+#formError { border-color: #7A3B2E; }
 .form-success-title {
   font-family: 'Cormorant Garamond', serif;
   font-size: 20px;
@@ -1189,7 +1190,8 @@ footer {
         </div>
       </div>
       <div>
-        <form id="contactForm">
+        <form id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+          <input type="hidden" name="_subject" value="Novo pedido de orçamento — M&amp;M Renovations">
           <div class="form-grid">
             <div class="form-field">
               <label for="f-name">Nome</label>
@@ -1227,6 +1229,10 @@ footer {
         <div class="form-success" id="formSuccess">
           <div class="form-success-title">Pedido recebido!</div>
           <div class="form-success-body">Obrigado pelo contacto. A nossa equipa vai analisar o teu pedido e responder em até 24 horas.</div>
+        </div>
+        <div class="form-success" id="formError">
+          <div class="form-success-title" style="color:#7A3B2E;">Não foi possível enviar</div>
+          <div class="form-success-body">Ocorreu um erro ao enviar o formulário. Por favor tenta novamente ou contacta-nos directamente por telefone ou email.</div>
         </div>
       </div>
     </div>
@@ -1278,14 +1284,37 @@ function socialScrollAmount() {
 socialPrev.addEventListener('click', () => socialTrack.scrollBy({ left: -socialScrollAmount(), behavior: 'smooth' }));
 socialNext.addEventListener('click', () => socialTrack.scrollBy({ left: socialScrollAmount(), behavior: 'smooth' }));
 
-// Contact form submission (front-end only — connect to a backend/email service to receive submissions)
+// Contact form submission — sends to Formspree (https://formspree.io)
 const contactForm = document.getElementById('contactForm');
 const formSuccess = document.getElementById('formSuccess');
-contactForm.addEventListener('submit', (e) => {
+const formError = document.getElementById('formError');
+const formSubmitBtn = contactForm.querySelector('.form-submit');
+
+contactForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  contactForm.reset();
-  contactForm.style.display = 'none';
-  formSuccess.classList.add('show');
+  formError.classList.remove('show');
+  formSubmitBtn.disabled = true;
+  formSubmitBtn.textContent = 'A enviar...';
+
+  try {
+    const response = await fetch(contactForm.action, {
+      method: 'POST',
+      body: new FormData(contactForm),
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (response.ok) {
+      contactForm.reset();
+      contactForm.style.display = 'none';
+      formSuccess.classList.add('show');
+    } else {
+      throw new Error('Submission failed');
+    }
+  } catch (err) {
+    formError.classList.add('show');
+    formSubmitBtn.disabled = false;
+    formSubmitBtn.textContent = 'Pedir orçamento gratuito';
+  }
 });
 </script>
 </body>
