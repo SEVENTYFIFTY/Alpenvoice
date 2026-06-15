@@ -487,6 +487,13 @@ section.dark { background: var(--ink); }
 .circular-card.g4 { background: linear-gradient(135deg, #D8D4C8 0%, #EEEAE0 60%, #F6F4EF 100%); }
 .circular-card.g5 { background: linear-gradient(135deg, #3D6B4F 0%, #1C1C1A 100%); }
 .circular-card.g6 { background: linear-gradient(135deg, #8A877E 0%, #2A4A35 100%); }
+.circular-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .circular-overlay {
   position: absolute;
   inset: 0;
@@ -537,11 +544,12 @@ section.dark { background: var(--ink); }
   padding: 24px;
 }
 .compare-after {
-  background: linear-gradient(135deg, #F6F4EF 0%, #EEEAE0 45%, #D8D4C8 100%);
+  background: linear-gradient(135deg, #F6F4EF 0%, #EEEAE0 45%, #D8D4C8 100%) center / cover, url('images/escadas-espiral.jpg') center / cover;
   z-index: 1;
 }
 .compare-before {
-  background: linear-gradient(135deg, #8A877E 0%, #4A4840 60%, #1C1C1A 100%);
+  background: url('images/escadas-espiral.jpg') center / cover;
+  filter: grayscale(0.7) brightness(0.55) contrast(0.9);
   z-index: 2;
   clip-path: inset(0 50% 0 0);
 }
@@ -789,17 +797,16 @@ section.dark { background: var(--ink); }
   justify-content: center;
   position: relative;
 }
-.social-post-img .icon {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 48px;
-  font-style: italic;
-  color: rgba(255,255,255,0.85);
+.social-post-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .social-post.p1 .social-post-img { background: linear-gradient(135deg, #2A4A35, #8FBA9F); }
 .social-post.p2 .social-post-img { background: linear-gradient(135deg, #4A4840, #D8D4C8); }
 .social-post.p3 .social-post-img { background: linear-gradient(135deg, #1C1C1A, #3D6B4F); }
 .social-post.p4 .social-post-img { background: linear-gradient(135deg, #8A877E, #F6F4EF); }
-.social-post.p4 .social-post-img .icon { color: var(--green); }
 .social-post.p5 .social-post-img { background: linear-gradient(135deg, #3D6B4F, #1C1C1A); }
 .social-post.p6 .social-post-img { background: linear-gradient(135deg, #D8D4C8, #2A4A35); }
 .social-post-body { padding: 16px; background: var(--white); }
@@ -1360,55 +1367,61 @@ footer {
           </div>
         </div>
       </div>
-      <div class="mono compare-caption">Arrasta para comparar · Cozinha, Setúbal</div>
+      <div class="mono compare-caption">Arrasta para comparar · Sala &amp; Escadas, Lisboa</div>
     </div>
     <div class="circular-gallery" id="circularGallery" role="region" aria-label="Galeria de projectos">
       <div class="circular-gallery-inner" id="circularGalleryInner">
         <div class="circular-item">
           <div class="circular-card g1">
+            <img src="images/sala-lareira-cascais.jpg" alt="Sala de estar com lareira renovada em Cascais" loading="lazy">
             <div class="circular-overlay">
-              <h3>Cozinha</h3>
-              <div class="circular-loc">Lisboa · Renovação completa</div>
+              <h3>Sala com Lareira</h3>
+              <div class="circular-loc">Cascais · Ampliação &amp; acabamentos premium</div>
             </div>
           </div>
         </div>
         <div class="circular-item">
           <div class="circular-card g2">
+            <img src="images/sala-vista-sintra.jpg" alt="Sala renovada com vista panorâmica em Sintra" loading="lazy">
             <div class="circular-overlay">
-              <h3>Casa de Banho</h3>
-              <div class="circular-loc">Cascais · Duche walk-in</div>
+              <h3>Sala com Vista</h3>
+              <div class="circular-loc">Sintra · Renovação integral</div>
             </div>
           </div>
         </div>
         <div class="circular-item">
           <div class="circular-card g3">
+            <img src="images/duplex-porto.jpg" alt="Duplex remodelado no Porto" loading="lazy">
             <div class="circular-overlay">
-              <h3>Apartamento T2</h3>
+              <h3>Duplex Moderno</h3>
               <div class="circular-loc">Porto · Renovação integral</div>
             </div>
           </div>
         </div>
         <div class="circular-item">
           <div class="circular-card g4">
+            <img src="images/quarto-infantil-almada.jpg" alt="Quarto infantil modular em Almada" loading="lazy">
             <div class="circular-overlay">
-              <h3>Sala &amp; Pavimento</h3>
-              <div class="circular-loc">Almada · Soalho flutuante</div>
+              <h3>Quarto Infantil</h3>
+              <div class="circular-loc">Almada · Mobiliário à medida</div>
             </div>
           </div>
         </div>
         <div class="circular-item">
           <div class="circular-card g5">
+            <img src="images/quarto-sotao-oeiras.jpg" alt="Quarto em sótão aproveitado em Oeiras" loading="lazy">
             <div class="circular-overlay">
-              <h3>Fachada</h3>
-              <div class="circular-loc">Sintra · Isolamento ETICS</div>
+              <h3>Quarto em Sótão</h3>
+              <div class="circular-loc">Oeiras · Aproveitamento de águas-furtadas</div>
             </div>
           </div>
         </div>
         <div class="circular-item">
           <div class="circular-card g6">
+            <img src="images/patio-setubal.jpg" alt="Pátio exterior renovado em Setúbal" loading="lazy">
             <div class="circular-overlay">
-              <h3>Quarto</h3>
-              <div class="circular-loc">Oeiras · Pintura &amp; acabamentos</div>
+              <h3>Pátio Exterior</h3>
+              <div class="circular-loc">Setúbal · Criação de zona exterior</div>
             </div>
           </div>
         </div>
@@ -1462,44 +1475,44 @@ footer {
     <div class="social-track-wrap">
       <div class="social-track" id="socialTrack">
         <div class="social-post p1">
-          <div class="social-post-img"><span class="icon">K</span></div>
+          <div class="social-post-img"><img src="images/terraco-lisboa.jpg" alt="Recuperação de telhado com terraço em Lisboa" loading="lazy"></div>
           <div class="social-post-body">
-            <div class="social-post-cap">Renovação de cozinha em L com ilha central — projecto e execução em 4 semanas.</div>
+            <div class="social-post-cap">Recuperação de telhado com criação de terraço com vista para a cidade.</div>
             <div class="social-post-meta"><span>Instagram</span><span>♥ 184</span></div>
           </div>
         </div>
         <div class="social-post p2">
-          <div class="social-post-img"><span class="icon">B</span></div>
+          <div class="social-post-img"><img src="images/fachada-historica-lisboa.jpg" alt="Reabilitação de fachada histórica em Lisboa" loading="lazy"></div>
           <div class="social-post-body">
-            <div class="social-post-cap">Casa de banho com duche walk-in e revestimento em grés porcelânico.</div>
+            <div class="social-post-cap">Reabilitação de fachada de edifício histórico, preservando o carácter original.</div>
             <div class="social-post-meta"><span>Instagram</span><span>♥ 231</span></div>
           </div>
         </div>
         <div class="social-post p3">
-          <div class="social-post-img"><span class="icon">H</span></div>
+          <div class="social-post-img"><img src="images/fachada-madeira.jpg" alt="Ampliação com revestimento em ripado de madeira" loading="lazy"></div>
           <div class="social-post-body">
-            <div class="social-post-cap">Antes/depois: apartamento T2 totalmente remodelado em 10 semanas.</div>
+            <div class="social-post-cap">Ampliação de moradia com revestimento em ripado de madeira.</div>
             <div class="social-post-meta"><span>Instagram</span><span>♥ 412</span></div>
           </div>
         </div>
         <div class="social-post p4">
-          <div class="social-post-img"><span class="icon">F</span></div>
+          <div class="social-post-img"><img src="images/moradia-rosa.jpg" alt="Pintura exterior de moradia tradicional" loading="lazy"></div>
           <div class="social-post-body">
-            <div class="social-post-cap">Aplicação de soalho flutuante em espaço de 85 m² — acabamento em carvalho.</div>
+            <div class="social-post-cap">Pintura exterior e recuperação de moradia tradicional — acabamento final.</div>
             <div class="social-post-meta"><span>Instagram</span><span>♥ 97</span></div>
           </div>
         </div>
         <div class="social-post p5">
-          <div class="social-post-img"><span class="icon">E</span></div>
+          <div class="social-post-img"><img src="images/moradia-renovada.jpg" alt="Moradia renovada pronta a habitar" loading="lazy"></div>
           <div class="social-post-body">
-            <div class="social-post-cap">Isolamento e pintura de fachada — sistema ETICS aplicado em 2 semanas.</div>
+            <div class="social-post-cap">Moradia renovada de raiz, pronta a habitar — entrega ao cliente.</div>
             <div class="social-post-meta"><span>Instagram</span><span>♥ 156</span></div>
           </div>
         </div>
         <div class="social-post p6">
-          <div class="social-post-img"><span class="icon">P</span></div>
+          <div class="social-post-img"><img src="images/casa-pedra.jpg" alt="Recuperação de casa em pedra" loading="lazy"></div>
           <div class="social-post-body">
-            <div class="social-post-cap">Pintura interior em tons neutros — sala e quartos prontos em 3 dias.</div>
+            <div class="social-post-cap">Recuperação de antiga casa em pedra — fachada restaurada ao detalhe.</div>
             <div class="social-post-meta"><span>Instagram</span><span>♥ 88</span></div>
           </div>
         </div>
