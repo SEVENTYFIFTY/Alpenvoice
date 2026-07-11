@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Sprout",
+    "slug": "sprout-ingredient-scanner",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "Sprout uses the camera to scan ingredient labels.",
+          "enableCodeScanner": false
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Sprout uses the camera to scan ingredient labels.",
+        "NSLocationWhenInUseUsageDescription": "Sprout uses your location to suggest healthier alternatives available in your region."
+      }
+    },
+    "android": {
+      "permissions": ["CAMERA", "ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
+    }
+  }
+}
