@@ -21,6 +21,8 @@ TEAM = [
     ("Noah Graf", "Site architect", "Site visit Arosa, back Thursday"),
 ]
 
+STATUS = {"25-010": "on_hold", "22-008": "completed"}  # everything else is active
+
 BLOCKERS = {
     "25-002": "Waiting on structural calcs for the cantilever",
     "23-021": "Heritage office: window replacement not approved yet",
@@ -47,6 +49,8 @@ PROJECTS = [
     ("25-013", "Mixed-use Bahnhofplatz", "SBB Immobilien", "Winterthur", "Sofia Brunner", 3, 36, 0.08),
     ("23-021", "Chalet Renovation Arosa", "Private client", "Arosa", "Noah Graf", 28, 26, 0.93),
     ("26-001", "Haus am See", "Private client", "Meilen", "Anna Keller", 0.3, 18, 0.02),
+    ("25-010", "Loft Conversion Kreis 5", "Loftwerk GmbH", "Zürich", "Jonas Weber", 6, 14, 0.27),
+    ("22-008", "Kindergarten Wiesental", "Stadt Winterthur", "Winterthur", "Sofia Brunner", 30, 24, 1.0),
 ]
 
 DRAWINGS = [
@@ -111,6 +115,8 @@ def seed(reset: bool = False) -> None:
 
             _milestones(conn, project_id)
             _contacts(conn, project_id, code, client, rng)
+            if code in STATUS:
+                db.update_project(conn, project_id, {"status": STATUS[code]})
             if code in BLOCKERS:
                 db.update_project(conn, project_id, {"blocker": BLOCKERS[code]})
 

@@ -292,6 +292,7 @@ def sync_account(member_id: int) -> str:
         result = f"OK: {len(rows)} project threads, {waiting} waiting on a reply"
         with db.connect() as conn:
             db.replace_mail_threads(conn, member_id, rows)
+            db.bump_version(conn)
             conn.execute("UPDATE gmail_accounts SET last_synced_at = ?, last_result = ? WHERE member_id = ?",
                          (db.now(), result, member_id))
         return result

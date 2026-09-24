@@ -10,6 +10,10 @@ const state = {
   boardFilter: "all",
   gmail: { configured: false, accounts: [] },
   user: null,
+  wallView: "cards",       // cards | stages | timeline
+  snapshot: new Map(),     // project id -> fingerprint, to highlight what changed
+  version: null,
+  rotating: false,
   dragId: null,
 };
 
@@ -29,6 +33,8 @@ const HEALTH = {
   not_started: { label: "Not started", icon: "–" },
 };
 const ATTENTION = ["overdue", "at_risk", "on_track", "not_started", "done"];
+const STATUS_ORDER = ["active", "on_hold", "completed"];
+const STATUS_LABEL = { active: "Active", on_hold: "On hold", completed: "Completed" };
 const STAGE_LABEL = {
   not_started: "Not started", draft: "Draft", in_progress: "In progress",
   review: "In review", approved: "Approved", issued: "Issued",
@@ -125,7 +131,9 @@ document.addEventListener("mouseout", (e) => {
 async function loadDashboard() {
   try {
     state.dashboard = await api("/api/dashboard");
+    const changed = changedProjects(state.dashboard.projects);
     renderWall();
+    highlight(changed);
     $("#last-refresh").textContent = `Updated ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   } catch (err) {
     $("#last-refresh").textContent = `Offline — ${err.message}`;
@@ -135,13 +143,40 @@ async function loadDashboard() {
   state.timer = setTimeout(loadDashboard, every);
 }
 
+// What a viewer would notice changing on a project
+function fingerprint(p) {
+  return JSON.stringify([p.status, Math.round(p.progress), p.current_phase, p.health, p.blocker, p.mail_waiting,
+    p.phases.map((ph) => Math.round(ph.progress)), p.drawings.by_stage]);
+}
+
+function changedProjects(projects) {
+  const changed = new Set();
+  const first = state.snapshot.size === 0;
+  for (const p of projects) {
+    const fp = fingerprint(p);
+    if (!first && state.snapshot.get(p.id) !== fp) changed.add(p.id);
+    state.snapshot.set(p.id, fp);
+  }
+  return changed;
+}
+
+function highlight(ids) {
+  for (const id of ids) {
+    document.querySelectorAll(`[data-project="${id}"]`).forEach((el) => {
+      el.classList.remove("flash");
+      void el.offsetWidth;  // restart the animation
+      el.classList.add("flash");
+    });
+  }
+}
+
 function renderWall() {
   const d = state.dashboard;
   $("#office-name").textContent = d.office;
   document.title = `Atelier · ${d.office}`;
   renderKpis(d.kpis);
   renderFilters(d.projects);
-  renderProjects();
+  renderProjectViews();
   renderMail(d.mail);
   renderAttention(d.projects);
   renderActivity(d.activity);
@@ -189,7 +224,8 @@ function renderAttention(projects) {
 function renderKpis(k) {
   const h = k.health;
   $("#kpis").innerHTML = `
-    <div class="kpi"><div class="label">Active projects</div><div class="value">${k.active_projects}</div></div>
+    <div class="kpi"><div class="label">Active projects</div><div class="value">${k.active_projects}</div>
+      <div class="sub">${otherCounts()}</div></div>
     <div class="kpi"><div class="label">Average progress</div><div class="value">${pct(k.average_progress)}</div></div>
     <div class="kpi"><div class="label">Moved today</div>
       <div class="value">${k.moved_today}<small class="muted"> / ${k.active_projects}</small></div>
@@ -202,6 +238,13 @@ function renderKpis(k) {
       </div></div>
     <div class="kpi"><div class="label">Drawings open</div><div class="value">${k.drawings_open}</div>
       <div class="sub">${k.drawings_in_review} waiting for review</div></div>`;
+}
+
+function otherCounts() {
+  const ps = state.dashboard.projects;
+  const hold = ps.filter((p) => p.status === "on_hold").length;
+  const done = ps.filter((p) => p.status === "completed").length;
+  return [hold && `${hold} on hold`, done && `${done} completed`].filter(Boolean).join(" · ") || "&nbsp;";
 }
 
 function renderFilters(projects) {
@@ -223,8 +266,10 @@ function visibleProjects() {
   const lead = $("#filter-lead").value;
   const health = $("#filter-health").value;
   const sort = $("#sort-by").value;
+  const status = $("#filter-status").value;
   const list = state.dashboard.projects.filter((p) =>
-    p.status === "active" && matchesSearch(p) && (!lead || p.lead_name === lead) && (!health || p.health === health));
+    (status === "all" || p.status === status) && matchesSearch(p) &&
+    (!lead || p.lead_name === lead) && (!health || p.health === health));
   const byDue = (a, b) => (a.due_date || "9999").localeCompare(b.due_date || "9999");
   const sorters = {
     attention: (a, b) => ATTENTION.indexOf(a.health) - ATTENTION.indexOf(b.health) || byDue(a, b),
@@ -232,18 +277,239 @@ function visibleProjects() {
     progress: (a, b) => b.progress - a.progress,
     today: (a, b) => b.delta_today - a.delta_today,
   };
-  return list.sort(sorters[sort]);
+  // active projects first, then on hold, then completed; the chosen order within each group
+  return list.sort((a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status) || sorters[sort](a, b));
+}
+
+function renderProjectViews() {
+  renderProjects();
+  renderStages();
+  renderTimeline();
 }
 
 function renderProjects() {
   const list = visibleProjects();
   const root = $("#projects");
   if (!list.length) {
-    root.innerHTML = `<div class="empty">No active projects match. Add one under <a href="#manage">Update progress</a> or import an Excel file under <a href="#data">Data &amp; sync</a>.</div>`;
+    root.innerHTML = `<div class="empty">No projects match. Add one under <a href="#manage">Update</a> or import an Excel file under <a href="#data">Data &amp; sync</a>.</div>`;
     return;
   }
-  root.innerHTML = list.map(projectCard).join("");
+  let group = null;
+  root.innerHTML = list.map((p) => {
+    const heading = p.status !== group && (group !== null || p.status !== "active")
+      ? `<div class="section-break">${STATUS_LABEL[p.status] || esc(p.status)} · ${list.filter((x) => x.status === p.status).length}</div>` : "";
+    group = p.status;
+    return heading + projectCard(p);
+  }).join("");
 }
+
+// ---------------------------------------------------------------------------
+// Stages view: every project × every phase
+// ---------------------------------------------------------------------------
+function phaseColumns(projects) {
+  const cols = new Map();
+  for (const p of projects) {
+    for (const ph of p.phases) {
+      const c = cols.get(ph.name) || { name: ph.name, code: ph.code, pos: [] };
+      c.pos.push(ph.position);
+      cols.set(ph.name, c);
+    }
+  }
+  const avg = (c) => c.pos.reduce((a, b) => a + b, 0) / c.pos.length;
+  return [...cols.values()].sort((a, b) => avg(a) - avg(b));
+}
+
+function renderStages() {
+  const root = $("#stages");
+  const list = visibleProjects();
+  if (!list.length) { root.innerHTML = `<div class="empty">No projects match.</div>`; return; }
+  const cols = phaseColumns(list);
+  root.innerHTML = `<table class="stages">
+    <thead><tr><th>Project</th>${cols.map((c) => `<th title="${esc(c.name)}">${c.code ? `<span class="code">${esc(c.code)}</span>` : ""}${esc(c.name)}</th>`).join("")}
+      <th>Overall</th><th>Status</th><th>Due</th></tr></thead>
+    <tbody>${list.map((p) => `<tr class="srow st-${esc(p.status)}" data-project="${p.id}" tabindex="0">
+      <td><div class="pname"><span class="code">${esc(p.code)}</span> ${esc(p.name)}</div>
+        <div class="pmeta">${esc([p.lead_name, p.client].filter(Boolean).join(" · "))}${p.blocker ? ` · <span class="mail-flag">! blocked</span>` : ""}${p.mail_waiting ? ` · <span class="mail-flag">✉ ${p.mail_waiting}</span>` : ""}</div></td>
+      ${cols.map((c) => stageCell(p, c)).join("")}
+      <td><div class="overall"><b>${pct(p.progress)}</b><div class="bar"><div class="bar-fill" style="width:${p.progress}%"></div>
+        ${p.expected != null && p.progress < 100 ? `<div class="bar-plan" style="left:calc(${p.expected}% - 1px)"></div>` : ""}</div></div></td>
+      <td>${p.status === "active" ? badge(p.health) : `<span class="status-tag">${STATUS_LABEL[p.status] || esc(p.status)}</span>`}</td>
+      <td class="num small">${p.days_left == null ? "–" : p.days_left < 0 && p.progress < 100 ? `<span class="mail-flag">${-p.days_left}d late</span>` : fmtDate(p.due_date)}</td>
+    </tr>`).join("")}</tbody></table>`;
+}
+
+function stageCell(p, col) {
+  const ph = p.phases.find((x) => x.name === col.name);
+  if (!ph) return `<td><div class="cell none"><span class="val">–</span></div></td>`;
+  const current = ph.id === p.current_phase_id;
+  const tipHtml = `<b>${esc(p.code)} · ${esc(ph.name)}</b><br>${pct(ph.progress)} done` +
+    (ph.expected != null && ph.progress < 100 ? ` · plan ${pct(ph.expected)}` : "") +
+    (ph.milestones_total ? `<br>${ph.milestones_done}/${ph.milestones_total} milestones` : "") +
+    (ph.planned_start ? `<br>${fmtDate(ph.planned_start)} – ${fmtDate(ph.planned_end)}` : "") +
+    (ph.assignee_name ? `<br>${esc(ph.assignee_name)}` : "") + `<br>${HEALTH[ph.health].label}`;
+  const warn = ph.health === "overdue" || ph.health === "at_risk";
+  return `<td><div class="cell ${current ? "current" : ""} ${ph.progress >= 100 ? "full" : ""}" data-tip="${esc(tipHtml)}"
+      aria-label="${esc(ph.name)} ${pct(ph.progress)}${warn ? ", " + HEALTH[ph.health].label : ""}">
+    <div class="fill" style="width:${ph.progress}%"></div>
+    <span class="val">${ph.progress >= 100 ? "✓" : ph.progress > 0 ? `<span>${pct(ph.progress)}</span>` : ""}</span>
+    ${warn && ph.progress < 100 ? `<span class="sdot ${ph.health}"></span>` : ""}
+  </div></td>`;
+}
+
+// ---------------------------------------------------------------------------
+// Timeline view: planned phases against today
+// ---------------------------------------------------------------------------
+const DAY = 86400000;
+const toTime = (iso) => new Date(iso.slice(0, 10) + "T00:00").getTime();
+
+function renderTimeline() {
+  const root = $("#timeline");
+  const list = visibleProjects();
+  const today = new Date(new Date().toDateString()).getTime();
+  // window: 6 months back to the latest deadline, at most 2 years ahead
+  const ends = list.flatMap((p) => [p.due_date, ...p.phases.map((ph) => ph.planned_end)]).filter(Boolean).map(toTime);
+  const start = today - 182 * DAY;
+  const end = Math.min(Math.max(today + 90 * DAY, ...ends) + 30 * DAY, today + 730 * DAY);
+  const x = (t) => ((Math.min(Math.max(t, start), end) - start) / (end - start)) * 100;
+
+  const ticks = [];
+  const d = new Date(start); d.setDate(1); d.setMonth(d.getMonth() + 1);
+  const months = (end - start) / (30 * DAY);
+  const step = months > 18 ? 3 : months > 9 ? 2 : 1;
+  for (; d.getTime() < end; d.setMonth(d.getMonth() + step)) {
+    if (Math.abs(x(d.getTime()) - x(today)) < 3) continue;  // leave room for the Today label
+    ticks.push({ at: x(d.getTime()), year: d.getMonth() < step,
+      label: d.toLocaleDateString(undefined, { month: "short", ...(d.getMonth() < step ? { year: "2-digit" } : {}) }) });
+  }
+
+  const rows = list.map((p) => {
+    const dated = p.phases.filter((ph) => ph.planned_start && ph.planned_end);
+    const segs = dated.map((ph) => {
+      const s = toTime(ph.planned_start), e = toTime(ph.planned_end);
+      if (e < start || s > end) return "";
+      const left = x(s), width = Math.max(x(e) - left, 0.4);
+      const overdue = ph.health === "overdue";
+      const tipHtml = `<b>${esc(p.code)} · ${esc(ph.name)}</b><br>${fmtDate(ph.planned_start)} – ${fmtDate(ph.planned_end)}<br>${pct(ph.progress)} done` +
+        (ph.expected != null && ph.progress < 100 ? ` · plan ${pct(ph.expected)}` : "") + `<br>${HEALTH[ph.health].label}`;
+      return `<div class="tl-seg ${ph.id === p.current_phase_id ? "current" : ""} ${overdue ? "overdue" : ""}"
+          style="left:${left}%;width:${width}%" data-tip="${esc(tipHtml)}">
+        <div class="fill" style="width:${ph.progress}%"></div>${width > 6 ? `<span class="lbl">${esc(ph.code || ph.name)}</span>` : ""}</div>`;
+    }).join("");
+    const earlier = dated.some((ph) => toTime(ph.planned_end) < start);
+    const due = p.due_date ? toTime(p.due_date) : null;
+    const dueMark = due && due >= start && due <= end
+      ? `<div class="tl-due ${due < today && p.progress < 100 ? "late" : ""}" style="left:${x(due)}%" data-tip="<b>${esc(p.code)}</b> due ${esc(fmtDate(p.due_date))}"></div>` : "";
+    return `<div class="tl-row st-${esc(p.status)}" data-project="${p.id}" tabindex="0">
+      <div class="tl-label"><span class="code">${esc(p.code)}</span> <b>${esc(p.name)}</b><br>
+        <span class="muted">${pct(p.progress)} · ${esc(p.current_phase || STATUS_LABEL[p.status] || "")}</span></div>
+      <div class="tl-track">${earlier && segs ? `<span class="tl-clip" style="left:0">◂</span>` : ""}${segs ||
+        `<span class="tl-clip" style="left:8px">${dated.length ? `◂ Planned before ${esc(fmtDate(new Date(start).toISOString()))}` : "No planned dates"}</span>`}${dueMark}</div>
+    </div>`;
+  }).join("");
+
+  root.innerHTML = list.length ? `
+    <div class="tl-head"><div></div><div class="tl-axis">${ticks.map((t) => `<span style="left:${t.at}%">${esc(t.label)}</span>`).join("")}</div></div>
+    <div class="tl-body">
+      <div class="tl-grid">${ticks.map((t) => `<i class="${t.year ? "year" : ""}" style="left:${t.at}%"></i>`).join("")}
+        <div class="today" style="left:${x(today)}%"></div></div>
+      ${rows}
+    </div>
+    <div class="tl-legend">
+      <span><span class="sw" style="background:var(--accent)"></span>Done part of a phase</span>
+      <span><span class="sw" style="box-shadow:inset 0 0 0 2px var(--ink)"></span>Current phase</span>
+      <span><span class="sw" style="box-shadow:inset 0 0 0 2px var(--critical)"></span>Past its planned end</span>
+      <span><span class="tl-due" style="position:static;transform:rotate(45deg)"></span>Deadline</span>
+    </div>` : `<div class="empty">No projects match.</div>`;
+}
+
+function setWallView(view) {
+  state.wallView = view;
+  storage("studio.wallview", view);
+  document.querySelectorAll("[data-wallview]").forEach((b) => {
+    b.classList.toggle("on", b.dataset.wallview === view);
+    b.setAttribute("aria-selected", String(b.dataset.wallview === view));
+  });
+  $("#projects").hidden = view !== "cards";
+  $("#stages").hidden = view !== "stages";
+  $("#timeline").hidden = view !== "timeline";
+}
+document.querySelectorAll("[data-wallview]").forEach((b) => b.addEventListener("click", () => {
+  if (state.rotating) toggleRotation(false);
+  setWallView(b.dataset.wallview);
+}));
+
+// ---------------------------------------------------------------------------
+// Live updates: the server announces every change; refresh within a moment
+// ---------------------------------------------------------------------------
+function connectLive() {
+  if (!window.EventSource || state.events) return;
+  const source = new EventSource("/api/events");
+  state.events = source;
+  source.addEventListener("version", (e) => {
+    $("#live").className = "live on";
+    $("#live").textContent = "Live";
+    const version = Number(e.data);
+    if (state.version !== null && version !== state.version) {
+      clearTimeout(state.liveTimer);
+      state.liveTimer = setTimeout(refreshVisible, 300);  // several saves in a row → one refresh
+    }
+    state.version = version;
+  });
+  source.onerror = () => {
+    $("#live").className = "live off";
+    $("#live").textContent = "Reconnecting…";
+  };
+}
+
+function refreshVisible() {
+  const view = (location.hash || "#wall").slice(1);
+  loadDashboard();
+  if (view === "manage") loadManage().catch(() => {});
+  if (state.openProject && $("#project-dialog").open) {
+    const tab = document.querySelector("[data-dtab].on")?.dataset.dtab;
+    openProject(state.openProject.id, tab).catch(() => {});
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Wall mode: cycle through every view; scroll long pages slowly
+// ---------------------------------------------------------------------------
+const ROTATION = [["wall", "cards"], ["wall", "stages"], ["wall", "timeline"], ["board", null]];
+const ROTATE_SECONDS = 30;
+
+function toggleRotation(on = !state.rotating) {
+  state.rotating = on;
+  storage("studio.rotate", on ? "1" : "0");
+  $("#rotate-btn").setAttribute("aria-pressed", String(on));
+  clearTimeout(state.rotateTimer);
+  cancelAnimationFrame(state.scrollFrame);
+  if (on) { state.rotateStep = -1; nextRotation(); }
+}
+
+function nextRotation() {
+  if (!state.rotating) return;
+  state.rotateStep = (state.rotateStep + 1) % ROTATION.length;
+  const [view, wallView] = ROTATION[state.rotateStep];
+  if (wallView) setWallView(wallView);
+  if (location.hash !== `#${view}`) location.hash = `#${view}`;
+  window.scrollTo(0, 0);
+  setTimeout(autoScroll, 2500);
+  state.rotateTimer = setTimeout(nextRotation, ROTATE_SECONDS * 1000);
+}
+
+function autoScroll() {
+  cancelAnimationFrame(state.scrollFrame);
+  const distance = document.documentElement.scrollHeight - window.innerHeight;
+  if (!state.rotating || distance <= 0) return;
+  const duration = (ROTATE_SECONDS - 5) * 1000, started = performance.now();
+  const stepFn = (now) => {
+    const t = Math.min(1, (now - started) / duration);
+    window.scrollTo(0, distance * t);
+    if (t < 1 && state.rotating) state.scrollFrame = requestAnimationFrame(stepFn);
+  };
+  state.scrollFrame = requestAnimationFrame(stepFn);
+}
+$("#rotate-btn").addEventListener("click", () => toggleRotation());
 
 function projectCard(p) {
   const current = p.phases.find((ph) => ph.progress < 100);
@@ -758,7 +1024,7 @@ document.addEventListener("change", async (e) => {
 });
 
 document.addEventListener("click", (e) => {
-  const card = e.target.closest(".project, .bcard, .attention-item");
+  const card = e.target.closest(".project, .bcard, .attention-item, .srow, .tl-row");
   if (card) openProject(card.dataset.project);
   if (e.target.closest("[data-close]")) $("#project-dialog").close();
   const edit = e.target.closest("[data-edit]");
@@ -769,20 +1035,20 @@ document.addEventListener("click", (e) => {
   }
 });
 document.addEventListener("keydown", (e) => {
-  const card = e.target.closest?.(".project, .bcard");
+  const card = e.target.closest?.(".project, .bcard, .srow, .tl-row");
   if (card && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openProject(card.dataset.project); }
 });
 $("#project-dialog").addEventListener("click", (e) => { if (e.target.id === "project-dialog") e.target.close(); });
-$("#search").addEventListener("input", () => { if (state.dashboard) { renderProjects(); renderBoard(); renderMail(state.dashboard.mail); } });
+$("#search").addEventListener("input", () => { if (state.dashboard) { renderProjectViews(); renderBoard(); renderMail(state.dashboard.mail); } });
 $("#board-person").addEventListener("change", renderBoard);
 document.querySelectorAll("[data-bfilter]").forEach((b) => b.addEventListener("click", () => {
   state.boardFilter = b.dataset.bfilter;
   document.querySelectorAll("[data-bfilter]").forEach((x) => x.classList.toggle("on", x === b));
   renderBoard();
 }));
-["#filter-lead", "#filter-health", "#sort-by"].forEach((sel) => $(sel).addEventListener("change", () => {
+["#filter-status", "#filter-lead", "#filter-health", "#sort-by"].forEach((sel) => $(sel).addEventListener("change", () => {
   storage(`studio.${sel}`, $(sel).value);
-  renderProjects();
+  renderProjectViews();
 }));
 
 // ---------------------------------------------------------------------------
@@ -1276,7 +1542,9 @@ async function authenticate() {
 async function init() {
   applyTheme(storage("studio.theme"));
   if (!(await authenticate())) return;
-  ["#filter-lead", "#filter-health", "#sort-by"].forEach((sel) => {
+  setWallView(["cards", "stages", "timeline"].includes(storage("studio.wallview")) ? storage("studio.wallview") : "cards");
+  connectLive();
+  ["#filter-status", "#filter-lead", "#filter-health", "#sort-by"].forEach((sel) => {
     const saved = storage(`studio.${sel}`);
     if (saved != null) $(sel).value = saved;
   });
@@ -1294,6 +1562,9 @@ async function init() {
   }
   window.addEventListener("hashchange", route);
   route();
+  // wall screens rotate through all views by default; anyone can switch it with ⟳
+  const rotate = storage("studio.rotate");
+  if (rotate === "1" || (rotate === null && state.user.display)) toggleRotation(true);
 }
 
 init().catch((err) => toast(err.message));

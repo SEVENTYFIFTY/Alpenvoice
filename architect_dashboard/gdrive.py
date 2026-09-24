@@ -124,6 +124,7 @@ def sync_source(source: dict) -> str:
                 conn.execute("UPDATE sync_sources SET name = ? WHERE id = ?", (meta["name"], source["id"]))
             result = "OK: " + report.summary()
             db.record_sync(conn, source["id"], result)
+            db.bump_version(conn)
         return result
     except Exception as exc:  # recorded so the UI can show what went wrong
         result = f"Error: {exc}"

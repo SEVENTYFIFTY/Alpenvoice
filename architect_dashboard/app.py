@@ -4,6 +4,7 @@ Run:  uvicorn architect_dashboard.app:app --host 0.0.0.0 --port 8000
 Open http://<server>:8000/: the first visit sets up the principal's account.
 """
 import re
+import asyncio
 from contextlib import asynccontextmanager
 from datetime import date
 from pathlib import Path
@@ -11,7 +12,8 @@ from typing import Optional
 from urllib.parse import quote
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
+from fastapi.concurrency import run_in_threadpool
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -85,7 +87,15 @@ async def access_control(request: Request, call_next):
     role = required_role(method, path)
     if auth.rank(user["access"]) < auth.rank(role):
         return JSONResponse({"detail": "You don't have permission to do that"}, status_code=403)
-    return await call_next(request)
+    response = await call_next(request)
+    if method not in SAFE_METHODS and response.status_code < 400 and not path.startswith("/api/auth/"):
+        await run_in_threadpool(_changed)
+    return response
+
+
+def _changed() -> None:
+    with db.connect() as conn:
+        db.bump_version(conn)
 
 
 def current_user(request: Request) -> dict:
@@ -815,3 +825,45 @@ def open_display(token: str):
             return RedirectResponse("/?display=invalid")
         session = auth.open_session(conn, display_id=link_id)
     return _set_session(RedirectResponse("/#wall"), session, days=auth.DISPLAY_SESSION_DAYS)
+
+
+# ---------------------------------------------------------------------------
+# Live updates (Server-Sent Events)
+# ---------------------------------------------------------------------------
+
+EVENT_POLL_SECONDS = 1.5
+KEEPALIVE_SECONDS = 25
+STREAM_MAX_SECONDS = 15 * 60  # then the browser reconnects by itself; frees stale connections
+
+
+def _version() -> int:
+    with db.connect() as conn:
+        return db.data_version(conn)
+
+
+@app.get("/api/version")
+def get_version():
+    return {"version": _version()}
+
+
+@app.get("/api/events")
+async def events(request: Request):
+    """Streams the data version whenever it changes; dashboards refresh when it does."""
+    async def stream():
+        last = await run_in_threadpool(_version)
+        yield f"retry: 5000\nevent: version\ndata: {last}\n\n"
+        quiet, deadline = 0.0, asyncio.get_running_loop().time() + STREAM_MAX_SECONDS
+        while asyncio.get_running_loop().time() < deadline and not await request.is_disconnected():
+            await asyncio.sleep(EVENT_POLL_SECONDS)
+            current = await run_in_threadpool(_version)
+            if current != last:
+                last, quiet = current, 0.0
+                yield f"event: version\ndata: {current}\n\n"
+            else:
+                quiet += EVENT_POLL_SECONDS
+                if quiet >= KEEPALIVE_SECONDS:  # keeps proxies from closing an idle connection
+                    quiet = 0.0
+                    yield ": keepalive\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})

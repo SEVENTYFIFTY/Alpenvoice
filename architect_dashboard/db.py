@@ -165,6 +165,13 @@ CREATE TABLE IF NOT EXISTS mail_threads (
 );
 CREATE INDEX IF NOT EXISTS idx_mail_project ON mail_threads(project_id);
 
+-- Counter bumped on every change; open dashboards watch it to refresh live.
+CREATE TABLE IF NOT EXISTS app_state (
+    key   TEXT PRIMARY KEY,
+    value INTEGER NOT NULL
+);
+INSERT OR IGNORE INTO app_state (key, value) VALUES ('data_version', 0);
+
 CREATE TABLE IF NOT EXISTS sync_sources (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     kind           TEXT NOT NULL DEFAULT 'gdrive',
@@ -780,3 +787,18 @@ def mail_threads(conn, project_id: int = None, awaiting_only: bool = False) -> l
         seen.add(key)
         result.append(row)
     return result
+
+
+# ---------------------------------------------------------------------------
+# Live updates
+# ---------------------------------------------------------------------------
+
+def data_version(conn) -> int:
+    row = conn.execute("SELECT value FROM app_state WHERE key = 'data_version'").fetchone()
+    return row["value"] if row else 0
+
+
+def bump_version(conn) -> None:
+    """Tell every open dashboard that something changed (stored in the database, so it
+    also works with several server processes)."""
+    conn.execute("UPDATE app_state SET value = value + 1 WHERE key = 'data_version'")

@@ -49,6 +49,8 @@
       <a href="#data" data-view="data" class="tab needs-member">Data &amp; sync</a>
     </nav>
     <div class="topbar-right">
+      <span class="live" id="live" title="Updates appear here as soon as anyone saves them">Connecting…</span>
+      <button class="icon-btn" id="rotate-btn" title="Wall mode: cycle through all views automatically" aria-pressed="false">⟳</button>
       <div class="clock" id="clock" aria-live="off"></div>
       <div class="muted small" id="last-refresh"></div>
       <button class="icon-btn" id="theme-btn" title="Toggle light / dark">◐</button>
@@ -74,8 +76,18 @@
     <div class="wall-grid">
       <section aria-label="Projects">
         <div class="section-head">
-          <h2>Projects</h2>
+          <div class="view-switch" role="tablist" aria-label="Dashboard view">
+            <button class="seg on" data-wallview="cards" role="tab">Cards</button>
+            <button class="seg" data-wallview="stages" role="tab">Stages</button>
+            <button class="seg" data-wallview="timeline" role="tab">Timeline</button>
+          </div>
           <div class="filters">
+            <select id="filter-status" aria-label="Which projects">
+              <option value="all">All projects</option>
+              <option value="active">Active</option>
+              <option value="on_hold">On hold</option>
+              <option value="completed">Completed</option>
+            </select>
             <select id="filter-lead" aria-label="Filter by lead architect"><option value="">All architects</option></select>
             <select id="filter-health" aria-label="Filter by status">
               <option value="">All statuses</option>
@@ -92,6 +104,8 @@
           </div>
         </div>
         <div class="projects" id="projects"></div>
+        <div class="stages-wrap" id="stages" hidden></div>
+        <div class="timeline" id="timeline" hidden></div>
       </section>
       <aside class="side">
         <section class="panel">
