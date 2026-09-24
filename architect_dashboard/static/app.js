@@ -774,7 +774,7 @@ function renderManageProject(p) {
       <label class="span-2">Google Drive folder <input name="drive_folder_id" value="${esc(p.drive_folder_id || "")}" placeholder="Paste folder link"></label>
       <div class="span-all actions">
         <button class="btn primary" type="submit">Save project</button>
-        ${p.phases.length ? "" : `<select id="apply-template">${Object.entries(state.meta.templates).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join("")}</select>
+        ${p.phases.length ? "" : `<select id="apply-template">${Object.entries(state.meta.templates).map(([k, v]) => `<option value="${k}" ${k === state.meta.default_template ? "selected" : ""}>${esc(v)}</option>`).join("")}</select>
           <button class="btn" type="button" id="apply-template-btn">Add standard phases</button>`}
         <button class="btn danger" type="button" id="delete-project">Delete project</button>
       </div>
@@ -1014,8 +1014,9 @@ async function init() {
   });
   tick(); setInterval(tick, 10000);
   state.meta = await api("/api/meta");
-  $("#template-select").innerHTML = `<option value="">No phases (add manually)</option>` +
-    Object.entries(state.meta.templates).map(([k, v]) => `<option value="${k}" ${k === "sia112" ? "selected" : ""}>${esc(v)}</option>`).join("");
+  $("#template-select").innerHTML = Object.entries(state.meta.templates).map(([k, v]) =>
+    `<option value="${k}" ${k === state.meta.default_template ? "selected" : ""}>${esc(v)}</option>`).join("") +
+    `<option value="none">No phases (add manually)</option>`;
   await loadMembers();
   window.addEventListener("hashchange", route);
   route();

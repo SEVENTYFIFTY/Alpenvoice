@@ -14,7 +14,7 @@ schedule, how much moved today, and where each drawing stands.
 | **People** | Client, consultant, authority and contractor contacts per project, each with a *notify on phase change* switch. Every team member keeps a one-line "what I'm working on" status that shows on the dashboard. |
 | **Wall dashboard** | One card per project. Each card shows overall % with the "plan today" marker, the change today and over 7 days, a phase strip, a 14-day trend, drawing stages and the deadline countdown. It refreshes itself every 60 s. Filter by architect and sort by "needs attention first". |
 | **Schedule health** | Each phase is *On track*, *At risk* (more than 10 points behind its planned dates) or *Overdue*. A project takes the status of its most serious phase. |
-| **Phases** | SIA 112 phases (21 Preliminary studies → 53 Handover) or an international (AIA-style) sequence, created automatically. Phases are weighted, so Construction project counts more than Building permit. Weights, names and dates can all be edited. |
+| **Phases** | New projects get the studio's stages by default: Inquiry (5) → Concept (10) → Schematic design (15) → Design development (20) → Construction documents (25) → Permitting (10) → Construction administration (10) → Closeout (5). The number is each phase's weight in the overall %. The SIA 112 and international (AIA-style) sequences are also available. Set `DEFAULT_PHASE_TEMPLATE` to change the default. Weights, names and dates can all be edited. |
 | **Drawings** | A drawing register per project. Each drawing moves through Draft → In progress → In review → Approved → Issued, and has a revision, a scale, an owner and a due date. |
 | **Daily updates** | Team members open *Update progress*, pick their name, move a slider and optionally write a note ("Facade details sent to engineer"). Every change is logged, which feeds the daily deltas, trends and the *Latest updates* feed. |
 | **Excel** | Download the template, fill in the Team, Projects, Phases, Milestones, Drawings and Contacts sheets, then upload it. Rows are matched by project code, phase name and drawing number, so re-uploading updates instead of duplicating. *Export everything* produces the same format plus a Summary sheet. |
@@ -35,7 +35,7 @@ uvicorn architect_dashboard.app:app --host 0.0.0.0 --port 8000
 - API docs: `http://<server>:8000/docs`
 
 Settings are read from environment variables or `.env` (see `.env.example`): `OFFICE_NAME`,
-`STUDIO_DB_PATH`, `DASHBOARD_REFRESH_SECONDS`, `AT_RISK_TOLERANCE`, `GOOGLE_SERVICE_ACCOUNT_FILE`,
+`STUDIO_DB_PATH`, `DEFAULT_PHASE_TEMPLATE`, `DASHBOARD_REFRESH_SECONDS`, `AT_RISK_TOLERANCE`, `GOOGLE_SERVICE_ACCOUNT_FILE`,
 `GDRIVE_SYNC_MINUTES`.
 
 ## Connecting Google Drive

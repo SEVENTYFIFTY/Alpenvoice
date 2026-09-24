@@ -441,3 +441,15 @@ def test_api_milestones_and_member_status(client):
     client.patch(f"/api/members/{member}", json={"status": "Concept studies · Ribeira"})
     team = client.get("/api/dashboard").json()["team"]
     assert team[0]["status"] == "Concept studies · Ribeira"
+
+
+def test_new_projects_get_the_default_atelier_phases(client):
+    project_id = client.post("/api/projects", json={"code": "CS-002", "name": "Casa do Sado"}).json()["id"]
+    phases = client.get(f"/api/projects/{project_id}").json()["phases"]
+    assert [p["name"] for p in phases] == ["Inquiry", "Concept", "Schematic design", "Design development",
+                                           "Construction documents", "Permitting",
+                                           "Construction administration", "Closeout"]
+    assert sum(p["weight"] for p in phases) == 100
+    bare = client.post("/api/projects", json={"code": "CS-003", "name": "Bare", "template": "none"}).json()["id"]
+    assert client.get(f"/api/projects/{bare}").json()["phases"] == []
+    assert client.get("/api/meta").json()["default_template"] == "atelier"

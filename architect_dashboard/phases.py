@@ -5,6 +5,18 @@ They are normalised when computed, so they don't have to sum to 100, and every
 project can edit its own weights after the template is applied.
 """
 
+# The studio's own stages, from first enquiry to closeout (the default).
+ATELIER = [
+    {"code": "INQ", "name": "Inquiry", "weight": 5},
+    {"code": "CON", "name": "Concept", "weight": 10},
+    {"code": "SD", "name": "Schematic design", "weight": 15},
+    {"code": "DD", "name": "Design development", "weight": 20},
+    {"code": "CD", "name": "Construction documents", "weight": 25},
+    {"code": "PER", "name": "Permitting", "weight": 10},
+    {"code": "CA", "name": "Construction administration", "weight": 10},
+    {"code": "CLO", "name": "Closeout", "weight": 5},
+]
+
 # SIA 112 phases (Switzerland). Weights follow the typical SIA 102 fee shares.
 SIA_112 = [
     {"code": "21", "name": "Preliminary studies", "weight": 3},
@@ -29,6 +41,7 @@ INTERNATIONAL = [
 ]
 
 TEMPLATES = {
+    "atelier": {"label": "Atelier (Inquiry → Closeout)", "phases": ATELIER},
     "sia112": {"label": "SIA 112 (Switzerland)", "phases": SIA_112},
     "international": {"label": "International (AIA-style)", "phases": INTERNATIONAL},
 }

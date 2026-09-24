@@ -237,7 +237,13 @@ def project_id_by_code(conn, code: str) -> Optional[int]:
     return row["id"] if row else None
 
 
+DEFAULT = "default"  # create_project(template=DEFAULT) uses config.DEFAULT_PHASE_TEMPLATE
+
+
 def create_project(conn, data: dict, template: Optional[str] = None) -> int:
+    """template: a key of TEMPLATES, DEFAULT for the office default, or None for no phases."""
+    if template == DEFAULT:
+        template = config.DEFAULT_PHASE_TEMPLATE
     values = {k: data.get(k) for k in PROJECT_FIELDS}
     values["status"] = values["status"] or "active"
     cols = ", ".join(values)

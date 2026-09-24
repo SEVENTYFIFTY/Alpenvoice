@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import db, excel_io, gdrive, notify, progress
+from . import config, db, excel_io, gdrive, notify, progress
 from .phases import DRAWING_STAGES, PHASE_STATUSES, PROJECT_STATUSES, TEMPLATES
 
 STATIC = Path(__file__).parent / "static"
@@ -158,6 +158,7 @@ def get_dashboard():
 def get_meta():
     return {
         "templates": {k: v["label"] for k, v in TEMPLATES.items()},
+        "default_template": config.DEFAULT_PHASE_TEMPLATE,
         "drawing_stages": DRAWING_STAGES,
         "phase_statuses": PHASE_STATUSES,
         "project_statuses": PROJECT_STATUSES,
@@ -204,10 +205,14 @@ def get_projects(include_archived: bool = False):
 @app.post("/api/projects", status_code=201)
 def add_project(body: ProjectIn):
     data = _fields(body)
-    template = data.pop("template", None)
+    # no template given -> the office default; "none" (or empty) -> start without phases
+    template = data.pop("template", db.DEFAULT)
+    if template in ("none", "", None):
+        template = None
     if not data.get("code") or not data.get("name"):
         raise HTTPException(422, "Project code and name are required")
-    _check(template, TEMPLATES, "template")
+    if template != db.DEFAULT:
+        _check(template, TEMPLATES, "template")
     _check(data.get("status"), PROJECT_STATUSES, "status")
     if data.get("drive_folder_id"):
         data["drive_folder_id"] = _drive_id(data["drive_folder_id"])

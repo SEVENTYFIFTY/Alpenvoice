@@ -6,6 +6,9 @@ load_dotenv()
 OFFICE_NAME = os.getenv("OFFICE_NAME", "Studio")
 DB_PATH = os.getenv("STUDIO_DB_PATH", "studio.db")
 
+# Phases given to new projects unless another template is chosen: atelier | sia112 | international
+DEFAULT_PHASE_TEMPLATE = os.getenv("DEFAULT_PHASE_TEMPLATE", "atelier")
+
 # How often the wall dashboard refreshes itself (seconds)
 DASHBOARD_REFRESH_SECONDS = int(os.getenv("DASHBOARD_REFRESH_SECONDS", "60"))
 

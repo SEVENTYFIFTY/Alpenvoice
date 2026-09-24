@@ -26,16 +26,16 @@ BLOCKERS = {
     "23-021": "Heritage office: window replacement not approved yet",
 }
 
-# Typical checklist for each SIA phase
+# Typical checklist for each phase of the default (Atelier) template
 MILESTONES = {
-    "21": ["Brief agreed", "Site analysis", "Feasibility study"],
-    "31": ["Massing options", "Client workshop", "Preliminary design booklet", "Cost estimate ±25%"],
-    "32": ["Plans 1:100 set", "Consultant coordination", "Cost estimate ±10%", "Client sign-off"],
-    "33": ["Permit submission", "Authority comments answered", "Permit granted"],
-    "41": ["Tender documents", "Tenders received", "Tender comparison", "Contracts awarded"],
-    "51": ["Detail drawings 1:20", "Consultant plans coordinated", "Construction schedule"],
-    "52": ["Site start", "Shell complete", "Weathertight", "Fit-out", "Snagging"],
-    "53": ["Handover inspection", "As-built documents", "Final account"],
+    "INQ": ["Intro call", "Site visit", "Fee proposal", "Appointment signed"],
+    "CON": ["Site analysis", "Massing options", "Client workshop"],
+    "SD": ["Brief locked", "Schematic booklet", "Cost check"],
+    "DD": ["Consultant kickoff", "DD plan set", "Outline spec", "Client DD review"],
+    "CD": ["CD 50%", "Door & window schedules", "Spec book", "Issue for tender"],
+    "PER": ["Submit permit package", "Authority comments answered", "Permit granted"],
+    "CA": ["Site start", "Weekly RFI log", "Shell complete", "Fit-out", "Snagging"],
+    "CLO": ["Handover inspection", "As-built documents", "Final account"],
 }
 
 # code, name, client, location, lead, months since start, months total, how far along (0-1)
@@ -46,6 +46,7 @@ PROJECTS = [
     ("25-006", "Office Refurbishment Enge", "Enge Offices SA", "Zürich", "Luca Moretti", 5, 10, 0.55),
     ("25-013", "Mixed-use Bahnhofplatz", "SBB Immobilien", "Winterthur", "Sofia Brunner", 3, 36, 0.08),
     ("23-021", "Chalet Renovation Arosa", "Private client", "Arosa", "Noah Graf", 28, 26, 0.93),
+    ("26-001", "Haus am See", "Private client", "Meilen", "Anna Keller", 0.3, 18, 0.02),
 ]
 
 DRAWINGS = [
@@ -88,7 +89,7 @@ def seed(reset: bool = False) -> None:
                 "code": code, "name": name, "client": client, "location": location,
                 "lead_id": members[lead], "start_date": start.isoformat(),
                 "due_date": _month(start, total).isoformat(),
-            }, template="sia112")
+            }, template=db.DEFAULT)
 
             phases = db.list_phases(conn, project_id)
             weight_total = sum(p["weight"] for p in phases)
@@ -114,6 +115,8 @@ def seed(reset: bool = False) -> None:
                 db.update_project(conn, project_id, {"blocker": BLOCKERS[code]})
 
             phase_by_code = {p["code"]: p["id"] for p in phases}
+            if done < 0.05:
+                continue  # still an enquiry: no drawings yet
             for number, title, discipline, scale in DRAWINGS:
                 if done < 0.1 and number in ("A-500", "A-510", "S-100", "M-100"):
                     continue
@@ -123,7 +126,7 @@ def seed(reset: bool = False) -> None:
                 db.upsert_drawing(conn, project_id, {
                     "number": number, "title": title, "discipline": discipline, "scale": scale,
                     "revision": rng.choice(["A", "B", "C"]), "stage": stage,
-                    "phase_id": phase_by_code.get("51" if scale in ("1:20", "1:5") else "32"),
+                    "phase_id": phase_by_code.get("CD" if scale in ("1:20", "1:5") else "DD"),
                     "assignee_id": rng.choice(staff),
                     "due_date": (today + timedelta(days=rng.randint(-5, 40))).isoformat(),
                 }, source="seed")

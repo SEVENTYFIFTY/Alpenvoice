@@ -182,8 +182,10 @@ def import_workbook(conn, data: bytes, source: str = "excel") -> ImportReport:
         else:
             if not name:
                 raise ValueError("missing Name for new project")
-            template = _slug(row.get("template"))
-            if template and template not in TEMPLATES:
+            template = _slug(row.get("template")) or db.DEFAULT
+            if template == "none":
+                template = None
+            elif template != db.DEFAULT and template not in TEMPLATES:
                 raise ValueError(f"unknown template '{template}'")
             blocker = data.pop("blocker")
             project_id = db.create_project(conn, data, template=template)
@@ -358,8 +360,8 @@ def _write_help(ws) -> None:
     lines = [
         ["How to fill this workbook"],
         ["Team: one row per person. Names are how Lead / Assignee columns are matched."],
-        ["Projects: Code is the unique key. Template (optional, new projects only): "
-         + ", ".join(TEMPLATES) + " — creates the standard phases automatically."],
+        ["Projects: Code is the unique key. Template (new projects only): " + ", ".join(TEMPLATES)
+         + " or none. Left empty, new projects get the office's default phases."],
         ["Phases: Project = project Code. Progress is a % cell or a number from 0–100 (values up to 1 are read as fractions: 0.5 = 50%). Dates as YYYY-MM-DD or DD.MM.YYYY."],
         ["Milestones: checklist items per phase (Project, Phase name or code, Milestone, Due, Done yes/no). "
          "When a phase has milestones, its progress = share of milestones done."],
