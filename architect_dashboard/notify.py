@@ -12,13 +12,12 @@ def phase_change_email(project: dict, phase: dict, contacts: list[dict], sender:
     recipients = [c for c in contacts if c["notify"] and c.get("email")]
     first_names = [c["name"].split()[0] for c in recipients]
     greeting = f"Dear {', '.join(first_names)}," if first_names else "Hello,"
-    phase_label = f"{phase['code']} {phase['name']}" if phase.get("code") else phase["name"]
     subject = f"{project['code']} {project['name']}: now in {phase['name']}"
     signature = sender["name"] if sender else config.OFFICE_NAME
     body = (
         f"{greeting}\n\n"
         f"A quick update on {project['name']}: we have completed the previous stage and the project "
-        f"has now moved into the {phase_label} phase.\n\n"
+        f"has now moved into the {phase['name']} phase.\n\n"
         f"We will be in touch about the next steps and anything we need from you.\n\n"
         f"Kind regards,\n{signature}\n{config.OFFICE_NAME}"
     )

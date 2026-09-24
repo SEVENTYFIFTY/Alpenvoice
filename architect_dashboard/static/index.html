@@ -54,6 +54,10 @@
       </section>
       <aside class="side">
         <section class="panel">
+          <h2>Waiting on us · mail</h2>
+          <ul class="mail-list" id="mail"></ul>
+        </section>
+        <section class="panel">
           <h2>Needs attention</h2>
           <ul class="attention-list" id="attention"></ul>
         </section>
@@ -166,6 +170,21 @@
         <ul class="sources" id="gdrive-sources"></ul>
         <button class="btn primary" id="gdrive-sync">Sync now</button>
         <p id="gdrive-result" class="result" role="status"></p>
+      </section>
+
+      <section class="card">
+        <h2>Gmail</h2>
+        <p class="muted" id="gmail-state"></p>
+        <p class="muted">Each person connects their own mailbox. Atelier then shows threads with each project's
+          clients and consultants, flags the ones waiting on a reply, and saves phase-change emails as drafts in your
+          Gmail. It reads sender, subject and date only, never message text, and it never sends anything itself.</p>
+        <div class="inline-form" id="gmail-connect-row">
+          <select id="gmail-member" aria-label="Team member"></select>
+          <button class="btn primary" id="gmail-connect">Connect my Gmail</button>
+        </div>
+        <ul class="sources" id="gmail-accounts"></ul>
+        <button class="btn" id="gmail-sync">Sync mail now</button>
+        <p id="gmail-result" class="result" role="status"></p>
       </section>
 
       <section class="card">

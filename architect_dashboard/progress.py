@@ -93,6 +93,7 @@ def project_summary(conn, project: dict, today: date) -> dict:
     drawings = db.list_drawings(conn, project["id"])
     log = db.phase_log(conn, project["id"])
     milestones = db.list_milestones(conn, project["id"])
+    mail_waiting = len(db.mail_threads(conn, project["id"], awaiting_only=True))
     for phase in phases:
         own = [m for m in milestones if m["phase_id"] == phase["id"]]
         phase["milestones_total"] = len(own)
@@ -138,7 +139,8 @@ def project_summary(conn, project: dict, today: date) -> dict:
         "current_phase_id": current["id"] if current else None,
         "next_milestones": [{"id": m["id"], "title": m["title"], "due_date": m["due_date"]} for m in upcoming[:3]],
         "team_ids": team_ids,
-        "needs_attention": health in ("at_risk", "overdue") or bool(project["blocker"]),
+        "mail_waiting": mail_waiting,
+        "needs_attention": health in ("at_risk", "overdue") or bool(project["blocker"]) or mail_waiting > 0,
         "phases": phases,
         "drawings": drawing_stats(drawings, today),
         "history": daily_history(phases, log, today),
@@ -186,6 +188,7 @@ def dashboard(conn, today: Optional[date] = None) -> dict:
             "average_progress": round(sum(p["progress"] for p in active) / len(active), 1) if active else 0,
             "moved_today": sum(1 for p in active if p["delta_today"] > 0),
             "blocked": sum(1 for p in active if p["blocker"]),
+            "mail_waiting": sum(p["mail_waiting"] for p in active),
             "points_today": round(sum(p["delta_today"] for p in active), 1),
             "health": counts,
             "drawings_open": sum(p["drawings"]["total"] - p["drawings"]["by_stage"]["issued"] for p in active),

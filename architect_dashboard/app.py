@@ -7,13 +7,14 @@ from contextlib import asynccontextmanager
 from datetime import date
 from pathlib import Path
 from typing import Optional
+from urllib.parse import quote
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import config, db, excel_io, gdrive, notify, progress
+from . import config, db, excel_io, gdrive, gmail, notify, progress
 from .phases import DRAWING_STAGES, PHASE_STATUSES, PROJECT_STATUSES, TEMPLATES
 
 STATIC = Path(__file__).parent / "static"
@@ -24,6 +25,7 @@ XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 async def lifespan(_app):
     db.init_db()
     gdrive.start_background_sync()
+    gmail.start_background_sync()
     yield
 
 
@@ -95,6 +97,7 @@ class DrawingIn(BaseModel):
 class MoveIn(BaseModel):
     phase_name: Optional[str] = None  # None = mark the project complete
     member_id: Optional[int] = None
+    create_draft: bool = False        # also save the notification as a draft in the mover's Gmail
 
 
 class MilestoneIn(BaseModel):
@@ -151,7 +154,9 @@ def index():
 @app.get("/api/dashboard")
 def get_dashboard():
     with db.connect() as conn:
-        return progress.dashboard(conn)
+        data = progress.dashboard(conn)
+        data["mail"] = [_mail_row(t) for t in db.mail_threads(conn, awaiting_only=True)]
+        return data
 
 
 @app.get("/api/meta")
@@ -164,6 +169,7 @@ def get_meta():
         "project_statuses": PROJECT_STATUSES,
         "contact_kinds": db.CONTACT_KINDS,
         "gdrive_configured": gdrive.is_configured(),
+        "gmail_configured": gmail.is_configured(),
     }
 
 
@@ -230,6 +236,7 @@ def get_project(project_id: int):
         summary["drawing_list"] = db.list_drawings(conn, project_id)
         summary["milestones"] = db.list_milestones(conn, project_id)
         summary["contacts"] = db.list_contacts(conn, project_id)
+        summary["mail"] = [_mail_row(t) for t in db.mail_threads(conn, project_id)]
         return summary
 
 
@@ -279,7 +286,15 @@ def move_project(project_id: int, body: MoveIn):
         contacts = db.list_contacts(conn, project_id)
         sender = db.get_member(conn, body.member_id) if body.member_id else None
         email = notify.phase_change_email(project, target, contacts, sender)
-        return {"changes": changes, "email": email if email["to"] else None}
+    if not email["to"]:
+        return {"changes": changes, "email": None}
+    if body.create_draft and body.member_id:
+        # outside the transaction above: the move is saved even if Gmail is unreachable
+        try:
+            email["gmail_draft"] = gmail.create_draft(body.member_id, email["to"], email["subject"], email["body"])
+        except gmail.GmailError as exc:
+            email["draft_error"] = str(exc)
+    return {"changes": changes, "email": email}
 
 
 # ---------------------------------------------------------------------------
@@ -502,3 +517,64 @@ def project_drive_files(project_id: int):
         return {"files": gdrive.list_folder(project["drive_folder_id"])}
     except gdrive.DriveError as exc:
         raise HTTPException(502, str(exc))
+
+
+# ---------------------------------------------------------------------------
+# Gmail
+# ---------------------------------------------------------------------------
+
+def _mail_row(t: dict) -> dict:
+    return {
+        "project_id": t["project_id"], "project_code": t["project_code"], "project_name": t["project_name"],
+        "subject": t["subject"], "from_name": t["from_name"], "from_email": t["from_email"],
+        "last_message_at": t["last_message_at"], "message_count": t["message_count"],
+        "awaiting_reply": bool(t["awaiting_reply"]), "mailbox_owner": t["mailbox_owner"],
+        "url": gmail.thread_url(t["mailbox"], t["thread_id"]),
+    }
+
+
+@app.get("/api/gmail/status")
+def gmail_status():
+    with db.connect() as conn:
+        accounts = db.list_gmail_accounts(conn)
+    return {
+        "configured": gmail.is_configured(),
+        "missing": gmail.missing_settings(),
+        "redirect_uri": gmail.redirect_uri(),
+        "accounts": accounts,
+    }
+
+
+@app.get("/api/gmail/connect", include_in_schema=False)
+def gmail_connect(member_id: int):
+    with db.connect() as conn:
+        member = _require(db.get_member(conn, member_id), "Team member not found")
+    try:
+        return RedirectResponse(gmail.authorization_url(member_id, login_hint=member["email"]))
+    except gmail.GmailError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.get("/api/gmail/callback", include_in_schema=False)
+def gmail_callback(code: Optional[str] = None, state: Optional[str] = None, error: Optional[str] = None):
+    if error or not code or not state:
+        return RedirectResponse("/?gmail=cancelled#data")
+    try:
+        account = gmail.complete_connection(code, state)
+    except gmail.GmailError as exc:
+        return RedirectResponse(f"/?gmail_error={quote(str(exc))}#data")
+    gmail.sync_account(account["member_id"])
+    return RedirectResponse("/?gmail=connected#data")
+
+
+@app.post("/api/gmail/sync")
+def gmail_sync():
+    if not gmail.is_configured():
+        raise HTTPException(400, "Gmail is not configured. Missing: " + ", ".join(gmail.missing_settings()))
+    return {"results": gmail.sync_all()}
+
+
+@app.delete("/api/gmail/accounts/{member_id}")
+def gmail_disconnect(member_id: int):
+    gmail.disconnect(member_id)
+    return {"ok": True}

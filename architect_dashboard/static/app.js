@@ -8,6 +8,7 @@ const state = {
   manageProjectId: null,
   timer: null,
   boardFilter: "all",
+  gmail: { configured: false, accounts: [] },
   dragId: null,
 };
 
@@ -136,10 +137,30 @@ function renderWall() {
   renderKpis(d.kpis);
   renderFilters(d.projects);
   renderProjects();
+  renderMail(d.mail);
   renderAttention(d.projects);
   renderActivity(d.activity);
   renderTeam(d.team);
   renderBoard();
+}
+
+function waitingFor(iso) {
+  const hours = (Date.now() - new Date(iso).getTime()) / 3600000;
+  return hours < 24 ? `${Math.max(1, Math.round(hours))}h` : `${Math.round(hours / 24)}d`;
+}
+
+function renderMail(mail) {
+  const root = $("#mail");
+  if (!state.gmail.configured || !state.gmail.accounts.length) {
+    root.innerHTML = `<li class="muted small" style="padding:4px 0">Connect Gmail under <a href="#data">Data &amp; sync</a> to see client and consultant emails waiting on a reply.</li>`;
+    return;
+  }
+  const visible = mail.filter((m) => matchesSearch(state.dashboard.projects.find((p) => p.id === m.project_id) || {}));
+  root.innerHTML = visible.length ? visible.map((m) => `<li><a href="${esc(m.url)}" target="_blank" rel="noopener">
+      <div class="from">${esc(m.from_name)}</div>
+      <div class="subj">${esc(m.subject)}</div>
+      <div class="meta"><span class="code">${esc(m.project_code)}</span> · <span class="wait">waiting ${waitingFor(m.last_message_at)}</span> · in ${esc(m.mailbox_owner)}'s inbox</div>
+    </a></li>`).join("") : `<li class="muted small" style="padding:4px 0">Inbox clear: nobody is waiting on a reply.</li>`;
 }
 
 function renderAttention(projects) {
@@ -151,6 +172,7 @@ function renderAttention(projects) {
       why.push(`<div class="blocker">${esc(p.blocker)}</div>`);
       if (p.blocker_since) why.push(`<div class="why">Blocked since ${timeAgo(p.blocker_since)}</div>`);
     }
+    if (p.mail_waiting) why.push(`<div class="why"><span class="mail-flag">✉ ${p.mail_waiting}</span> email${p.mail_waiting > 1 ? "s" : ""} waiting on a reply</div>`);
     if (p.health === "overdue" || p.health === "at_risk") {
       const late = p.phases.filter((ph) => ph.health === p.health).map((ph) => ph.name).join(", ");
       why.push(`<div class="why">${badge(p.health)} ${esc(late || (p.days_left < 0 ? "Past the deadline" : "Behind schedule"))}</div>`);
@@ -242,7 +264,7 @@ function projectCard(p) {
         <div class="project-name">${esc(p.name)}</div>
         <div class="project-meta">${esc([p.client, p.location].filter(Boolean).join(" · "))}${p.lead_name ? ` · <b>${esc(p.lead_name)}</b>` : ""}</div>
       </div>
-      ${badge(p.health)}
+      <div style="display:flex;gap:8px;align-items:center">${p.mail_waiting ? `<span class="mail-flag" title="${p.mail_waiting} email(s) waiting on a reply">✉ ${p.mail_waiting}</span>` : ""}${badge(p.health)}</div>
     </div>
     ${p.blocker ? `<div class="blocker">${esc(p.blocker)}</div>` : ""}
     <div class="progress-row">
@@ -402,7 +424,7 @@ function boardCard(p) {
     ${p.blocker ? `<div class="blocker">${esc(p.blocker)}</div>` : ""}
     <div class="foot">
       <div class="avatars">${team.slice(0, 4).map((m) => avatar(m.id, m.name)).join("")}${team.length > 4 ? `<span class="more">+${team.length - 4}</span>` : ""}</div>
-      <div class="flags">${p.health === "overdue" || p.health === "at_risk" ? badge(p.health) : ""}</div>
+      <div class="flags">${p.mail_waiting ? `<span class="mail-flag" title="${p.mail_waiting} email(s) waiting on a reply">✉ ${p.mail_waiting}</span>` : ""}${p.health === "overdue" || p.health === "at_risk" ? badge(p.health) : ""}</div>
     </div>
   </article>`;
 }
@@ -475,7 +497,7 @@ async function confirmMove(project, phaseName) {
       <div class="actions">
         <button class="btn" data-close-modal>Cancel</button>
         ${phaseName && notify.length ? `<button class="btn" data-do-move="${esc(phaseName)}" data-email="0">Move, don't email</button>
-          <button class="btn primary" data-do-move="${esc(phaseName)}" data-email="1">Move + email draft</button>`
+          <button class="btn primary" data-do-move="${esc(phaseName)}" data-email="1">${myGmail() ? "Move + Gmail draft" : "Move + email draft"}</button>`
         : `<button class="btn primary" data-do-move="${esc(phaseName ?? "")}" data-complete="${phaseName === null}" data-email="0">Move</button>`}
       </div>
     </div>`);
@@ -488,7 +510,11 @@ async function doMove(btn) {
   btn.disabled = true;
   try {
     const res = await api(`/api/projects/${project.id}/move`, {
-      method: "POST", body: { phase_name: phaseName, member_id: Number(storage("studio.me")) || null },
+      method: "POST",
+      body: {
+        phase_name: phaseName, member_id: Number(storage("studio.me")) || null,
+        create_draft: btn.dataset.email === "1" && Boolean(myGmail()),
+      },
     });
     await loadDashboard();
     if (btn.dataset.email === "1" && res.email) {
@@ -503,14 +529,23 @@ async function doMove(btn) {
   }
 }
 
+function myGmail() {
+  const me = Number(storage("studio.me"));
+  return state.gmail.accounts.find((a) => a.member_id === me) || null;
+}
+
 function showDraft(project, email) {
+  const saved = email.gmail_draft;
   openModal(`
     <div class="dialog-head"><div>
       <div class="project-code">${esc(project.code)} moved ✓</div>
-      <h2 id="modal-title">Email draft</h2></div>
+      <h2 id="modal-title">${saved ? "Draft saved in Gmail" : "Email draft"}</h2></div>
       <button class="icon-btn" data-close-modal aria-label="Close">✕</button></div>
     <div class="dialog-content">
-      <p>Nothing has been sent. Open the draft, check it, and send it yourself.</p>
+      <p>${saved
+        ? `It's in the Drafts folder of <b>${esc(saved.mailbox)}</b>. Nothing has been sent: open it, check it and press send.`
+        : "Nothing has been sent. Open the draft, check it, and send it yourself."}</p>
+      ${email.draft_error ? `<p class="blocker">Couldn't save to Gmail: ${esc(email.draft_error)}</p>` : ""}
       <div class="draft">
         <div class="row"><b>To</b><span>${email.to.map((t) => `${esc(t.name)} &lt;${esc(t.email)}&gt;`).join(", ")}</span></div>
         <div class="row"><b>Subject</b><span>${esc(email.subject)}</span></div>
@@ -518,8 +553,10 @@ function showDraft(project, email) {
       </div>
       <div class="actions">
         <button class="btn" data-copy-draft>Copy text</button>
-        <a class="btn" href="${esc(email.mailto_url)}">Open in mail app</a>
-        <a class="btn primary" href="${esc(email.gmail_url)}" target="_blank" rel="noopener">Open in Gmail</a>
+        ${saved
+          ? `<a class="btn primary" href="${esc(saved.url)}" target="_blank" rel="noopener">Open draft in Gmail</a>`
+          : `<a class="btn" href="${esc(email.mailto_url)}">Open in mail app</a>
+             <a class="btn primary" href="${esc(email.gmail_url)}" target="_blank" rel="noopener">Open in Gmail</a>`}
       </div>
     </div>`);
   state.draft = email;
@@ -534,7 +571,9 @@ async function openProject(id, tab = "overview") {
   }
   const p = await api(`/api/projects/${id}`);
   state.openProject = p;
+  const waiting = p.mail.filter((m) => m.awaiting_reply).length;
   const tabs = [["overview", "Overview"], ["milestones", `Milestones`], ["people", `People (${p.contacts.length})`],
+    ["mail", `Mail${waiting ? ` (${waiting} waiting)` : ""}`],
     ["drawings", `Drawings (${p.drawing_list.length})`], ["drive", "Drive"]];
   $("#dialog-body").innerHTML = `
     <div class="dialog-head">
@@ -553,6 +592,7 @@ async function openProject(id, tab = "overview") {
       <div data-pane="overview" ${tab === "overview" ? "" : "hidden"}>${overviewPane(p)}</div>
       <div data-pane="milestones" ${tab === "milestones" ? "" : "hidden"}>${milestonesPane(p)}</div>
       <div data-pane="people" ${tab === "people" ? "" : "hidden"}>${peoplePane(p)}</div>
+      <div data-pane="mail" ${tab === "mail" ? "" : "hidden"}>${mailPane(p)}</div>
       <div data-pane="drawings" ${tab === "drawings" ? "" : "hidden"}>${drawingsPane(p)}</div>
       <div data-pane="drive" ${tab === "drive" ? "" : "hidden"}><div id="drive-files" class="muted small">Loading…</div></div>
     </div>`;
@@ -634,6 +674,23 @@ function peoplePane(p) {
     <p class="muted small" style="margin-top:14px">Internal: ${internal.map(esc).join(", ") || "–"}</p>`;
 }
 
+function mailPane(p) {
+  if (!state.gmail.accounts.length) {
+    return `<p class="muted">Connect Gmail under <a href="#data">Data &amp; sync</a> to see this project's emails here.</p>`;
+  }
+  if (!p.mail.length) {
+    return `<p class="muted">No emails with this project's contacts in the last few weeks.
+      Threads show up here when a contact under People has an email address.</p>`;
+  }
+  return p.mail.map((m) => `<div class="thread">
+      <a href="${esc(m.url)}" target="_blank" rel="noopener"><b>${esc(m.subject)}</b>
+        <small>${esc(m.from_name)} · ${m.message_count} message${m.message_count > 1 ? "s" : ""} · in ${esc(m.mailbox_owner)}'s inbox</small></a>
+      <span class="state">${m.awaiting_reply
+        ? `<span class="mail-flag">waiting ${waitingFor(m.last_message_at)}</span>`
+        : `<span class="muted">answered · ${timeAgo(m.last_message_at)}</span>`}</span>
+    </div>`).join("");
+}
+
 function drawingsPane(p) {
   return `<div class="table-wrap"><table class="edit-table">
     <thead><tr><th>No.</th><th>Title</th><th>Phase</th><th>Scale</th><th>Rev</th><th>Stage</th><th>Responsible</th><th>Due</th></tr></thead>
@@ -712,7 +769,7 @@ document.addEventListener("keydown", (e) => {
   if (card && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openProject(card.dataset.project); }
 });
 $("#project-dialog").addEventListener("click", (e) => { if (e.target.id === "project-dialog") e.target.close(); });
-$("#search").addEventListener("input", () => { if (state.dashboard) { renderProjects(); renderBoard(); } });
+$("#search").addEventListener("input", () => { if (state.dashboard) { renderProjects(); renderBoard(); renderMail(state.dashboard.mail); } });
 $("#board-person").addEventListener("change", renderBoard);
 document.querySelectorAll("[data-bfilter]").forEach((b) => b.addEventListener("click", () => {
   state.boardFilter = b.dataset.bfilter;
@@ -945,10 +1002,59 @@ $("#cancel-new-project").addEventListener("click", () => { $("#new-project").hid
 // ---------------------------------------------------------------------------
 // data & sync view
 // ---------------------------------------------------------------------------
+async function loadGmail() {
+  state.gmail = await api("/api/gmail/status");
+  return state.gmail;
+}
+
+// connection state for integrations (not a schedule status, so no status colours)
+function connChip(ok, label) {
+  return `<span class="chip ${ok ? "client" : ""}">${ok ? "● " : "○ "}${esc(label)}</span>`;
+}
+
+function renderGmail() {
+  const g = state.gmail;
+  $("#gmail-state").innerHTML = g.configured
+    ? `${connChip(true, "Set up")} ${g.accounts.length} mailbox${g.accounts.length === 1 ? "" : "es"} connected.`
+    : `${connChip(false, "Not set up")} The server needs ${g.missing.map((m) => `<code>${esc(m)}</code>`).join(", ")}
+       (see README), and <code>${esc(g.redirect_uri)}</code> as an authorised redirect URI in Google Cloud.`;
+  $("#gmail-connect-row").hidden = !g.configured;
+  $("#gmail-sync").hidden = !g.accounts.length;
+  const me = Number(storage("studio.me")) || null;
+  $("#gmail-member").innerHTML = memberOptions(me, "— who are you? —");
+  $("#gmail-accounts").innerHTML = g.accounts.map((a) => `<li>
+      <span><b>${esc(a.member_name)}</b> · ${esc(a.email)}<br>
+        <span class="muted">${a.last_synced_at ? `Synced ${timeAgo(a.last_synced_at)}: ${esc(a.last_result || "")}` : "Not synced yet"}</span></span>
+      <button class="btn small danger" data-gmail-disconnect="${a.member_id}">Disconnect</button></li>`).join("");
+}
+
+$("#gmail-connect").addEventListener("click", () => {
+  const member = $("#gmail-member").value;
+  if (!member) { toast("Pick your name first"); return; }
+  storage("studio.me", member);
+  location.href = `/api/gmail/connect?member_id=${member}`;
+});
+$("#gmail-sync").addEventListener("click", async () => {
+  $("#gmail-result").textContent = "Checking mailboxes…";
+  try {
+    const res = await api("/api/gmail/sync", { method: "POST" });
+    $("#gmail-result").textContent = res.results.join("\n");
+  } catch (err) { $("#gmail-result").textContent = err.message; }
+  await loadGmail(); renderGmail();
+});
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-gmail-disconnect]");
+  if (!btn || !confirm("Disconnect this Gmail account? Its threads disappear from Atelier.")) return;
+  await api(`/api/gmail/accounts/${btn.dataset.gmailDisconnect}`, { method: "DELETE" });
+  await loadGmail(); renderGmail();
+  toast("Gmail disconnected");
+});
+
 async function loadSources() {
+  await loadGmail().then(renderGmail).catch((err) => toast(err.message));
   $("#gdrive-state").innerHTML = state.meta.gdrive_configured
-    ? `${badge("on_track")} Connected with a service account.`
-    : `${badge("at_risk")} Not connected yet — set <code>GOOGLE_SERVICE_ACCOUNT_FILE</code> on the server (see README).`;
+    ? `${connChip(true, "Connected")} with a service account.`
+    : `${connChip(false, "Not connected")} Set <code>GOOGLE_SERVICE_ACCOUNT_FILE</code> on the server (see README).`;
   const sources = await api("/api/gdrive/sources");
   $("#gdrive-sources").innerHTML = sources.map((s) => `<li>
       <span><b>${esc(s.name || s.file_id)}</b><br><span class="muted">${s.last_synced_at ? `${timeAgo(s.last_synced_at)} — ${esc(s.last_result)}` : "Not synced yet"}</span></span>
@@ -1018,6 +1124,12 @@ async function init() {
     `<option value="${k}" ${k === state.meta.default_template ? "selected" : ""}>${esc(v)}</option>`).join("") +
     `<option value="none">No phases (add manually)</option>`;
   await loadMembers();
+  await loadGmail().catch(() => {});
+  const params = new URLSearchParams(location.search);
+  if (params.has("gmail") || params.has("gmail_error")) {
+    toast(params.get("gmail_error") || (params.get("gmail") === "connected" ? "Gmail connected ✓" : "Gmail connection cancelled"));
+    history.replaceState(null, "", "/" + location.hash);
+  }
   window.addEventListener("hashchange", route);
   route();
 }

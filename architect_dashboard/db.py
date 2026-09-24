@@ -106,6 +106,36 @@ CREATE TABLE IF NOT EXISTS contacts (
     UNIQUE (project_id, name)
 );
 
+-- One connected Gmail mailbox per team member. Tokens are encrypted (see gmail.py).
+CREATE TABLE IF NOT EXISTS gmail_accounts (
+    member_id        INTEGER PRIMARY KEY REFERENCES members(id) ON DELETE CASCADE,
+    email            TEXT NOT NULL,
+    refresh_token    TEXT NOT NULL,
+    access_token     TEXT,
+    token_expires_at REAL,
+    connected_at     TEXT NOT NULL,
+    last_synced_at   TEXT,
+    last_result      TEXT
+);
+
+-- Recent threads with project contacts. Headers only: no message bodies are stored.
+CREATE TABLE IF NOT EXISTS mail_threads (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    member_id       INTEGER NOT NULL REFERENCES gmail_accounts(member_id) ON DELETE CASCADE,
+    thread_id       TEXT NOT NULL,
+    project_id      INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    contact_id      INTEGER REFERENCES contacts(id) ON DELETE SET NULL,
+    subject         TEXT,
+    from_name       TEXT,
+    from_email      TEXT,
+    last_message_at TEXT,
+    last_message_id TEXT,   -- RFC Message-ID, used to show a thread once when several mailboxes have it
+    message_count   INTEGER,
+    awaiting_reply  INTEGER NOT NULL DEFAULT 0,  -- last message came from the contact
+    UNIQUE (member_id, thread_id)
+);
+CREATE INDEX IF NOT EXISTS idx_mail_project ON mail_threads(project_id);
+
 CREATE TABLE IF NOT EXISTS sync_sources (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     kind           TEXT NOT NULL DEFAULT 'gdrive',
@@ -655,3 +685,66 @@ def record_sync(conn, source_id: int, result: str) -> None:
 
 def delete_sync_source(conn, source_id: int) -> None:
     conn.execute("DELETE FROM sync_sources WHERE id = ?", (source_id,))
+
+
+# ---------------------------------------------------------------------------
+# Gmail
+# ---------------------------------------------------------------------------
+
+def list_gmail_accounts(conn) -> list[dict]:
+    return rows(conn.execute(
+        """SELECT g.member_id, g.email, g.connected_at, g.last_synced_at, g.last_result, m.name AS member_name
+           FROM gmail_accounts g JOIN members m ON m.id = g.member_id ORDER BY m.name"""
+    ))
+
+
+def get_gmail_account(conn, member_id: int) -> Optional[dict]:
+    row = conn.execute("SELECT * FROM gmail_accounts WHERE member_id = ?", (member_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def contact_directory(conn) -> list[dict]:
+    """Every contact with an email address on an active project."""
+    return rows(conn.execute(
+        """SELECT c.id AS contact_id, c.project_id, lower(c.email) AS email, c.name, p.code
+           FROM contacts c JOIN projects p ON p.id = c.project_id
+           WHERE c.email IS NOT NULL AND c.email != '' AND p.status = 'active'"""
+    ))
+
+
+def replace_mail_threads(conn, member_id: int, threads: list[dict]) -> None:
+    conn.execute("DELETE FROM mail_threads WHERE member_id = ?", (member_id,))
+    for t in threads:
+        conn.execute(
+            """INSERT INTO mail_threads (member_id, thread_id, project_id, contact_id, subject, from_name,
+                 from_email, last_message_at, last_message_id, message_count, awaiting_reply)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (member_id, t["thread_id"], t["project_id"], t.get("contact_id"), t.get("subject"), t.get("from_name"),
+             t.get("from_email"), t.get("last_message_at"), t.get("last_message_id"), t.get("message_count"),
+             1 if t.get("awaiting_reply") else 0),
+        )
+
+
+def mail_threads(conn, project_id: int = None, awaiting_only: bool = False) -> list[dict]:
+    """Threads for the dashboard, each shown once even when several team mailboxes hold it."""
+    where, params = [], []
+    if project_id is not None:
+        where.append("t.project_id = ?")
+        params.append(project_id)
+    if awaiting_only:
+        where.append("t.awaiting_reply = 1")
+    sql = f"""SELECT t.*, g.email AS mailbox, m.name AS mailbox_owner, p.code AS project_code, p.name AS project_name
+              FROM mail_threads t
+              JOIN gmail_accounts g ON g.member_id = t.member_id
+              JOIN members m ON m.id = t.member_id
+              JOIN projects p ON p.id = t.project_id
+              {"WHERE " + " AND ".join(where) if where else ""}
+              ORDER BY t.last_message_at DESC"""
+    seen, result = set(), []
+    for row in rows(conn.execute(sql, params)):
+        key = row["last_message_id"] or f"{row['member_id']}:{row['thread_id']}"
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(row)
+    return result

@@ -423,6 +423,23 @@ dialog::backdrop { background: rgba(0, 0, 0, .45); }
 .draft pre { white-space: pre-wrap; font: inherit; margin: 8px 0 0; padding-top: 8px; border-top: 1px solid var(--border); }
 .changes { font-size: 12px; color: var(--ink-2); margin: 0; padding-left: 18px; }
 
+/* ---------- mail ---------- */
+.mail-list { list-style: none; margin: 0; padding: 0; max-height: 34vh; overflow: auto; }
+.mail-list li { border-top: 1px solid var(--border); }
+.mail-list li:first-child { border-top: 0; }
+.mail-list a { display: block; padding: 8px 0; color: inherit; text-decoration: none; font-size: 13px; }
+.mail-list a:hover .subj { text-decoration: underline; }
+.mail-list .from { font-weight: 600; }
+.mail-list .subj { color: var(--ink-2); }
+.mail-list .meta { font-size: 11px; color: var(--ink-2); margin-top: 3px; }
+.mail-list .wait { color: var(--down); font-weight: 600; }
+.mail-flag { font-size: 11px; font-weight: 600; color: var(--down); white-space: nowrap; }
+.thread { display: flex; gap: 10px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.thread a { color: inherit; text-decoration: none; flex: 1; }
+.thread a:hover b { text-decoration: underline; }
+.thread small { display: block; color: var(--ink-2); font-size: 12px; }
+.thread .state { font-size: 12px; white-space: nowrap; }
+
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {
   .wall-grid { grid-template-columns: 1fr; }

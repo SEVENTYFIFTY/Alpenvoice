@@ -18,6 +18,7 @@ schedule, how much moved today, and where each drawing stands.
 | **Drawings** | A drawing register per project. Each drawing moves through Draft → In progress → In review → Approved → Issued, and has a revision, a scale, an owner and a due date. |
 | **Daily updates** | Team members open *Update progress*, pick their name, move a slider and optionally write a note ("Facade details sent to engineer"). Every change is logged, which feeds the daily deltas, trends and the *Latest updates* feed. |
 | **Excel** | Download the template, fill in the Team, Projects, Phases, Milestones, Drawings and Contacts sheets, then upload it. Rows are matched by project code, phase name and drawing number, so re-uploading updates instead of duplicating. *Export everything* produces the same format plus a Summary sheet. |
+| **Gmail** | Each person connects their own Gmail. The dashboard gets a *Waiting on us · mail* panel with client and consultant emails where the contact wrote last, showing how long it has waited and which inbox it's in. Cards show ✉ counts, and each project has a Mail tab. *Move + Gmail draft* on the board saves the phase-change email in your Gmail Drafts. Only sender, subject and date are read, never message text, and nothing is ever sent automatically. |
 | **Google Drive** | Link a Google Sheet (or an .xlsx in Drive) in the template's layout. It syncs automatically every 15 min. Link each project to its Drive folder to see the latest plans and documents inside the project view. |
 
 ## Run it
@@ -48,6 +49,45 @@ Settings are read from environment variables or `.env` (see `.env.example`): `OF
 4. Under *Data & sync*, paste the spreadsheet link. For each project, paste its Drive folder link
    into *Update progress → Google Drive folder*.
 
+## Connecting Gmail
+
+Each team member connects their own mailbox, but an administrator first registers Atelier with Google once:
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), select or create a project and
+   enable the **Gmail API**.
+2. Set up the **OAuth consent screen**.
+   - **Google Workspace office (recommended):** choose user type **Internal**. Only your domain's
+     accounts can connect, and Google doesn't need to review the app.
+   - **Personal @gmail.com accounts:** choose **External**, leave it in *Testing* and add each
+     person as a test user. Google expires tokens of apps in Testing after 7 days, so people will
+     have to reconnect weekly. Publishing the app for wider use requires Google's verification,
+     because it reads Gmail.
+3. Create **Credentials → OAuth client ID → Web application**. Add the authorised redirect URI
+   `PUBLIC_BASE_URL/api/gmail/callback`, e.g. `https://atelier.yourstudio.ch/api/gmail/callback`.
+   Google only accepts plain `http://` for `localhost`, so an office server needs HTTPS.
+4. Set on the server:
+   ```bash
+   GOOGLE_OAUTH_CLIENT_ID=…apps.googleusercontent.com
+   GOOGLE_OAUTH_CLIENT_SECRET=…
+   PUBLIC_BASE_URL=https://atelier.yourstudio.ch
+   STUDIO_SECRET_KEY=$(python -c "import secrets; print(secrets.token_urlsafe(32))")
+   ```
+   `STUDIO_SECRET_KEY` encrypts the stored Gmail tokens. Keep it secret and don't change it, or
+   everyone has to reconnect.
+5. Each person opens *Data & sync → Gmail*, picks their name and clicks **Connect my Gmail**.
+
+What Atelier does with the access:
+- **Read-only search.** Every 10 minutes (`GMAIL_SYNC_MINUTES`) it searches the last 30 days
+  (`GMAIL_LOOKBACK_DAYS`) for threads to or from the email addresses under each project's *People*.
+  It stores only sender, subject, date and message count, never the text. A thread is "waiting on
+  us" when the contact sent the last message.
+- **Drafts, never sending.** *Move + Gmail draft* creates a draft in the mover's own mailbox. It
+  doesn't send anything.
+- **Disconnect** removes the account and its threads from Atelier and revokes the access at Google.
+
+Everyone who can open the dashboard sees the subjects and senders of those project threads, so
+keep the app on the office network until logins are added.
+
 ## How progress is calculated
 
 - **Project %** = Σ(phase % × phase weight) / Σ weights
@@ -66,6 +106,7 @@ architect_dashboard/
   phases.py     SIA 112 / international phase templates, drawing stages
   excel_io.py   workbook import (upsert) and export
   gdrive.py     Drive API: Sheets export, folder listing, background sync
+  gmail.py      Gmail OAuth, encrypted tokens, project-thread sync, drafts
   seed.py       demo data
   static/       the dashboard (plain HTML/CSS/JS, no build step)
   tests/        pytest suite
@@ -73,11 +114,9 @@ architect_dashboard/
 
 ## Not built yet
 
-- Logins and roles. Right now anyone on the network can edit, so run it on the office LAN or VPN, or
-  put it behind a reverse proxy with authentication.
-- An inbox panel of unanswered client and consultant threads per project. This needs Gmail API access
-  (OAuth for each user), so project mail can be matched by contact email address.
-- Sending phase-change emails directly from the server (today they are drafts that someone reviews and sends).
+- Logins and roles. Right now anyone on the network can edit and see project mail subjects, so run it
+  on the office LAN or VPN, or put it behind a reverse proxy with authentication.
+- Outlook / Microsoft 365 mail (same idea as Gmail, via the Microsoft Graph API).
 - Writing changes back to Google Sheets (sync currently only reads from Drive into the dashboard).
 - Microsoft 365 / OneDrive / SharePoint Excel sync. It would reuse the same importer via the Graph API.
 - Hours and fees per phase (budget vs. actual), and email or Slack alerts when a project turns *At risk*.
