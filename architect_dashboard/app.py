@@ -1,20 +1,21 @@
 """Atelier Studio Board web server.
 
 Run:  uvicorn architect_dashboard.app:app --host 0.0.0.0 --port 8000
-Wall display:  http://<server>:8000/          Updates:  http://<server>:8000/#manage
+Open http://<server>:8000/: the first visit sets up the principal's account.
 """
+import re
 from contextlib import asynccontextmanager
 from datetime import date
 from pathlib import Path
 from typing import Optional
 from urllib.parse import quote
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse, RedirectResponse, Response
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import config, db, excel_io, gdrive, gmail, notify, progress
+from . import auth, config, db, excel_io, gdrive, gmail, notify, progress
 from .phases import DRAWING_STAGES, PHASE_STATUSES, PROJECT_STATUSES, TEMPLATES
 
 STATIC = Path(__file__).parent / "static"
@@ -34,6 +35,70 @@ app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 
 # ---------------------------------------------------------------------------
+# Access control
+# ---------------------------------------------------------------------------
+
+# Reachable without signing in
+PUBLIC = re.compile(r"^/(|static/.*|display/[^/]+|api/auth/(me|login|logout|setup|invite/[^/]+))$")
+
+# (methods, path, minimum role). First match wins; otherwise reading needs "viewer"
+# and changing anything needs "member".
+RULES = [
+    ({"POST"}, r"/api/members", "admin"),
+    ({"POST"}, r"/api/members/\d+/invite", "admin"),
+    ({"PUT"}, r"/api/members/\d+/access", "admin"),
+    ({"DELETE"}, r"/api/projects/\d+", "admin"),
+    ({"POST"}, r"/api/import/excel", "admin"),
+    ({"POST", "DELETE"}, r"/api/gdrive/sources(/\d+)?", "admin"),
+    ({"GET", "POST", "DELETE"}, r"/api/auth/display-links(/\d+)?", "admin"),
+    ({"GET"}, r"/api/export/excel", "member"),     # includes contact details
+    ({"GET"}, r"/api/gmail/(connect|callback)", "member"),
+    ({"GET"}, r"/(docs|redoc|openapi\.json)", "member"),
+]
+SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+CSRF_HEADER = "x-atelier"
+
+
+def required_role(method: str, path: str) -> str:
+    for methods, pattern, role in RULES:
+        if method in methods and re.fullmatch(pattern, path):
+            return role
+    return "viewer" if method in SAFE_METHODS else "member"
+
+
+@app.middleware("http")
+async def access_control(request: Request, call_next):
+    method, path = request.method, request.url.path
+    # Changes must come from the app's own scripts: browsers can't add this header to a
+    # cross-site form post or image load, which blocks cross-site request forgery.
+    if method not in SAFE_METHODS and path.startswith("/api/") and request.headers.get(CSRF_HEADER) != "1":
+        return JSONResponse({"detail": "Missing X-Atelier header"}, status_code=403)
+    with db.connect() as conn:
+        user = auth.session_user(conn, request.cookies.get(auth.SESSION_COOKIE))
+    request.state.user = user
+    if PUBLIC.match(path):
+        return await call_next(request)
+    if user is None:
+        if method == "GET" and not path.startswith("/api/"):
+            return RedirectResponse("/")
+        return JSONResponse({"detail": "Sign in to continue"}, status_code=401)
+    role = required_role(method, path)
+    if auth.rank(user["access"]) < auth.rank(role):
+        return JSONResponse({"detail": "You don't have permission to do that"}, status_code=403)
+    return await call_next(request)
+
+
+def current_user(request: Request) -> dict:
+    return request.state.user
+
+
+def _set_session(response: Response, token: str, days: int = auth.SESSION_DAYS) -> Response:
+    response.set_cookie(auth.SESSION_COOKIE, token, max_age=days * 86400, httponly=True, samesite="lax",
+                        secure=config.PUBLIC_BASE_URL.startswith("https://"), path="/")
+    return response
+
+
+# ---------------------------------------------------------------------------
 # Request bodies
 # ---------------------------------------------------------------------------
 
@@ -48,6 +113,30 @@ class MemberUpdate(BaseModel):
     role: Optional[str] = None
     email: Optional[str] = None
     status: Optional[str] = None
+
+
+class AccessIn(BaseModel):
+    access: Optional[str] = None  # admin | member | viewer | None (no login)
+
+
+class LoginIn(BaseModel):
+    email: str
+    password: str
+
+
+class SetupIn(BaseModel):
+    name: str = Field(min_length=1)
+    email: str
+    password: str
+
+
+class PasswordIn(BaseModel):
+    password: str
+    current: Optional[str] = None
+
+
+class DisplayLinkIn(BaseModel):
+    label: str = "Wall display"
 
 
 class ProjectIn(BaseModel):
@@ -186,16 +275,46 @@ def get_members():
 @app.post("/api/members", status_code=201)
 def add_member(body: MemberIn):
     with db.connect() as conn:
-        member_id = db.upsert_member(conn, body.name.strip(), body.role, body.email)
+        member_id = db.upsert_member(conn, body.name.strip(), body.role,
+                                     body.email.strip().lower() if body.email else None)
         return {"id": member_id}
 
 
 @app.patch("/api/members/{member_id}")
-def edit_member(member_id: int, body: MemberUpdate):
+def edit_member(member_id: int, body: MemberUpdate, request: Request):
+    user, data = current_user(request), _fields(body)
+    if user["access"] != "admin" and (member_id != user["id"] or set(data) - {"status"}):
+        raise HTTPException(403, "You can only update your own status")
+    if data.get("email"):
+        data["email"] = data["email"].strip().lower()
     with db.connect() as conn:
         _require(db.get_member(conn, member_id), "Team member not found")
-        db.update_member(conn, member_id, _fields(body))
+        db.update_member(conn, member_id, data)
     return {"ok": True}
+
+
+@app.put("/api/members/{member_id}/access")
+def set_member_access(member_id: int, body: AccessIn, request: Request):
+    with db.connect() as conn:
+        _require(db.get_member(conn, member_id), "Team member not found")
+        try:
+            auth.set_access(conn, member_id, body.access)
+        except auth.AuthError as exc:
+            raise HTTPException(422, str(exc))
+    return {"ok": True}
+
+
+@app.post("/api/members/{member_id}/invite")
+def invite_member(member_id: int):
+    """One-time link for the person to set their password (also a password reset)."""
+    with db.connect() as conn:
+        member = _require(db.get_member(conn, member_id), "Team member not found")
+        if not member["email"]:
+            raise HTTPException(422, f"Add an email address for {member['name']} first")
+        if not member["access"]:
+            auth.set_access(conn, member_id, "member")
+        token = auth.create_invite(conn, member_id)
+    return {"url": f"{config.PUBLIC_BASE_URL}/#invite={token}", "expires_in_days": auth.INVITE_DAYS}
 
 
 # ---------------------------------------------------------------------------
@@ -265,9 +384,10 @@ def remove_project(project_id: int):
 
 
 @app.post("/api/projects/{project_id}/move")
-def move_project(project_id: int, body: MoveIn):
+def move_project(project_id: int, body: MoveIn, request: Request):
     """Board drag & drop: make a phase current (or finish the project), and
     return an email draft for the contacts marked 'notify'."""
+    body.member_id = current_user(request)["id"]  # whoever is signed in made the move
     with db.connect() as conn:
         project = _require(db.get_project(conn, project_id), "Project not found")
         phases = db.list_phases(conn, project_id)
@@ -313,8 +433,8 @@ def add_phase(project_id: int, body: PhaseIn):
 
 
 @app.patch("/api/phases/{phase_id}")
-def edit_phase(phase_id: int, body: PhaseIn):
-    data = _fields(body)
+def edit_phase(phase_id: int, body: PhaseIn, request: Request):
+    data = {**_fields(body), "member_id": current_user(request)["id"]}
     _check(data.get("status"), PHASE_STATUSES, "status")
     with db.connect() as conn:
         _require(db.get_phase(conn, phase_id), "Phase not found")
@@ -335,8 +455,8 @@ def remove_phase(phase_id: int):
 # ---------------------------------------------------------------------------
 
 @app.post("/api/phases/{phase_id}/milestones", status_code=201)
-def add_milestone(phase_id: int, body: MilestoneIn):
-    data = _fields(body)
+def add_milestone(phase_id: int, body: MilestoneIn, request: Request):
+    data = {**_fields(body), "member_id": current_user(request)["id"]}
     if not (data.get("title") or "").strip():
         raise HTTPException(422, "Milestone title is required")
     with db.connect() as conn:
@@ -346,10 +466,10 @@ def add_milestone(phase_id: int, body: MilestoneIn):
 
 
 @app.patch("/api/milestones/{milestone_id}")
-def edit_milestone(milestone_id: int, body: MilestoneIn):
+def edit_milestone(milestone_id: int, body: MilestoneIn, request: Request):
     with db.connect() as conn:
         milestone = _require(db.get_milestone(conn, milestone_id), "Milestone not found")
-        db.update_milestone(conn, milestone_id, _fields(body))
+        db.update_milestone(conn, milestone_id, {**_fields(body), "member_id": current_user(request)["id"]})
         phase = db.get_phase(conn, milestone["phase_id"])
     return {"ok": True, "phase_progress": phase["progress"]}
 
@@ -400,8 +520,8 @@ def remove_contact(contact_id: int):
 # ---------------------------------------------------------------------------
 
 @app.post("/api/projects/{project_id}/drawings", status_code=201)
-def add_drawing(project_id: int, body: DrawingIn):
-    data = _fields(body)
+def add_drawing(project_id: int, body: DrawingIn, request: Request):
+    data = {**_fields(body), "member_id": current_user(request)["id"]}
     if not data.get("number"):
         raise HTTPException(422, "Drawing number is required")
     _check(data.get("stage"), DRAWING_STAGES, "stage")
@@ -413,8 +533,8 @@ def add_drawing(project_id: int, body: DrawingIn):
 
 
 @app.patch("/api/drawings/{drawing_id}")
-def edit_drawing(drawing_id: int, body: DrawingIn):
-    data = _fields(body)
+def edit_drawing(drawing_id: int, body: DrawingIn, request: Request):
+    data = {**_fields(body), "member_id": current_user(request)["id"]}
     _check(data.get("stage"), DRAWING_STAGES, "stage")
     with db.connect() as conn:
         drawing = _require(db.get_drawing(conn, drawing_id), "Drawing not found")
@@ -546,7 +666,8 @@ def gmail_status():
 
 
 @app.get("/api/gmail/connect", include_in_schema=False)
-def gmail_connect(member_id: int):
+def gmail_connect(request: Request):
+    member_id = current_user(request)["id"]  # you can only connect your own mailbox
     with db.connect() as conn:
         member = _require(db.get_member(conn, member_id), "Team member not found")
     try:
@@ -556,10 +677,13 @@ def gmail_connect(member_id: int):
 
 
 @app.get("/api/gmail/callback", include_in_schema=False)
-def gmail_callback(code: Optional[str] = None, state: Optional[str] = None, error: Optional[str] = None):
+def gmail_callback(request: Request, code: Optional[str] = None, state: Optional[str] = None,
+                   error: Optional[str] = None):
     if error or not code or not state:
         return RedirectResponse("/?gmail=cancelled#data")
     try:
+        if gmail.read_state(state) != current_user(request)["id"]:
+            raise gmail.GmailError("This Gmail sign-in was started by someone else. Please try again.")
         account = gmail.complete_connection(code, state)
     except gmail.GmailError as exc:
         return RedirectResponse(f"/?gmail_error={quote(str(exc))}#data")
@@ -575,6 +699,119 @@ def gmail_sync():
 
 
 @app.delete("/api/gmail/accounts/{member_id}")
-def gmail_disconnect(member_id: int):
+def gmail_disconnect(member_id: int, request: Request):
+    user = current_user(request)
+    if user["access"] != "admin" and user["id"] != member_id:
+        raise HTTPException(403, "You can only disconnect your own Gmail")
     gmail.disconnect(member_id)
     return {"ok": True}
+
+
+# ---------------------------------------------------------------------------
+# Sign-in
+# ---------------------------------------------------------------------------
+
+def _auth_error(exc: auth.AuthError, status: int = 422):
+    raise HTTPException(status, str(exc))
+
+
+@app.get("/api/auth/me")
+def whoami(request: Request):
+    with db.connect() as conn:
+        setup_needed = not auth.has_accounts(conn)
+    return {"user": request.state.user, "setup_needed": setup_needed, "office": config.OFFICE_NAME}
+
+
+@app.post("/api/auth/setup")
+def first_setup(body: SetupIn):
+    """Fresh install only: create the principal's account."""
+    with db.connect() as conn:
+        try:
+            member_id = auth.create_first_admin(conn, body.name, body.email, body.password)
+        except auth.AuthError as exc:
+            _auth_error(exc, 409 if "already" in str(exc) else 422)
+        token = auth.open_session(conn, member_id=member_id)
+    return _set_session(JSONResponse({"ok": True}), token)
+
+
+@app.post("/api/auth/login")
+def sign_in(body: LoginIn):
+    with db.connect() as conn:
+        try:
+            token = auth.login(conn, body.email, body.password)
+        except auth.AuthError as exc:
+            _auth_error(exc, 401)
+    return _set_session(JSONResponse({"ok": True}), token)
+
+
+@app.post("/api/auth/logout")
+def sign_out(request: Request):
+    with db.connect() as conn:
+        auth.logout(conn, request.cookies.get(auth.SESSION_COOKIE))
+    response = JSONResponse({"ok": True})
+    response.delete_cookie(auth.SESSION_COOKIE, path="/")
+    return response
+
+
+@app.get("/api/auth/invite/{token}")
+def read_invite(token: str):
+    with db.connect() as conn:
+        try:
+            member = auth.invite_member(conn, token)
+        except auth.AuthError as exc:
+            _auth_error(exc, 404)
+    return {"name": member["name"], "email": member["email"], "reset": bool(member["has_password"])}
+
+
+@app.post("/api/auth/invite/{token}")
+def accept_invite(token: str, body: PasswordIn):
+    with db.connect() as conn:
+        try:
+            session = auth.accept_invite(conn, token, body.password)
+        except auth.AuthError as exc:
+            _auth_error(exc)
+    return _set_session(JSONResponse({"ok": True}), session)
+
+
+@app.post("/api/auth/password")
+def change_password(body: PasswordIn, request: Request):
+    user = current_user(request)
+    if user["display"]:
+        raise HTTPException(403, "A wall display has no password")
+    with db.connect() as conn:
+        try:
+            auth.change_password(conn, user["id"], body.current, body.password)
+        except auth.AuthError as exc:
+            _auth_error(exc)
+    return {"ok": True}
+
+
+@app.get("/api/auth/display-links")
+def get_display_links():
+    with db.connect() as conn:
+        return auth.list_display_links(conn)
+
+
+@app.post("/api/auth/display-links", status_code=201)
+def add_display_link(body: DisplayLinkIn, request: Request):
+    with db.connect() as conn:
+        token = auth.create_display_link(conn, body.label, current_user(request)["id"])
+    return {"url": f"{config.PUBLIC_BASE_URL}/display/{token}"}
+
+
+@app.delete("/api/auth/display-links/{link_id}")
+def remove_display_link(link_id: int):
+    with db.connect() as conn:
+        auth.revoke_display_link(conn, link_id)
+    return {"ok": True}
+
+
+@app.get("/display/{token}", include_in_schema=False)
+def open_display(token: str):
+    """A wall screen opens its secret link once and stays signed in, read-only."""
+    with db.connect() as conn:
+        link_id = auth.display_link_id(conn, token)
+        if link_id is None:
+            return RedirectResponse("/?display=invalid")
+        session = auth.open_session(conn, display_id=link_id)
+    return _set_session(RedirectResponse("/#wall"), session, days=auth.DISPLAY_SESSION_DAYS)

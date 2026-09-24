@@ -15,13 +15,6 @@ def temp_db(tmp_path, monkeypatch):
     db.init_db()
 
 
-@pytest.fixture
-def client():
-    from architect_dashboard.app import app
-    with TestClient(app) as c:
-        yield c
-
-
 def _project(conn, template="sia112", **extra):
     return db.create_project(conn, {"code": "25-001", "name": "Test House", **extra}, template=template)
 
@@ -256,7 +249,7 @@ def test_api_project_lifecycle(client):
     assert dash["kpis"]["active_projects"] == 1
     assert dash["projects"][0]["progress"] == 6.0  # 60% of a 10% weight phase
     update = next(a for a in dash["activity"] if a["note"] == "Massing approved")
-    assert update["member_name"] == "Anna"
+    assert update["member_name"] == "Ana Silva"  # recorded as whoever is signed in
 
     files = client.get(f"/api/projects/{project_id}/drive-files").json()
     assert files["files"] == [] and "not configured" in files["message"]
@@ -439,8 +432,8 @@ def test_api_milestones_and_member_status(client):
 
     member = client.post("/api/members", json={"name": "Diogo Alves"}).json()["id"]
     client.patch(f"/api/members/{member}", json={"status": "Concept studies · Ribeira"})
-    team = client.get("/api/dashboard").json()["team"]
-    assert team[0]["status"] == "Concept studies · Ribeira"
+    team = {m["name"]: m for m in client.get("/api/dashboard").json()["team"]}
+    assert team["Diogo Alves"]["status"] == "Concept studies · Ribeira"
 
 
 def test_new_projects_get_the_default_atelier_phases(client):

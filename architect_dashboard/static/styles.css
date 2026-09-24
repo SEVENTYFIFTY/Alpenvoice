@@ -440,6 +440,36 @@ dialog::backdrop { background: rgba(0, 0, 0, .45); }
 .thread small { display: block; color: var(--ink-2); font-size: 12px; }
 .thread .state { font-size: 12px; white-space: nowrap; }
 
+/* ---------- sign-in & roles ---------- */
+.auth { position: fixed; inset: 0; z-index: 50; background: var(--navy); display: grid; place-items: center; padding: 16px; }
+.auth-card { background: var(--surface); color: var(--ink); width: min(400px, 100%); border-radius: 16px; padding: 28px; box-shadow: 0 30px 80px rgba(0,0,0,.35); }
+.auth-brand { font-size: 13px; font-weight: 700; letter-spacing: .14em; color: var(--ink); margin-bottom: 18px; }
+.auth-brand span { font-weight: 500; letter-spacing: 0; color: var(--ink-2); margin-left: 6px; }
+.auth-card h2 { font-size: 22px; margin-bottom: 8px; }
+.auth-card form { display: flex; flex-direction: column; gap: 12px; }
+.auth-card label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink-2); }
+.auth-card .btn { justify-content: center; padding: 10px; }
+.auth-error { color: var(--down); font-size: 14px; min-height: 1em; margin: 10px 0 0; }
+body.signed-out > header, body.signed-out > main { visibility: hidden; }
+
+.user-menu { position: relative; }
+.user-btn { border: 1px solid #ffffff33; background: transparent; color: #fff; border-radius: 999px; padding: 5px 12px;
+  font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.user-btn:hover { background: #ffffff14; }
+.user-pop { position: absolute; right: 0; top: calc(100% + 8px); background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 12px; padding: 12px; width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  display: flex; flex-direction: column; gap: 10px; z-index: 10; }
+.user-pop[hidden] { display: none; }
+.stack { display: flex; flex-direction: column; gap: 6px; }
+.access-select { font-size: 13px; padding: 3px 6px; }
+.members li { align-items: center; flex-wrap: wrap; }
+.member-actions { display: flex; gap: 6px; align-items: center; }
+.link-box { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+.link-box input { flex: 1; min-width: 0; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+
+/* role-based visibility: viewers only look; only principals administer */
+body.role-viewer .needs-member, body:not(.role-admin) .needs-admin, body.is-display .needs-person { display: none !important; }
+
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {
   .wall-grid { grid-template-columns: 1fr; }

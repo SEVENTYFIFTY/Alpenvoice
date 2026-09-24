@@ -4,9 +4,10 @@ from email import message_from_bytes, policy
 from urllib.parse import parse_qs, urlparse
 
 import pytest
-from fastapi.testclient import TestClient
 
 from architect_dashboard import config, db, gmail
+
+from .conftest import sign_in_as
 
 ME = "luca@studio.example"
 CLIENT = "joana@costa.example"
@@ -101,13 +102,6 @@ def google(monkeypatch):
     return fake
 
 
-@pytest.fixture
-def client():
-    from architect_dashboard.app import app
-    with TestClient(app) as c:
-        yield c
-
-
 def _office():
     with db.connect() as conn:
         luca = db.upsert_member(conn, "Luca Moretti", email=ME)
@@ -120,7 +114,8 @@ def _office():
 
 
 def _connect(client, luca):
-    res = client.get(f"/api/gmail/connect?member_id={luca}", follow_redirects=False)
+    sign_in_as(client, luca)
+    res = client.get("/api/gmail/connect", follow_redirects=False)
     state = parse_qs(urlparse(res.headers["location"]).query)["state"][0]
     return client.get(f"/api/gmail/callback?code=good-code&state={state}", follow_redirects=False)
 
@@ -138,7 +133,8 @@ def test_state_is_signed_and_expires(monkeypatch):
 
 def test_connect_flow_stores_encrypted_tokens_and_syncs(client, google):
     luca, hh, lx = _office()
-    start = client.get(f"/api/gmail/connect?member_id={luca}", follow_redirects=False)
+    sign_in_as(client, luca)
+    start = client.get("/api/gmail/connect", follow_redirects=False)
     params = parse_qs(urlparse(start.headers["location"]).query)
     assert params["redirect_uri"] == ["https://atelier.example/api/gmail/callback"]
     assert params["access_type"] == ["offline"] and params["login_hint"] == [ME]
@@ -225,6 +221,7 @@ def test_board_move_saves_gmail_draft(client, google):
 
 def test_draft_failure_does_not_undo_the_move(client, google):
     luca, hh, lx = _office()  # Gmail never connected
+    sign_in_as(client, luca)
     res = client.post(f"/api/projects/{hh}/move",
                       json={"phase_name": "Concept", "member_id": luca, "create_draft": True}).json()
     assert "not connected" in res["email"]["draft_error"]

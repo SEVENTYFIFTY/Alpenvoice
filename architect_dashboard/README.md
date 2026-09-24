@@ -29,7 +29,8 @@ python -m architect_dashboard.seed --reset          # optional: demo office with
 uvicorn architect_dashboard.app:app --host 0.0.0.0 --port 8000
 ```
 
-- Wall screen: `http://<server>:8000/`. Press ⛶ for full screen; ◐ switches between light and dark.
+- First visit: `http://<server>:8000/` asks the principal to create their account (see *Sign-in and roles*).
+- Wall screen: use a display link (below). Press ⛶ for full screen; ◐ switches between light and dark.
 - Board: `http://<server>:8000/#board`
 - Team updates: `http://<server>:8000/#manage`
 - Excel / Drive / team: `http://<server>:8000/#data`
@@ -38,6 +39,36 @@ uvicorn architect_dashboard.app:app --host 0.0.0.0 --port 8000
 Settings are read from environment variables or `.env` (see `.env.example`): `OFFICE_NAME`,
 `STUDIO_DB_PATH`, `DEFAULT_PHASE_TEMPLATE`, `DASHBOARD_REFRESH_SECONDS`, `AT_RISK_TOLERANCE`, `GOOGLE_SERVICE_ACCOUNT_FILE`,
 `GDRIVE_SYNC_MINUTES`.
+
+## Sign-in and roles
+
+Everyone signs in with their email and a password (10+ characters). There are three roles:
+
+| Role | Can |
+|---|---|
+| **Principal** | Everything: manage the team and roles, invite people, wall displays, Excel import, Drive sources, delete projects |
+| **Team** | Update projects, phases, milestones, drawings, contacts and blockers; move cards on the board; connect their own Gmail; export Excel |
+| **Viewer** | Look only: dashboard, board and project details |
+
+- **First run:** the first visit shows *Set up Atelier* and creates the principal's account. After that, the setup screen is gone for good.
+- **Inviting the team:** under *Data & sync → Team*, add each person's email, choose their role and click
+  **Invite link**. Send them the link; it works once and expires after 7 days. **Reset link** does the same
+  for a forgotten password and signs that person out everywhere else. Setting a role to *No login* signs
+  them out immediately.
+- **Wall displays:** under *Data & sync → Wall displays*, create a link (e.g. "Studio TV") and open it once
+  in the screen's browser. It stays signed in, read-only, for about a year. **Revoke** signs it out.
+- **Locked out?** On the server, run `python -m architect_dashboard.auth invite you@studio.ch --admin`
+  to print a new link.
+
+Security notes:
+- Passwords are hashed with scrypt.
+- Sessions, invites and display links are random tokens, and only their hashes are stored.
+- Sign-in attempts are throttled.
+- Every change needs a signed-in session plus a custom request header, which blocks cross-site request
+  forgery.
+- Progress updates, board moves and Gmail connections are always recorded as the signed-in person.
+- Serve Atelier over **HTTPS** outside a trusted network: with an `https://` `PUBLIC_BASE_URL`, session
+  cookies are marked *Secure*.
 
 ## Connecting Google Drive
 
@@ -74,7 +105,8 @@ Each team member connects their own mailbox, but an administrator first register
    ```
    `STUDIO_SECRET_KEY` encrypts the stored Gmail tokens. Keep it secret and don't change it, or
    everyone has to reconnect.
-5. Each person opens *Data & sync → Gmail*, picks their name and clicks **Connect my Gmail**.
+5. Each person signs in, opens *Data & sync → Gmail* and clicks **Connect my Gmail**. It always connects
+   the signed-in person's own mailbox.
 
 What Atelier does with the access:
 - **Read-only search.** Every 10 minutes (`GMAIL_SYNC_MINUTES`) it searches the last 30 days
@@ -85,8 +117,8 @@ What Atelier does with the access:
   doesn't send anything.
 - **Disconnect** removes the account and its threads from Atelier and revokes the access at Google.
 
-Everyone who can open the dashboard sees the subjects and senders of those project threads, so
-keep the app on the office network until logins are added.
+Everyone who can sign in, including viewers and wall displays, sees the subjects and senders of those
+project threads.
 
 ## How progress is calculated
 
@@ -107,6 +139,7 @@ architect_dashboard/
   excel_io.py   workbook import (upsert) and export
   gdrive.py     Drive API: Sheets export, folder listing, background sync
   gmail.py      Gmail OAuth, encrypted tokens, project-thread sync, drafts
+  auth.py       passwords, sessions, roles, invites, wall-display links, recovery command
   seed.py       demo data
   static/       the dashboard (plain HTML/CSS/JS, no build step)
   tests/        pytest suite
@@ -114,8 +147,7 @@ architect_dashboard/
 
 ## Not built yet
 
-- Logins and roles. Right now anyone on the network can edit and see project mail subjects, so run it
-  on the office LAN or VPN, or put it behind a reverse proxy with authentication.
+- Sign-in with Google or Microsoft accounts (single sign-on) and two-factor authentication.
 - Outlook / Microsoft 365 mail (same idea as Gmail, via the Microsoft Graph API).
 - Writing changes back to Google Sheets (sync currently only reads from Drive into the dashboard).
 - Microsoft 365 / OneDrive / SharePoint Excel sync. It would reuse the same importer via the Graph API.

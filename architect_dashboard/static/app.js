@@ -9,6 +9,7 @@ const state = {
   timer: null,
   boardFilter: "all",
   gmail: { configured: false, accounts: [] },
+  user: null,
   dragId: null,
 };
 
@@ -61,13 +62,17 @@ function timeAgo(iso) {
 }
 
 async function api(path, options = {}) {
-  const opts = { ...options };
+  const opts = { ...options, headers: { "X-Atelier": "1" } };  // server rejects changes without it (CSRF)
   if (opts.body && !(opts.body instanceof FormData)) {
-    opts.headers = { "Content-Type": "application/json" };
+    opts.headers["Content-Type"] = "application/json";
     opts.body = JSON.stringify(opts.body);
   }
   const res = await fetch(path, opts);
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && !path.startsWith("/api/auth/")) {
+    showAuth("login");
+    throw new Error("Please sign in again");
+  }
   if (!res.ok) {
     const detail = Array.isArray(data.detail) ? data.detail.map((d) => d.msg).join(", ") : data.detail;
     throw new Error(detail || `Request failed (${res.status})`);
@@ -416,7 +421,7 @@ function renderBoard() {
 function boardCard(p) {
   const team = p.team_ids.map((id) => state.dashboard.team.find((m) => m.id === id)).filter(Boolean);
   const cur = p.phases.find((ph) => ph.id === p.current_phase_id);
-  return `<article class="bcard" draggable="true" tabindex="0" data-project="${p.id}" aria-label="${esc(p.name)}, ${pct(p.progress)}">
+  return `<article class="bcard" draggable="${canEdit()}" tabindex="0" data-project="${p.id}" aria-label="${esc(p.name)}, ${pct(p.progress)}">
     <div class="top"><h4>${esc(p.name)}</h4><span class="gold-chip">${esc(p.code)}</span></div>
     <div class="client">${esc(p.client || "")}</div>
     <div class="pct"><b>${Math.round(p.progress)}%</b><div class="bar"><div class="bar-fill" style="width:${p.progress}%"></div></div></div>
@@ -512,7 +517,7 @@ async function doMove(btn) {
     const res = await api(`/api/projects/${project.id}/move`, {
       method: "POST",
       body: {
-        phase_name: phaseName, member_id: Number(storage("studio.me")) || null,
+        phase_name: phaseName,
         create_draft: btn.dataset.email === "1" && Boolean(myGmail()),
       },
     });
@@ -530,8 +535,7 @@ async function doMove(btn) {
 }
 
 function myGmail() {
-  const me = Number(storage("studio.me"));
-  return state.gmail.accounts.find((a) => a.member_id === me) || null;
+  return state.gmail.accounts.find((a) => a.member_id === me()) || null;
 }
 
 function showDraft(project, email) {
@@ -583,7 +587,7 @@ async function openProject(id, tab = "overview") {
         <div class="project-meta">${esc([p.location, p.lead_name && "lead " + p.lead_name, p.current_phase].filter(Boolean).join(" · "))}</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">${badge(p.health)}
-        <button class="btn small" data-edit="${p.id}">Edit</button>
+        <button class="btn small needs-member" data-edit="${p.id}">Edit</button>
         <button class="icon-btn" data-close aria-label="Close">✕</button></div>
     </div>
     <div class="dtabs" role="tablist">${tabs.map(([k, label]) =>
@@ -608,7 +612,7 @@ async function openProject(id, tab = "overview") {
 
 function overviewPane(p) {
   return `
-    <form class="inline-form" data-blocker-form style="margin-bottom:14px">
+    <form class="inline-form needs-member" data-blocker-form style="margin-bottom:14px">
       <input name="blocker" value="${esc(p.blocker || "")}" placeholder="Blocked by… (e.g. waiting on structural calcs)" style="flex:1;min-width:220px">
       <button class="btn" type="submit">${p.blocker ? "Update blocker" : "Set blocker"}</button>
       ${p.blocker ? `<button class="btn" type="button" data-clear-blocker>Resolved</button>` : ""}
@@ -638,11 +642,11 @@ function milestonesPane(p) {
       return `<div class="ms-phase ${isCurrent ? "current" : ""}">
         <h4><span>${esc(ph.code || "")} ${esc(ph.name)} <span class="muted" style="font-weight:400">${pct(ph.progress)}</span></span></h4>
         ${items.map((m) => `<label class="ms ${m.done ? "done" : ""}">
-          <input type="checkbox" data-milestone="${m.id}" ${m.done ? "checked" : ""}> <span>${esc(m.title)}</span>
+          <input type="checkbox" data-milestone="${m.id}" ${m.done ? "checked" : ""} ${canEdit() ? "" : "disabled"}> <span>${esc(m.title)}</span>
           ${m.due_date ? `<span class="due">${fmtDate(m.due_date)}</span>` : ""}
-          <button type="button" class="btn small danger x" data-delete-milestone="${m.id}" aria-label="Remove milestone">✕</button>
+          <button type="button" class="btn small danger x needs-member" data-delete-milestone="${m.id}" aria-label="Remove milestone">✕</button>
         </label>`).join("")}
-        <details class="add-ms" ${isCurrent && !items.length ? "open" : ""}><summary>+ Add milestone</summary>
+        <details class="add-ms needs-member" ${isCurrent && !items.length ? "open" : ""}><summary>+ Add milestone</summary>
         <form class="inline-form" data-add-milestone="${ph.id}">
           <input name="title" placeholder="e.g. Outline spec" required style="flex:1;min-width:180px">
           <input type="date" name="due_date" aria-label="Due date">
@@ -660,10 +664,10 @@ function peoplePane(p) {
       <span class="av" style="background:${c.kind === "client" ? "var(--gold)" : "#1b2a4a"};margin:0">${esc(initials(c.name))}</span>
       <div class="who"><b>${esc(c.name)}</b><small>${[c.email && `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`, c.phone && esc(c.phone)].filter(Boolean).join(" · ")}</small></div>
       <span class="chip ${c.kind === "client" ? "client" : ""}">${esc(c.kind)}${c.role ? ` · ${esc(c.role)}` : ""}</span>
-      <label class="notify-toggle"><input type="checkbox" data-notify="${c.id}" ${c.notify ? "checked" : ""}> notify on phase change</label>
-      <button class="btn small danger" data-delete-contact="${c.id}" aria-label="Remove contact">✕</button>
+      <label class="notify-toggle"><input type="checkbox" data-notify="${c.id}" ${c.notify ? "checked" : ""} ${canEdit() ? "" : "disabled"}> notify on phase change</label>
+      <button class="btn small danger needs-member" data-delete-contact="${c.id}" aria-label="Remove contact">✕</button>
     </div>`).join("") || `<p class="muted">No contacts yet.</p>`}
-    <form class="form-grid" data-add-contact style="margin-top:14px">
+    <form class="form-grid needs-member" data-add-contact style="margin-top:14px">
       <label>Name <input name="name" required></label>
       <label>Email <input name="email" type="email"></label>
       <label>Type <select name="kind">${kinds.map((k) => `<option>${k}</option>`).join("")}</select></label>
@@ -742,7 +746,7 @@ document.addEventListener("change", async (e) => {
   try {
     if (t.matches("[data-milestone]")) {
       const res = await api(`/api/milestones/${t.dataset.milestone}`, {
-        method: "PATCH", body: { done: t.checked, member_id: Number(storage("studio.me")) || null },
+        method: "PATCH", body: { done: t.checked },
       });
       toast(`Phase now ${pct(res.phase_progress)}`);
       await refreshOpenProject("milestones");
@@ -792,11 +796,75 @@ function memberOptions(selected, blank = "—") {
 async function loadMembers() {
   state.members = await api("/api/members");
   document.querySelectorAll(".member-select").forEach((s) => { s.innerHTML = memberOptions(null); });
-  const me = $("#m-member");
-  me.innerHTML = memberOptions(Number(storage("studio.me")) || null, "— select your name —");
   fillMyStatus();
-  $("#members").innerHTML = state.members.map((m) =>
-    `<li><span><b>${esc(m.name)}</b> ${esc(m.role || "")}</span><span class="muted">${esc(m.email || "")}</span></li>`).join("");
+  renderMembers();
+}
+
+const ACCESS_LABEL = { "": "No login", viewer: "Viewer", member: "Team", admin: "Principal" };
+
+function renderMembers() {
+  $("#members").innerHTML = state.members.map((m) => {
+    const access = m.access || "";
+    const admin = isAdmin() ? `<span class="member-actions">
+        <input class="access-select" data-member-email="${m.id}" type="email" value="${esc(m.email || "")}" placeholder="email" aria-label="Email for ${esc(m.name)}">
+        <select class="access-select" data-member-access="${m.id}" aria-label="Access for ${esc(m.name)}">
+          ${Object.entries(ACCESS_LABEL).map(([k, v]) => `<option value="${k}" ${k === access ? "selected" : ""}>${v}</option>`).join("")}
+        </select>
+        <button class="btn small" data-invite="${m.id}">${m.has_password ? "Reset link" : "Invite link"}</button>
+      </span>` : `<span class="muted">${esc(ACCESS_LABEL[access])}</span>`;
+    return `<li><span><b>${esc(m.name)}</b> <span class="muted">${esc(m.role || "")}</span>
+      ${m.access && !m.has_password ? ` <span class="gold-chip">invited</span>` : ""}</span>${admin}</li>`;
+  }).join("");
+}
+
+function showLink(el, title, url) {
+  el.hidden = false;
+  el.innerHTML = `<b>${esc(title)}</b>
+    <div class="link-box"><input readonly value="${esc(url)}" aria-label="Link"><button class="btn small" data-copy="${esc(url)}">Copy</button></div>`;
+  el.querySelector("input").select();
+}
+
+document.addEventListener("change", async (e) => {
+  const t = e.target;
+  try {
+    if (t.matches("[data-member-access]")) {
+      await api(`/api/members/${t.dataset.memberAccess}/access`, { method: "PUT", body: { access: t.value || null } });
+      toast(`Access: ${ACCESS_LABEL[t.value]}`);
+      await loadMembers();
+    } else if (t.matches("[data-member-email]")) {
+      await api(`/api/members/${t.dataset.memberEmail}`, { method: "PATCH", body: { email: t.value } });
+      toast("Email saved");
+      await loadMembers();
+    }
+  } catch (err) { toast(err.message); await loadMembers(); }
+});
+
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  try {
+    if (t.matches("[data-invite]")) {
+      const member = state.members.find((m) => m.id === Number(t.dataset.invite));
+      const res = await api(`/api/members/${t.dataset.invite}/invite`, { method: "POST" });
+      showLink($("#invite-result"), `Send this to ${member.name} (valid ${res.expires_in_days} days, works once):`, res.url);
+      await loadMembers();
+    } else if (t.matches("[data-copy]")) {
+      await navigator.clipboard.writeText(t.dataset.copy);
+      toast("Copied");
+    } else if (t.matches("[data-revoke-display]")) {
+      if (!confirm("Revoke this link? The screen using it will be signed out.")) return;
+      await api(`/api/auth/display-links/${t.dataset.revokeDisplay}`, { method: "DELETE" });
+      loadDisplayLinks();
+    }
+  } catch (err) { toast(err.message); }
+});
+
+async function loadDisplayLinks() {
+  if (!isAdmin()) return;
+  const links = await api("/api/auth/display-links");
+  $("#display-links").innerHTML = links.map((l) => `<li><span><b>${esc(l.label)}</b><br>
+      <span class="muted">${l.last_used_at ? `last seen ${timeAgo(l.last_used_at)}` : "not opened yet"} · by ${esc(l.created_by || "–")}</span></span>
+      <button class="btn small danger" data-revoke-display="${l.id}">Revoke</button></li>`).join("") ||
+    `<li class="muted">No wall displays yet.</li>`;
 }
 
 async function loadManage() {
@@ -833,7 +901,7 @@ function renderManageProject(p) {
         <button class="btn primary" type="submit">Save project</button>
         ${p.phases.length ? "" : `<select id="apply-template">${Object.entries(state.meta.templates).map(([k, v]) => `<option value="${k}" ${k === state.meta.default_template ? "selected" : ""}>${esc(v)}</option>`).join("")}</select>
           <button class="btn" type="button" id="apply-template-btn">Add standard phases</button>`}
-        <button class="btn danger" type="button" id="delete-project">Delete project</button>
+        <button class="btn danger needs-admin" type="button" id="delete-project">Delete project</button>
       </div>
     </form>`;
 
@@ -879,7 +947,9 @@ function rowData(tr) {
   return data;
 }
 
-function me() { return Number($("#m-member").value) || null; }
+function me() { return state.user?.id || null; }
+const canEdit = () => state.user && state.user.access !== "viewer";
+const isAdmin = () => state.user?.access === "admin";
 
 document.addEventListener("input", (e) => {
   const tr = e.target.closest(".edit-table tr");
@@ -898,7 +968,7 @@ document.addEventListener("click", async (e) => {
       const tr = t.closest("tr");
       const data = rowData(tr);
       if (!data.note) delete data.note;
-      await api(`/api/phases/${tr.dataset.phase}`, { method: "PATCH", body: { ...data, member_id: me() } });
+      await api(`/api/phases/${tr.dataset.phase}`, { method: "PATCH", body: data });
       toast("Phase saved"); await loadManage();
     } else if (t.matches("[data-delete-phase]")) {
       if (!confirm("Delete this phase and its history?")) return;
@@ -906,7 +976,7 @@ document.addEventListener("click", async (e) => {
       toast("Phase deleted"); await loadManage();
     } else if (t.matches("[data-save-drawing]")) {
       const tr = t.closest("tr");
-      await api(`/api/drawings/${tr.dataset.drawing}`, { method: "PATCH", body: { ...rowData(tr), member_id: me() } });
+      await api(`/api/drawings/${tr.dataset.drawing}`, { method: "PATCH", body: rowData(tr) });
       toast("Drawing saved"); await loadManage();
     } else if (t.matches("[data-delete-drawing]")) {
       if (!confirm("Delete this drawing?")) return;
@@ -948,6 +1018,11 @@ document.addEventListener("submit", async (e) => {
       e.preventDefault();
       await api(`/api/projects/${state.manageProjectId}/drawings`, { method: "POST", body: { ...fields, stage: "not_started" } });
       form.reset(); toast("Drawing added"); await loadManage();
+    } else if (form.id === "add-display") {
+      e.preventDefault();
+      const res = await api("/api/auth/display-links", { method: "POST", body: fields });
+      showLink($("#display-result"), "Open this once on the wall screen. It's shown only now:", res.url);
+      form.reset(); loadDisplayLinks();
     } else if (form.id === "add-member") {
       e.preventDefault();
       await api("/api/members", { method: "POST", body: fields });
@@ -976,7 +1051,6 @@ document.addEventListener("submit", async (e) => {
       await refreshOpenProject("people");
     } else if (form.id === "my-status") {
       e.preventDefault();
-      if (!me()) { toast("Select your name first"); return; }
       await api(`/api/members/${me()}`, { method: "PATCH", body: { status: fields.status || "" } });
       toast("Status updated"); await loadMembers();
     } else if (form.id === "gdrive-add") {
@@ -995,7 +1069,6 @@ function fillMyStatus() {
   const m = state.members.find((x) => x.id === me());
   $("#m-status").value = m?.status || "";
 }
-$("#m-member").addEventListener("change", (e) => { storage("studio.me", e.target.value); fillMyStatus(); });
 $("#m-new-project-btn").addEventListener("click", () => { $("#new-project").hidden = false; $('#new-project [name="code"]').focus(); });
 $("#cancel-new-project").addEventListener("click", () => { $("#new-project").hidden = true; });
 
@@ -1020,19 +1093,15 @@ function renderGmail() {
        (see README), and <code>${esc(g.redirect_uri)}</code> as an authorised redirect URI in Google Cloud.`;
   $("#gmail-connect-row").hidden = !g.configured;
   $("#gmail-sync").hidden = !g.accounts.length;
-  const me = Number(storage("studio.me")) || null;
-  $("#gmail-member").innerHTML = memberOptions(me, "— who are you? —");
+  $("#gmail-connect").textContent = myGmail() ? `Reconnect my Gmail (${myGmail().email})` : "Connect my Gmail";
   $("#gmail-accounts").innerHTML = g.accounts.map((a) => `<li>
       <span><b>${esc(a.member_name)}</b> · ${esc(a.email)}<br>
         <span class="muted">${a.last_synced_at ? `Synced ${timeAgo(a.last_synced_at)}: ${esc(a.last_result || "")}` : "Not synced yet"}</span></span>
-      <button class="btn small danger" data-gmail-disconnect="${a.member_id}">Disconnect</button></li>`).join("");
+      ${isAdmin() || a.member_id === me() ? `<button class="btn small danger" data-gmail-disconnect="${a.member_id}">Disconnect</button>` : ""}</li>`).join("");
 }
 
 $("#gmail-connect").addEventListener("click", () => {
-  const member = $("#gmail-member").value;
-  if (!member) { toast("Pick your name first"); return; }
-  storage("studio.me", member);
-  location.href = `/api/gmail/connect?member_id=${member}`;
+  location.href = "/api/gmail/connect";
 });
 $("#gmail-sync").addEventListener("click", async () => {
   $("#gmail-result").textContent = "Checking mailboxes…";
@@ -1052,6 +1121,7 @@ document.addEventListener("click", async (e) => {
 
 async function loadSources() {
   await loadGmail().then(renderGmail).catch((err) => toast(err.message));
+  loadDisplayLinks().catch((err) => toast(err.message));
   $("#gdrive-state").innerHTML = state.meta.gdrive_configured
     ? `${connChip(true, "Connected")} with a service account.`
     : `${connChip(false, "Not connected")} Set <code>GOOGLE_SERVICE_ACCOUNT_FILE</code> on the server (see README).`;
@@ -1082,7 +1152,11 @@ document.addEventListener("click", async (e) => {
 // ---------------------------------------------------------------------------
 function route() {
   const view = (location.hash || "#wall").slice(1);
-  const known = ["wall", "board", "manage", "data"].includes(view) ? view : "wall";
+  let known = ["wall", "board", "manage", "data"].includes(view) ? view : "wall";
+  if (!canEdit() && (known === "manage" || known === "data")) {
+    known = "wall";
+    history.replaceState(null, "", "/#wall");
+  }
   document.querySelectorAll(".view").forEach((v) => { v.hidden = v.id !== `view-${known}`; });
   document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.view === known));
   if (known === "wall" || known === "board") loadDashboard();
@@ -1112,8 +1186,96 @@ $("#fullscreen-btn").addEventListener("click", () => {
   else document.documentElement.requestFullscreen?.();
 });
 
+// ---------------------------------------------------------------------------
+// sign-in
+// ---------------------------------------------------------------------------
+function showAuth(mode, info = {}) {
+  clearTimeout(state.timer);
+  document.body.className = "signed-out";
+  $("#auth").hidden = false;
+  $("#auth-error").textContent = "";
+  ["login", "setup", "invite"].forEach((m) => { $(`#${m}-form`).hidden = m !== mode; });
+  if (mode === "invite") {
+    $("#invite-title").textContent = info.reset ? `New password, ${info.name.split(" ")[0]}` : `Welcome, ${info.name.split(" ")[0]}`;
+    $("#invite-text").textContent = `You'll sign in as ${info.email}.`;
+  }
+  $(`#${mode}-form input`)?.focus();
+}
+
+function applyUser(user) {
+  state.user = user;
+  $("#auth").hidden = true;
+  document.body.className = `role-${user.access}${user.display ? " is-display" : ""}`;
+  $("#user-btn").textContent = user.display ? `🖥 ${user.name}` : user.name;
+  $("#user-role").textContent = user.display ? "Wall display · read-only" : `${ACCESS_LABEL[user.access]}${user.email ? ` · ${user.email}` : ""}`;
+  $("#sign-out").hidden = user.display;
+  const view = (location.hash || "#wall").slice(1);
+  if (!canEdit() && ["manage", "data"].includes(view)) location.hash = "#wall";
+}
+
+async function authSubmit(e, path, body) {
+  e.preventDefault();
+  $("#auth-error").textContent = "";
+  try {
+    await api(path, { method: "POST", body });
+    history.replaceState(null, "", "/#wall");
+    location.reload();
+  } catch (err) { $("#auth-error").textContent = err.message; }
+}
+
+$("#login-form").addEventListener("submit", (e) => authSubmit(e, "/api/auth/login", Object.fromEntries(new FormData(e.target))));
+$("#setup-form").addEventListener("submit", (e) => authSubmit(e, "/api/auth/setup", Object.fromEntries(new FormData(e.target))));
+$("#invite-form").addEventListener("submit", (e) =>
+  authSubmit(e, `/api/auth/invite/${encodeURIComponent(state.inviteToken)}`, Object.fromEntries(new FormData(e.target))));
+$("#user-btn").addEventListener("click", () => {
+  const pop = $("#user-pop");
+  pop.hidden = !pop.hidden;
+  $("#user-btn").setAttribute("aria-expanded", String(!pop.hidden));
+});
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".user-menu")) $("#user-pop").hidden = true;
+});
+$("#sign-out").addEventListener("click", async () => {
+  await api("/api/auth/logout", { method: "POST" });
+  location.href = "/";
+});
+$("#password-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    await api("/api/auth/password", { method: "POST", body: Object.fromEntries(new FormData(e.target)) });
+    e.target.reset(); $("#user-pop").hidden = true;
+    toast("Password changed");
+  } catch (err) { toast(err.message); }
+});
+
+/** Returns true once someone is signed in; otherwise shows the right sign-in screen. */
+async function authenticate() {
+  const hash = location.hash;
+  if (hash.startsWith("#invite=")) {
+    state.inviteToken = decodeURIComponent(hash.slice("#invite=".length));
+    history.replaceState(null, "", "/");  // keep the one-time token out of history and bookmarks
+    try {
+      const info = await api(`/api/auth/invite/${encodeURIComponent(state.inviteToken)}`);
+      showAuth("invite", info);
+    } catch (err) {
+      showAuth("login");
+      $("#auth-error").textContent = err.message;
+    }
+    return false;
+  }
+  const me = await api("/api/auth/me");
+  $("#auth-office").textContent = me.office;
+  if (me.user) { applyUser(me.user); return true; }
+  showAuth(me.setup_needed ? "setup" : "login");
+  if (new URLSearchParams(location.search).get("display") === "invalid") {
+    $("#auth-error").textContent = "That display link is no longer valid. Ask the principal for a new one.";
+  }
+  return false;
+}
+
 async function init() {
   applyTheme(storage("studio.theme"));
+  if (!(await authenticate())) return;
   ["#filter-lead", "#filter-health", "#sort-by"].forEach((sel) => {
     const saved = storage(`studio.${sel}`);
     if (saved != null) $(sel).value = saved;
@@ -1123,7 +1285,7 @@ async function init() {
   $("#template-select").innerHTML = Object.entries(state.meta.templates).map(([k, v]) =>
     `<option value="${k}" ${k === state.meta.default_template ? "selected" : ""}>${esc(v)}</option>`).join("") +
     `<option value="none">No phases (add manually)</option>`;
-  await loadMembers();
+  if (canEdit()) await loadMembers();
   await loadGmail().catch(() => {});
   const params = new URLSearchParams(location.search);
   if (params.has("gmail") || params.has("gmail_error")) {

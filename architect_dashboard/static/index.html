@@ -6,7 +6,36 @@
   <title>Atelier Studio Board</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
-<body>
+<body class="signed-out">
+  <!-- ============ Sign in / setup / invite ============ -->
+  <section id="auth" class="auth" hidden>
+    <div class="auth-card">
+      <div class="auth-brand">ATELIER <span id="auth-office"></span></div>
+      <form id="login-form" hidden>
+        <h2>Sign in</h2>
+        <label>Email <input name="email" type="email" autocomplete="username" required></label>
+        <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+        <button class="btn primary" type="submit">Sign in</button>
+        <p class="muted small">Forgot your password? Ask the principal for a new link.</p>
+      </form>
+      <form id="setup-form" hidden>
+        <h2>Set up Atelier</h2>
+        <p class="muted">Create the principal's account. You'll invite the team afterwards.</p>
+        <label>Your name <input name="name" required autocomplete="name"></label>
+        <label>Email <input name="email" type="email" required autocomplete="username"></label>
+        <label>Password (10+ characters) <input name="password" type="password" minlength="10" required autocomplete="new-password"></label>
+        <button class="btn primary" type="submit">Create account</button>
+      </form>
+      <form id="invite-form" hidden>
+        <h2 id="invite-title">Welcome</h2>
+        <p class="muted" id="invite-text"></p>
+        <label>Choose a password (10+ characters) <input name="password" type="password" minlength="10" required autocomplete="new-password"></label>
+        <button class="btn primary" type="submit">Set password &amp; sign in</button>
+      </form>
+      <p class="auth-error" id="auth-error" role="alert"></p>
+    </div>
+  </section>
+
   <header class="topbar">
     <div class="brand">
       <h1>Atelier</h1>
@@ -16,13 +45,25 @@
     <nav class="tabs" aria-label="Views">
       <a href="#wall" data-view="wall" class="tab">Dashboard</a>
       <a href="#board" data-view="board" class="tab">Board</a>
-      <a href="#manage" data-view="manage" class="tab">Update</a>
-      <a href="#data" data-view="data" class="tab">Data &amp; sync</a>
+      <a href="#manage" data-view="manage" class="tab needs-member">Update</a>
+      <a href="#data" data-view="data" class="tab needs-member">Data &amp; sync</a>
     </nav>
     <div class="topbar-right">
       <div class="clock" id="clock" aria-live="off"></div>
       <div class="muted small" id="last-refresh"></div>
       <button class="icon-btn" id="theme-btn" title="Toggle light / dark">◐</button>
+      <div class="user-menu">
+        <button class="user-btn" id="user-btn" aria-haspopup="true" aria-expanded="false"></button>
+        <div class="user-pop" id="user-pop" hidden>
+          <div class="muted small" id="user-role"></div>
+          <form id="password-form" class="stack needs-person">
+            <input name="current" type="password" placeholder="Current password" autocomplete="current-password" required>
+            <input name="password" type="password" placeholder="New password (10+)" minlength="10" autocomplete="new-password" required>
+            <button class="btn small" type="submit">Change password</button>
+          </form>
+          <button class="btn small" id="sign-out">Sign out</button>
+        </div>
+      </div>
       <button class="icon-btn" id="fullscreen-btn" title="Full screen">⛶</button>
     </div>
   </header>
@@ -89,7 +130,6 @@
   <main id="view-manage" class="view" hidden>
     <div class="manage-bar">
       <label>Project <select id="m-project"></select></label>
-      <label>I am <select id="m-member"><option value="">— select your name —</option></select></label>
       <form id="my-status" class="inline-form" style="align-items:end">
         <label>What I'm working on <input name="status" id="m-status" placeholder="e.g. CD package · Harbor House" size="32"></label>
         <button class="btn" type="submit">Update status</button>
@@ -151,7 +191,7 @@
           <a class="btn" href="/api/export/template">Download template</a>
           <a class="btn" href="/api/export/excel">Export everything (.xlsx)</a>
         </div>
-        <form id="excel-upload" class="upload">
+        <form id="excel-upload" class="upload needs-admin">
           <input type="file" name="file" accept=".xlsx,.xlsm" required>
           <button class="btn primary" type="submit">Import workbook</button>
         </form>
@@ -163,7 +203,7 @@
         <p class="muted" id="gdrive-state"></p>
         <p class="muted">Add a Google Sheet (or an .xlsx stored in Drive) that uses the same layout as the Excel
           template. It is pulled automatically on a schedule, or on demand with “Sync now”.</p>
-        <form id="gdrive-add" class="inline-form">
+        <form id="gdrive-add" class="inline-form needs-admin">
           <input name="link" placeholder="Paste the Google Sheets / Drive link" required>
           <button class="btn" type="submit">Add</button>
         </form>
@@ -179,7 +219,6 @@
           clients and consultants, flags the ones waiting on a reply, and saves phase-change emails as drafts in your
           Gmail. It reads sender, subject and date only, never message text, and it never sends anything itself.</p>
         <div class="inline-form" id="gmail-connect-row">
-          <select id="gmail-member" aria-label="Team member"></select>
           <button class="btn primary" id="gmail-connect">Connect my Gmail</button>
         </div>
         <ul class="sources" id="gmail-accounts"></ul>
@@ -189,13 +228,28 @@
 
       <section class="card">
         <h2>Team</h2>
-        <form id="add-member" class="inline-form">
+        <p class="muted small needs-admin">Give each person access, then send them their invite link. <b>Team</b> can update
+          projects; <b>Viewer</b> can only look; <b>Principal</b> can also manage the team and integrations.</p>
+        <form id="add-member" class="inline-form needs-admin">
           <input name="name" placeholder="Name" required>
-          <input name="role" placeholder="Role">
+          <input name="role" placeholder="Job title">
           <input name="email" placeholder="Email" type="email">
           <button class="btn" type="submit">Add</button>
         </form>
         <ul class="members" id="members"></ul>
+        <div id="invite-result" class="draft" hidden></div>
+      </section>
+
+      <section class="card needs-admin">
+        <h2>Wall displays</h2>
+        <p class="muted small">A secret link for the office screen: open it once in the TV's browser and it stays signed in,
+          read-only. Revoke it if the link leaks or the screen is replaced.</p>
+        <form id="add-display" class="inline-form">
+          <input name="label" placeholder="e.g. Studio TV" required>
+          <button class="btn" type="submit">Create link</button>
+        </form>
+        <div id="display-result" class="draft" hidden></div>
+        <ul class="sources" id="display-links"></ul>
       </section>
     </div>
   </main>

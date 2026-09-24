@@ -13,7 +13,36 @@ CREATE TABLE IF NOT EXISTS members (
     role       TEXT,
     email      TEXT,
     status     TEXT,  -- what they're working on right now
+    access     TEXT,  -- admin | member | viewer; NULL = no login
+    password_hash TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Signed-in browsers. Only a hash of the cookie value is stored.
+CREATE TABLE IF NOT EXISTS sessions (
+    token_hash TEXT PRIMARY KEY,
+    member_id  INTEGER REFERENCES members(id) ON DELETE CASCADE,  -- NULL for a display session
+    display_id INTEGER REFERENCES display_links(id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+);
+
+-- One-time links to set a password (invites and resets).
+CREATE TABLE IF NOT EXISTS invites (
+    token_hash TEXT PRIMARY KEY,
+    member_id  INTEGER NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL
+);
+
+-- Secret read-only links for wall screens.
+CREATE TABLE IF NOT EXISTS display_links (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_hash TEXT NOT NULL UNIQUE,
+    label      TEXT NOT NULL,
+    created_by INTEGER REFERENCES members(id) ON DELETE SET NULL,
+    created_at TEXT NOT NULL,
+    last_used_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS projects (
@@ -169,7 +198,7 @@ def connect() -> Iterator[sqlite3.Connection]:
 
 # Columns added after the first release; created on databases that predate them.
 MIGRATIONS = {
-    "members": {"status": "TEXT"},
+    "members": {"status": "TEXT", "access": "TEXT", "password_hash": "TEXT"},
     "projects": {"blocker": "TEXT", "blocker_since": "TEXT"},
 }
 
@@ -202,8 +231,11 @@ def clamp(value: float) -> float:
 # Members
 # ---------------------------------------------------------------------------
 
+MEMBER_COLUMNS = "id, name, role, email, status, access, created_at, password_hash IS NOT NULL AS has_password"
+
+
 def list_members(conn) -> list[dict]:
-    return rows(conn.execute("SELECT * FROM members ORDER BY name"))
+    return rows(conn.execute(f"SELECT {MEMBER_COLUMNS} FROM members ORDER BY name"))
 
 
 def upsert_member(conn, name: str, role: str = None, email: str = None) -> int:
@@ -220,14 +252,14 @@ def upsert_member(conn, name: str, role: str = None, email: str = None) -> int:
 
 
 def update_member(conn, member_id: int, data: dict) -> None:
-    values = {k: v for k, v in data.items() if k in ("name", "role", "email", "status")}
+    values = {k: v for k, v in data.items() if k in ("name", "role", "email", "status", "access")}
     if values:
         assignments = ", ".join(f"{k} = ?" for k in values)
         conn.execute(f"UPDATE members SET {assignments} WHERE id = ?", (*values.values(), member_id))
 
 
 def get_member(conn, member_id: int) -> Optional[dict]:
-    row = conn.execute("SELECT * FROM members WHERE id = ?", (member_id,)).fetchone()
+    row = conn.execute(f"SELECT {MEMBER_COLUMNS} FROM members WHERE id = ?", (member_id,)).fetchone()
     return dict(row) if row else None
 
 
