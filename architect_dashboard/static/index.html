@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Studio Dashboard</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div>
+        <h1 id="office-name">Studio</h1>
+        <p class="muted" id="subtitle">Project progress</p>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Views">
+      <a href="#wall" data-view="wall" class="tab">Dashboard</a>
+      <a href="#manage" data-view="manage" class="tab">Update progress</a>
+      <a href="#data" data-view="data" class="tab">Data &amp; sync</a>
+    </nav>
+    <div class="topbar-right">
+      <div class="clock" id="clock" aria-live="off"></div>
+      <div class="muted small" id="last-refresh"></div>
+      <button class="icon-btn" id="theme-btn" title="Toggle light / dark">◐</button>
+      <button class="icon-btn" id="fullscreen-btn" title="Full screen">⛶</button>
+    </div>
+  </header>
+
+  <!-- ============ Wall dashboard ============ -->
+  <main id="view-wall" class="view">
+    <section class="kpis" id="kpis" aria-label="Office summary"></section>
+    <div class="wall-grid">
+      <section aria-label="Projects">
+        <div class="section-head">
+          <h2>Projects</h2>
+          <div class="filters">
+            <select id="filter-lead" aria-label="Filter by lead architect"><option value="">All architects</option></select>
+            <select id="filter-health" aria-label="Filter by status">
+              <option value="">All statuses</option>
+              <option value="overdue">Overdue</option>
+              <option value="at_risk">At risk</option>
+              <option value="on_track">On track</option>
+            </select>
+            <select id="sort-by" aria-label="Sort projects">
+              <option value="attention">Needs attention first</option>
+              <option value="due">Due date</option>
+              <option value="progress">Progress</option>
+              <option value="today">Moved today</option>
+            </select>
+          </div>
+        </div>
+        <div class="projects" id="projects"></div>
+      </section>
+      <aside class="side">
+        <section class="panel">
+          <h2>Latest updates</h2>
+          <ol class="activity" id="activity"></ol>
+        </section>
+        <section class="panel">
+          <h2>Team workload</h2>
+          <p class="muted small">Open phases and drawings assigned, active projects</p>
+          <div id="team"></div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ============ Update progress ============ -->
+  <main id="view-manage" class="view" hidden>
+    <div class="manage-bar">
+      <label>Project <select id="m-project"></select></label>
+      <label>I am <select id="m-member"><option value="">— select your name —</option></select></label>
+      <button class="btn" id="m-new-project-btn">+ New project</button>
+    </div>
+
+    <form id="new-project" class="card form-grid" hidden>
+      <h2 class="span-all">New project</h2>
+      <label>Code <input name="code" required placeholder="25-020"></label>
+      <label>Name <input name="name" required placeholder="Housing Langstrasse"></label>
+      <label>Client <input name="client"></label>
+      <label>Location <input name="location"></label>
+      <label>Lead architect <select name="lead_id" class="member-select"></select></label>
+      <label>Phases <select name="template" id="template-select"></select></label>
+      <label>Start <input type="date" name="start_date"></label>
+      <label>Due <input type="date" name="due_date"></label>
+      <label class="span-2">Google Drive folder (link) <input name="drive_folder_id" placeholder="https://drive.google.com/drive/folders/…"></label>
+      <div class="span-all actions">
+        <button class="btn primary" type="submit">Create project</button>
+        <button class="btn" type="button" id="cancel-new-project">Cancel</button>
+      </div>
+    </form>
+
+    <section class="card" id="m-project-card"></section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Phases</h2>
+        <form id="add-phase" class="inline-form">
+          <input name="name" placeholder="Add a phase…" required>
+          <button class="btn" type="submit">Add</button>
+        </form>
+      </div>
+      <div class="table-wrap"><table class="edit-table" id="m-phases"></table></div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Drawings</h2>
+        <form id="add-drawing" class="inline-form">
+          <input name="number" placeholder="No. e.g. A-120" required size="10">
+          <input name="title" placeholder="Title">
+          <button class="btn" type="submit">Add drawing</button>
+        </form>
+      </div>
+      <div class="table-wrap"><table class="edit-table" id="m-drawings"></table></div>
+    </section>
+  </main>
+
+  <!-- ============ Data & sync ============ -->
+  <main id="view-data" class="view" hidden>
+    <div class="data-grid">
+      <section class="card">
+        <h2>Excel</h2>
+        <p class="muted">Keep your project list in Excel? Download the template, fill in the Team, Projects,
+          Phases and Drawings sheets, and upload it. Re-uploading updates existing rows; nothing is deleted.</p>
+        <div class="actions">
+          <a class="btn" href="/api/export/template">Download template</a>
+          <a class="btn" href="/api/export/excel">Export everything (.xlsx)</a>
+        </div>
+        <form id="excel-upload" class="upload">
+          <input type="file" name="file" accept=".xlsx,.xlsm" required>
+          <button class="btn primary" type="submit">Import workbook</button>
+        </form>
+        <p id="excel-result" class="result" role="status"></p>
+      </section>
+
+      <section class="card">
+        <h2>Google Drive</h2>
+        <p class="muted" id="gdrive-state"></p>
+        <p class="muted">Add a Google Sheet (or an .xlsx stored in Drive) that uses the same layout as the Excel
+          template. It is pulled automatically on a schedule, or on demand with “Sync now”.</p>
+        <form id="gdrive-add" class="inline-form">
+          <input name="link" placeholder="Paste the Google Sheets / Drive link" required>
+          <button class="btn" type="submit">Add</button>
+        </form>
+        <ul class="sources" id="gdrive-sources"></ul>
+        <button class="btn primary" id="gdrive-sync">Sync now</button>
+        <p id="gdrive-result" class="result" role="status"></p>
+      </section>
+
+      <section class="card">
+        <h2>Team</h2>
+        <form id="add-member" class="inline-form">
+          <input name="name" placeholder="Name" required>
+          <input name="role" placeholder="Role">
+          <input name="email" placeholder="Email" type="email">
+          <button class="btn" type="submit">Add</button>
+        </form>
+        <ul class="members" id="members"></ul>
+      </section>
+    </div>
+  </main>
+
+  <dialog id="project-dialog" aria-labelledby="dialog-title">
+    <div id="dialog-body"></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
