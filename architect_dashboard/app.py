@@ -1,4 +1,4 @@
-"""Studio Dashboard web server.
+"""Atelier Studio Board web server.
 
 Run:  uvicorn architect_dashboard.app:app --host 0.0.0.0 --port 8000
 Wall display:  http://<server>:8000/          Updates:  http://<server>:8000/#manage
@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import db, excel_io, gdrive, progress
+from . import db, excel_io, gdrive, notify, progress
 from .phases import DRAWING_STAGES, PHASE_STATUSES, PROJECT_STATUSES, TEMPLATES
 
 STATIC = Path(__file__).parent / "static"
@@ -27,7 +27,7 @@ async def lifespan(_app):
     yield
 
 
-app = FastAPI(title="Studio Dashboard", lifespan=lifespan)
+app = FastAPI(title="Atelier Studio Board", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 
@@ -41,6 +41,13 @@ class MemberIn(BaseModel):
     email: Optional[str] = None
 
 
+class MemberUpdate(BaseModel):
+    name: Optional[str] = None
+    role: Optional[str] = None
+    email: Optional[str] = None
+    status: Optional[str] = None
+
+
 class ProjectIn(BaseModel):
     code: Optional[str] = None
     name: Optional[str] = None
@@ -52,6 +59,7 @@ class ProjectIn(BaseModel):
     due_date: Optional[date] = None
     drive_folder_id: Optional[str] = None
     notes: Optional[str] = None
+    blocker: Optional[str] = None
     template: Optional[str] = None
 
 
@@ -82,6 +90,28 @@ class DrawingIn(BaseModel):
     due_date: Optional[date] = None
     note: Optional[str] = None
     member_id: Optional[int] = None
+
+
+class MoveIn(BaseModel):
+    phase_name: Optional[str] = None  # None = mark the project complete
+    member_id: Optional[int] = None
+
+
+class MilestoneIn(BaseModel):
+    title: Optional[str] = None
+    due_date: Optional[date] = None
+    done: Optional[bool] = None
+    position: Optional[int] = None
+    member_id: Optional[int] = None
+
+
+class ContactIn(BaseModel):
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    kind: Optional[str] = None
+    role: Optional[str] = None
+    notify: Optional[bool] = None
 
 
 class SyncSourceIn(BaseModel):
@@ -131,6 +161,7 @@ def get_meta():
         "drawing_stages": DRAWING_STAGES,
         "phase_statuses": PHASE_STATUSES,
         "project_statuses": PROJECT_STATUSES,
+        "contact_kinds": db.CONTACT_KINDS,
         "gdrive_configured": gdrive.is_configured(),
     }
 
@@ -150,6 +181,14 @@ def add_member(body: MemberIn):
     with db.connect() as conn:
         member_id = db.upsert_member(conn, body.name.strip(), body.role, body.email)
         return {"id": member_id}
+
+
+@app.patch("/api/members/{member_id}")
+def edit_member(member_id: int, body: MemberUpdate):
+    with db.connect() as conn:
+        _require(db.get_member(conn, member_id), "Team member not found")
+        db.update_member(conn, member_id, _fields(body))
+    return {"ok": True}
 
 
 # ---------------------------------------------------------------------------
@@ -184,6 +223,8 @@ def get_project(project_id: int):
         project = _require(db.get_project(conn, project_id), "Project not found")
         summary = progress.project_summary(conn, project, date.today())
         summary["drawing_list"] = db.list_drawings(conn, project_id)
+        summary["milestones"] = db.list_milestones(conn, project_id)
+        summary["contacts"] = db.list_contacts(conn, project_id)
         return summary
 
 
@@ -209,6 +250,31 @@ def remove_project(project_id: int):
         _require(db.get_project(conn, project_id), "Project not found")
         db.delete_project(conn, project_id)
     return {"ok": True}
+
+
+@app.post("/api/projects/{project_id}/move")
+def move_project(project_id: int, body: MoveIn):
+    """Board drag & drop: make a phase current (or finish the project), and
+    return an email draft for the contacts marked 'notify'."""
+    with db.connect() as conn:
+        project = _require(db.get_project(conn, project_id), "Project not found")
+        phases = db.list_phases(conn, project_id)
+        if body.phase_name is None:
+            changes = []
+            for phase in phases:
+                if phase["progress"] < 100:
+                    db.set_phase_progress(conn, phase["id"], 100, note="Project complete",
+                                          member_id=body.member_id, source="board")
+                    changes.append(f"{phase['name']}: {phase['progress']:.0f}% → 100%")
+            return {"changes": changes, "email": None}
+        target = next((p for p in phases if p["name"] == body.phase_name), None)
+        if target is None:
+            raise HTTPException(422, f"{project['code']} has no phase called '{body.phase_name}'")
+        changes = db.move_to_phase(conn, project_id, target["id"], member_id=body.member_id)
+        contacts = db.list_contacts(conn, project_id)
+        sender = db.get_member(conn, body.member_id) if body.member_id else None
+        email = notify.phase_change_email(project, target, contacts, sender)
+        return {"changes": changes, "email": email if email["to"] else None}
 
 
 # ---------------------------------------------------------------------------
@@ -241,6 +307,71 @@ def remove_phase(phase_id: int):
     with db.connect() as conn:
         _require(db.get_phase(conn, phase_id), "Phase not found")
         db.delete_phase(conn, phase_id)
+    return {"ok": True}
+
+
+# ---------------------------------------------------------------------------
+# Milestones
+# ---------------------------------------------------------------------------
+
+@app.post("/api/phases/{phase_id}/milestones", status_code=201)
+def add_milestone(phase_id: int, body: MilestoneIn):
+    data = _fields(body)
+    if not (data.get("title") or "").strip():
+        raise HTTPException(422, "Milestone title is required")
+    with db.connect() as conn:
+        _require(db.get_phase(conn, phase_id), "Phase not found")
+        return {"id": db.upsert_milestone(conn, phase_id, data["title"].strip(), data.get("due_date"),
+                                          data.get("done"), member_id=data.get("member_id"))}
+
+
+@app.patch("/api/milestones/{milestone_id}")
+def edit_milestone(milestone_id: int, body: MilestoneIn):
+    with db.connect() as conn:
+        milestone = _require(db.get_milestone(conn, milestone_id), "Milestone not found")
+        db.update_milestone(conn, milestone_id, _fields(body))
+        phase = db.get_phase(conn, milestone["phase_id"])
+    return {"ok": True, "phase_progress": phase["progress"]}
+
+
+@app.delete("/api/milestones/{milestone_id}")
+def remove_milestone(milestone_id: int):
+    with db.connect() as conn:
+        _require(db.get_milestone(conn, milestone_id), "Milestone not found")
+        db.delete_milestone(conn, milestone_id)
+    return {"ok": True}
+
+
+# ---------------------------------------------------------------------------
+# Contacts
+# ---------------------------------------------------------------------------
+
+@app.post("/api/projects/{project_id}/contacts", status_code=201)
+def add_contact(project_id: int, body: ContactIn):
+    data = _fields(body)
+    if not (data.get("name") or "").strip():
+        raise HTTPException(422, "Contact name is required")
+    _check(data.get("kind"), db.CONTACT_KINDS, "contact type")
+    with db.connect() as conn:
+        _require(db.get_project(conn, project_id), "Project not found")
+        return {"id": db.upsert_contact(conn, project_id, data)}
+
+
+@app.patch("/api/contacts/{contact_id}")
+def edit_contact(contact_id: int, body: ContactIn):
+    data = _fields(body)
+    _check(data.get("kind"), db.CONTACT_KINDS, "contact type")
+    with db.connect() as conn:
+        _require(db.get_contact(conn, contact_id), "Contact not found")
+        db.update_contact(conn, contact_id, data)
+    return {"ok": True}
+
+
+@app.delete("/api/contacts/{contact_id}")
+def remove_contact(contact_id: int):
+    with db.connect() as conn:
+        _require(db.get_contact(conn, contact_id), "Contact not found")
+        db.delete_contact(conn, contact_id)
     return {"ok": True}
 
 

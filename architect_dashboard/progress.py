@@ -92,6 +92,11 @@ def project_summary(conn, project: dict, today: date) -> dict:
     phases = db.list_phases(conn, project["id"])
     drawings = db.list_drawings(conn, project["id"])
     log = db.phase_log(conn, project["id"])
+    milestones = db.list_milestones(conn, project["id"])
+    for phase in phases:
+        own = [m for m in milestones if m["phase_id"] == phase["id"]]
+        phase["milestones_total"] = len(own)
+        phase["milestones_done"] = sum(m["done"] for m in own)
 
     for phase in phases:
         phase["health"] = phase_health(phase, today)
@@ -112,6 +117,13 @@ def project_summary(conn, project: dict, today: date) -> dict:
     if expected and overall < expected - config.AT_RISK_TOLERANCE:
         healths.append("at_risk")
     health = "done" if phases and overall >= 100 else worst(healths)
+    team_ids = [project["lead_id"]] if project["lead_id"] else []
+    # lead first, then whoever holds the open phases, then open drawings
+    open_drawings = [d["assignee_id"] for d in drawings if d["stage"] != "issued"]
+    for member_id in [p["assignee_id"] for p in phases if p["progress"] < 100] + open_drawings:
+        if member_id and member_id not in team_ids:
+            team_ids.append(member_id)
+    upcoming = [m for m in milestones if not m["done"] and current and m["phase_id"] == current["id"]]
 
     return {
         **project,
@@ -123,6 +135,10 @@ def project_summary(conn, project: dict, today: date) -> dict:
         "days_left": (due - today).days if due else None,
         "current_phase": current["name"] if current else None,
         "current_phase_code": current["code"] if current else None,
+        "current_phase_id": current["id"] if current else None,
+        "next_milestones": [{"id": m["id"], "title": m["title"], "due_date": m["due_date"]} for m in upcoming[:3]],
+        "team_ids": team_ids,
+        "needs_attention": health in ("at_risk", "overdue") or bool(project["blocker"]),
         "phases": phases,
         "drawings": drawing_stats(drawings, today),
         "history": daily_history(phases, log, today),
@@ -131,7 +147,7 @@ def project_summary(conn, project: dict, today: date) -> dict:
 
 def team_workload(conn) -> list[dict]:
     return db.rows(conn.execute(
-        """SELECT m.id, m.name, m.role,
+        """SELECT m.id, m.name, m.role, m.status,
              (SELECT COUNT(*) FROM phases ph JOIN projects p ON p.id = ph.project_id
                WHERE ph.assignee_id = m.id AND ph.progress < 100 AND p.status = 'active') AS open_phases,
              (SELECT COUNT(*) FROM drawings d JOIN projects p ON p.id = d.project_id
@@ -140,6 +156,20 @@ def team_workload(conn) -> list[dict]:
              (SELECT MAX(logged_at) FROM progress_log l WHERE l.member_id = m.id) AS last_update
            FROM members m ORDER BY m.name"""
     ))
+
+
+def board_columns(projects: list[dict]) -> list[dict]:
+    """Kanban columns: every phase name used by an active project, in phase order,
+    plus a final column for finished projects."""
+    columns: dict[str, dict] = {}
+    for p in projects:
+        if p["status"] != "active":
+            continue
+        for ph in p["phases"]:
+            col = columns.setdefault(ph["name"], {"name": ph["name"], "code": ph["code"], "positions": []})
+            col["positions"].append(ph["position"])
+    ordered = sorted(columns.values(), key=lambda c: sum(c["positions"]) / len(c["positions"]))
+    return [{"name": c["name"], "code": c["code"]} for c in ordered] + [{"name": None, "code": "✓", "label": "Complete"}]
 
 
 def dashboard(conn, today: Optional[date] = None) -> dict:
@@ -155,12 +185,14 @@ def dashboard(conn, today: Optional[date] = None) -> dict:
             "active_projects": len(active),
             "average_progress": round(sum(p["progress"] for p in active) / len(active), 1) if active else 0,
             "moved_today": sum(1 for p in active if p["delta_today"] > 0),
+            "blocked": sum(1 for p in active if p["blocker"]),
             "points_today": round(sum(p["delta_today"] for p in active), 1),
             "health": counts,
             "drawings_open": sum(p["drawings"]["total"] - p["drawings"]["by_stage"]["issued"] for p in active),
             "drawings_in_review": sum(p["drawings"]["by_stage"]["review"] for p in active),
         },
         "projects": projects,
+        "board": board_columns(projects),
         "team": team_workload(conn),
         "activity": db.recent_activity(conn),
     }

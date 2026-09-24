@@ -149,7 +149,7 @@ def test_excel_export_round_trips():
         excel_io.import_workbook(conn, _workbook())
         content = excel_io.export_workbook(conn)
     wb = load_workbook(io.BytesIO(content))
-    assert wb.sheetnames == ["Summary", "Team", "Projects", "Phases", "Drawings"]
+    assert wb.sheetnames == ["Summary", *excel_io.SHEETS]
     assert wb["Summary"]["A2"].value == "26-001"
 
     # a second database built from the export ends up with the same progress
@@ -270,10 +270,174 @@ def test_api_excel_endpoints(client):
     assert res.status_code == 200 and res.json()["projects"] == 1
     assert client.post("/api/import/excel", files={"file": ("notes.txt", b"hi", "text/plain")}).status_code == 422
     template = client.get("/api/export/template")
-    assert load_workbook(io.BytesIO(template.content)).sheetnames[:4] == ["Team", "Projects", "Phases", "Drawings"]
+    assert load_workbook(io.BytesIO(template.content)).sheetnames == [*excel_io.SHEETS, "Help"]
     assert client.get("/api/export/excel").status_code == 200
 
 
 def test_index_served(client):
     res = client.get("/")
-    assert res.status_code == 200 and "Studio Dashboard" in res.text
+    assert res.status_code == 200 and "Atelier" in res.text
+
+
+# ---------------------------------------------------------------------------
+# Board, milestones, contacts, blockers
+# ---------------------------------------------------------------------------
+
+def test_milestones_drive_phase_progress():
+    with db.connect() as conn:
+        project_id = _project(conn, template=None)
+        phase_id = db.upsert_phase(conn, project_id, {"name": "Design development"})
+        first = db.upsert_milestone(conn, phase_id, "DD plan set")
+        db.upsert_milestone(conn, phase_id, "Outline spec")
+        db.upsert_milestone(conn, phase_id, "Client DD review")
+        db.upsert_milestone(conn, phase_id, "Consultant kickoff", done=True)
+        assert db.get_phase(conn, phase_id)["progress"] == 25
+        db.set_milestone_done(conn, first, True)
+        assert db.get_phase(conn, phase_id)["progress"] == 50
+        db.set_milestone_done(conn, first, False)
+        assert db.get_phase(conn, phase_id)["progress"] == 25
+        db.delete_milestone(conn, first)
+        assert round(db.get_phase(conn, phase_id)["progress"], 1) == 33.3
+        notes = [a["note"] for a in db.recent_activity(conn)]
+    assert "✓ DD plan set" in notes and "↺ DD plan set" in notes
+
+
+def test_move_to_phase_completes_earlier_and_resets_later():
+    with db.connect() as conn:
+        project_id = _project(conn)
+        phases = db.list_phases(conn, project_id)
+        db.set_phase_progress(conn, phases[5]["id"], 30)  # work logged on a later phase
+        db.upsert_milestone(conn, phases[1]["id"], "Massing options")
+        db.upsert_milestone(conn, phases[5]["id"], "Details 1:20", done=True)
+        changes = db.move_to_phase(conn, project_id, phases[2]["id"])
+        after = {p["id"]: p for p in db.list_phases(conn, project_id)}
+        ticks = {m["title"]: m["done"] for m in db.list_milestones(conn, project_id)}
+    assert ticks == {"Massing options": 1, "Details 1:20": 0}
+    assert after[phases[0]["id"]]["progress"] == 100
+    assert after[phases[1]["id"]]["progress"] == 100
+    assert after[phases[2]["id"]]["progress"] == 0
+    assert after[phases[2]["id"]]["status"] == "in_progress"
+    assert after[phases[5]["id"]]["progress"] == 0
+    assert len(changes) == 3
+
+
+def test_blocker_since_is_tracked():
+    with db.connect() as conn:
+        project_id = _project(conn, template=None)
+        db.update_project(conn, project_id, {"blocker": "Waiting on structural calcs"})
+        since = db.get_project(conn, project_id)["blocker_since"]
+        assert since
+        db.update_project(conn, project_id, {"blocker": "Waiting on revised structural calcs"})
+        assert db.get_project(conn, project_id)["blocker_since"] == since
+        db.update_project(conn, project_id, {"blocker": "  "})
+        project = db.get_project(conn, project_id)
+    assert project["blocker"] is None and project["blocker_since"] is None
+
+
+def test_existing_database_is_migrated(tmp_path, monkeypatch):
+    import sqlite3
+    path = tmp_path / "old.db"
+    old = sqlite3.connect(path)
+    old.executescript("""
+        CREATE TABLE members (id INTEGER PRIMARY KEY, name TEXT UNIQUE, role TEXT, email TEXT, created_at TEXT);
+        CREATE TABLE projects (id INTEGER PRIMARY KEY, code TEXT UNIQUE, name TEXT, client TEXT, location TEXT,
+            lead_id INTEGER, status TEXT DEFAULT 'active', start_date TEXT, due_date TEXT,
+            drive_folder_id TEXT, notes TEXT, created_at TEXT, updated_at TEXT);
+        INSERT INTO projects (code, name) VALUES ('OLD-1', 'Legacy');
+    """)
+    old.close()
+    monkeypatch.setattr(config, "DB_PATH", str(path))
+    db.init_db()
+    with db.connect() as conn:
+        db.update_project(conn, 1, {"blocker": "Permit query"})
+        assert db.get_project(conn, 1)["blocker"] == "Permit query"
+
+
+def test_board_columns_follow_phase_order():
+    with db.connect() as conn:
+        a = _project(conn)
+        db.create_project(conn, {"code": "25-002", "name": "Other"}, template="sia112")
+        db.move_to_phase(conn, a, db.list_phases(conn, a)[3]["id"])
+        dash = progress.dashboard(conn)
+    names = [c["name"] for c in dash["board"]]
+    assert names[:2] == ["Preliminary studies", "Preliminary design"]
+    assert names[-1] is None  # "Complete" column
+    current = {p["code"]: p["current_phase"] for p in dash["projects"]}
+    assert current == {"25-001": "Building permit", "25-002": "Preliminary studies"}
+
+
+def test_excel_imports_milestones_and_contacts():
+    wb = Workbook()
+    wb.remove(wb.active)
+    ws = wb.create_sheet("Projects")
+    ws.append(["Code", "Name", "Template", "Blocker"])
+    ws.append(["HH-014", "Harbor House", "international", "Waiting on structural calcs"])
+    ws = wb.create_sheet("Milestones")
+    ws.append(["Project", "Phase", "Milestone", "Done"])
+    ws.append(["HH-014", "DD", "Consultant kickoff", "yes"])
+    ws.append(["HH-014", "Design development", "DD plan set", None])
+    ws.append(["HH-014", "Nope", "Ghost", None])
+    ws = wb.create_sheet("Contacts")
+    ws.append(["Project", "Name", "Type", "Role", "Email", "Notify"])
+    ws.append(["HH-014", "Joana Costa", "Client", "Client", "joana@costa.pt", "x"])
+    ws.append(["HH-014", "Rita Lopes", "consultant", "Structural", "rita@lopes-eng.pt", "no"])
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    with db.connect() as conn:
+        report = excel_io.import_workbook(conn, buffer.getvalue())
+        project_id = db.project_id_by_code(conn, "HH-014")
+        dd = next(p for p in db.list_phases(conn, project_id) if p["code"] == "DD")
+        contacts = {c["name"]: c for c in db.list_contacts(conn, project_id)}
+        blocker = db.get_project(conn, project_id)["blocker"]
+    assert report["milestones"] == 2 and report["contacts"] == 2 and len(report["errors"]) == 1
+    assert dd["progress"] == 50
+    assert contacts["Joana Costa"]["notify"] == 1 and contacts["Rita Lopes"]["notify"] == 0
+    assert blocker == "Waiting on structural calcs"
+
+
+def test_api_board_move_returns_email_draft(client):
+    member = client.post("/api/members", json={"name": "Ana Silva"}).json()["id"]
+    project_id = client.post("/api/projects", json={"code": "HH-014", "name": "Harbor House",
+                                                    "template": "international"}).json()["id"]
+    client.post(f"/api/projects/{project_id}/contacts",
+                json={"name": "Joana Costa", "email": "joana@costa.pt", "kind": "client", "notify": True})
+    client.post(f"/api/projects/{project_id}/contacts",
+                json={"name": "Rita Lopes", "email": "rita@lopes-eng.pt", "kind": "consultant"})
+    assert client.post(f"/api/projects/{project_id}/contacts", json={"name": "X", "kind": "friend"}).status_code == 422
+
+    res = client.post(f"/api/projects/{project_id}/move",
+                      json={"phase_name": "Design development", "member_id": member}).json()
+    assert len(res["changes"]) == 2
+    email = res["email"]
+    assert [t["email"] for t in email["to"]] == ["joana@costa.pt"]
+    assert email["subject"] == "HH-014 Harbor House: now in Design development"
+    assert "Dear Joana," in email["body"] and "Ana Silva" in email["body"]
+    assert email["gmail_url"].startswith("https://mail.google.com/mail/?view=cm")
+    assert "joana%40costa.pt" in email["gmail_url"]
+
+    assert client.post(f"/api/projects/{project_id}/move", json={"phase_name": "Nope"}).status_code == 422
+    done = client.post(f"/api/projects/{project_id}/move", json={"phase_name": None}).json()
+    assert done["email"] is None
+    assert client.get(f"/api/projects/{project_id}").json()["progress"] == 100
+
+
+def test_api_milestones_and_member_status(client):
+    project_id = client.post("/api/projects", json={"code": "RB-003", "name": "Ribeira Lofts",
+                                                    "template": "international"}).json()["id"]
+    phase_id = client.get(f"/api/projects/{project_id}").json()["phases"][0]["id"]
+    ids = [client.post(f"/api/phases/{phase_id}/milestones", json={"title": t}).json()["id"]
+           for t in ("Site photos", "Massing options")]
+    res = client.patch(f"/api/milestones/{ids[0]}", json={"done": True}).json()
+    assert res["phase_progress"] == 50
+    project = client.get(f"/api/projects/{project_id}").json()
+    assert [m["title"] for m in project["milestones"]] == ["Site photos", "Massing options"]
+    assert project["next_milestones"][0]["title"] == "Massing options"
+
+    client.patch(f"/api/projects/{project_id}", json={"blocker": "Client decision on massing"})
+    dash = client.get("/api/dashboard").json()
+    assert dash["kpis"]["blocked"] == 1 and dash["projects"][0]["needs_attention"]
+
+    member = client.post("/api/members", json={"name": "Diogo Alves"}).json()["id"]
+    client.patch(f"/api/members/{member}", json={"status": "Concept studies · Ribeira"})
+    team = client.get("/api/dashboard").json()["team"]
+    assert team[0]["status"] == "Concept studies · Ribeira"

@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS members (
     name       TEXT NOT NULL UNIQUE,
     role       TEXT,
     email      TEXT,
+    status     TEXT,  -- what they're working on right now
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -27,6 +28,8 @@ CREATE TABLE IF NOT EXISTS projects (
     due_date        TEXT,
     drive_folder_id TEXT,
     notes           TEXT,
+    blocker         TEXT,  -- what the project is waiting on, if anything
+    blocker_since   TEXT,
     created_at      TEXT DEFAULT CURRENT_TIMESTAMP,
     updated_at      TEXT DEFAULT CURRENT_TIMESTAMP
 );
@@ -78,6 +81,31 @@ CREATE TABLE IF NOT EXISTS progress_log (
 );
 CREATE INDEX IF NOT EXISTS idx_log_project ON progress_log(project_id, logged_at);
 
+-- Checklist items inside a phase. When a phase has milestones, ticking them sets its progress.
+CREATE TABLE IF NOT EXISTS milestones (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    phase_id   INTEGER NOT NULL REFERENCES phases(id) ON DELETE CASCADE,
+    title      TEXT NOT NULL,
+    position   INTEGER NOT NULL DEFAULT 0,
+    due_date   TEXT,
+    done       INTEGER NOT NULL DEFAULT 0,
+    done_at    TEXT,
+    UNIQUE (phase_id, title)
+);
+
+-- Clients, consultants and authorities on a project.
+CREATE TABLE IF NOT EXISTS contacts (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    name       TEXT NOT NULL,
+    email      TEXT,
+    phone      TEXT,
+    kind       TEXT NOT NULL DEFAULT 'client',  -- client | consultant | authority | contractor
+    role       TEXT,
+    notify     INTEGER NOT NULL DEFAULT 0,      -- email them when the project changes phase
+    UNIQUE (project_id, name)
+);
+
 CREATE TABLE IF NOT EXISTS sync_sources (
     id             INTEGER PRIMARY KEY AUTOINCREMENT,
     kind           TEXT NOT NULL DEFAULT 'gdrive',
@@ -109,8 +137,22 @@ def connect() -> Iterator[sqlite3.Connection]:
         conn.close()
 
 
+# Columns added after the first release; created on databases that predate them.
+MIGRATIONS = {
+    "members": {"status": "TEXT"},
+    "projects": {"blocker": "TEXT", "blocker_since": "TEXT"},
+}
+
+
 def init_db() -> None:
     with connect() as conn:
+        for table, columns in MIGRATIONS.items():
+            existing = {r["name"] for r in conn.execute(f"PRAGMA table_info({table})")}
+            if not existing:
+                continue  # table is created fresh by the schema below
+            for column, kind in columns.items():
+                if column not in existing:
+                    conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {kind}")
         conn.executescript(SCHEMA)
 
 
@@ -147,6 +189,18 @@ def upsert_member(conn, name: str, role: str = None, email: str = None) -> int:
     ).lastrowid
 
 
+def update_member(conn, member_id: int, data: dict) -> None:
+    values = {k: v for k, v in data.items() if k in ("name", "role", "email", "status")}
+    if values:
+        assignments = ", ".join(f"{k} = ?" for k in values)
+        conn.execute(f"UPDATE members SET {assignments} WHERE id = ?", (*values.values(), member_id))
+
+
+def get_member(conn, member_id: int) -> Optional[dict]:
+    row = conn.execute("SELECT * FROM members WHERE id = ?", (member_id,)).fetchone()
+    return dict(row) if row else None
+
+
 def member_id_by_name(conn, name: Optional[str]) -> Optional[int]:
     if not name:
         return None
@@ -158,7 +212,7 @@ def member_id_by_name(conn, name: Optional[str]) -> Optional[int]:
 # ---------------------------------------------------------------------------
 
 PROJECT_FIELDS = ("code", "name", "client", "location", "lead_id", "status",
-                  "start_date", "due_date", "drive_folder_id", "notes")
+                  "start_date", "due_date", "drive_folder_id", "notes", "blocker")
 
 
 def list_projects(conn, include_archived: bool = False) -> list[dict]:
@@ -200,6 +254,14 @@ def update_project(conn, project_id: int, data: dict) -> None:
     values = {k: v for k, v in data.items() if k in PROJECT_FIELDS}
     if not values:
         return
+    if "blocker" in values:
+        values["blocker"] = (values["blocker"] or "").strip() or None
+        current = conn.execute("SELECT blocker, blocker_since FROM projects WHERE id = ?",
+                               (project_id,)).fetchone()
+        if not values["blocker"]:
+            values["blocker_since"] = None
+        elif not current or not current["blocker"]:
+            values["blocker_since"] = now()
     assignments = ", ".join(f"{k} = ?" for k in values)
     conn.execute(
         f"UPDATE projects SET {assignments}, updated_at = ? WHERE id = ?",
@@ -309,6 +371,167 @@ def update_phase(conn, phase_id: int, data: dict) -> None:
 
 def delete_phase(conn, phase_id: int) -> None:
     conn.execute("DELETE FROM phases WHERE id = ?", (phase_id,))
+
+
+def move_to_phase(conn, project_id: int, phase_id: int, member_id: int = None) -> list[str]:
+    """Make `phase_id` the project's current phase (e.g. dragged on the board).
+
+    Earlier phases are completed, the target phase is reopened if it was done,
+    later phases are reset. Returns a description of each change made.
+    """
+    phases = list_phases(conn, project_id)
+    target = next((p for p in phases if p["id"] == phase_id), None)
+    if target is None:
+        raise KeyError(phase_id)
+    note = f"Moved to {target['name']}"
+    changes = []
+    for phase in phases:
+        if phase["position"] < target["position"] or (phase["position"] == target["position"] and phase["id"] < target["id"]):
+            new = 100.0
+        elif phase["id"] == target["id"]:
+            new = 0.0 if phase["progress"] >= 100 else phase["progress"]
+        else:
+            new = 0.0
+        if new != phase["progress"]:
+            set_phase_progress(conn, phase["id"], new, note=note, member_id=member_id, source="board")
+            changes.append(f"{phase['name']}: {phase['progress']:.0f}% → {new:.0f}%")
+        # keep checklists consistent with the jump: finished phases are fully ticked,
+        # reset phases fully unticked (a reopened target keeps its ticks unless it was complete)
+        if new in (0.0, 100.0) and new != phase["progress"]:
+            done = new == 100.0
+            conn.execute("UPDATE milestones SET done = ?, done_at = ? WHERE phase_id = ? AND done != ?",
+                         (int(done), now() if done else None, phase["id"], int(done)))
+        if phase["id"] == target["id"] and phase["status"] != "in_progress":
+            conn.execute("UPDATE phases SET status = 'in_progress' WHERE id = ?", (phase["id"],))
+    return changes
+
+
+# ---------------------------------------------------------------------------
+# Milestones
+# ---------------------------------------------------------------------------
+
+def list_milestones(conn, project_id: int) -> list[dict]:
+    return rows(conn.execute(
+        """SELECT ms.* FROM milestones ms JOIN phases ph ON ph.id = ms.phase_id
+           WHERE ph.project_id = ? ORDER BY ph.position, ph.id, ms.position, ms.id""",
+        (project_id,),
+    ))
+
+
+def get_milestone(conn, milestone_id: int) -> Optional[dict]:
+    row = conn.execute("SELECT * FROM milestones WHERE id = ?", (milestone_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def upsert_milestone(conn, phase_id: int, title: str, due_date: str = None,
+                     done: Optional[bool] = None, member_id: int = None, source: str = "manual") -> int:
+    existing = conn.execute("SELECT id FROM milestones WHERE phase_id = ? AND title = ?",
+                            (phase_id, title)).fetchone()
+    if existing:
+        milestone_id = existing["id"]
+        if due_date:
+            conn.execute("UPDATE milestones SET due_date = ? WHERE id = ?", (due_date, milestone_id))
+    else:
+        position = conn.execute("SELECT COALESCE(MAX(position), 0) + 1 FROM milestones WHERE phase_id = ?",
+                                (phase_id,)).fetchone()[0]
+        milestone_id = conn.execute(
+            "INSERT INTO milestones (phase_id, title, position, due_date) VALUES (?, ?, ?, ?)",
+            (phase_id, title, position, due_date),
+        ).lastrowid
+    if done is not None:
+        set_milestone_done(conn, milestone_id, done, member_id=member_id, source=source)
+    elif not existing:
+        sync_phase_from_milestones(conn, phase_id, member_id=member_id, source=source)
+    return milestone_id
+
+
+def set_milestone_done(conn, milestone_id: int, done: bool, member_id: int = None,
+                       source: str = "manual") -> None:
+    milestone = get_milestone(conn, milestone_id)
+    if milestone is None:
+        raise KeyError(milestone_id)
+    if bool(milestone["done"]) == bool(done):
+        return
+    conn.execute("UPDATE milestones SET done = ?, done_at = ? WHERE id = ?",
+                 (1 if done else 0, now() if done else None, milestone_id))
+    note = f"{'✓' if done else '↺'} {milestone['title']}"
+    sync_phase_from_milestones(conn, milestone["phase_id"], note=note, member_id=member_id, source=source)
+
+
+def sync_phase_from_milestones(conn, phase_id: int, note: str = None, member_id: int = None,
+                               source: str = "manual") -> None:
+    """A phase with milestones is exactly as far along as its ticked share."""
+    total, done = conn.execute(
+        "SELECT COUNT(*), COALESCE(SUM(done), 0) FROM milestones WHERE phase_id = ?", (phase_id,)
+    ).fetchone()
+    if total:
+        set_phase_progress(conn, phase_id, done / total * 100, note=note, member_id=member_id, source=source)
+
+
+def update_milestone(conn, milestone_id: int, data: dict) -> None:
+    values = {k: v for k, v in data.items() if k in ("title", "due_date", "position")}
+    if values:
+        assignments = ", ".join(f"{k} = ?" for k in values)
+        conn.execute(f"UPDATE milestones SET {assignments} WHERE id = ?", (*values.values(), milestone_id))
+    if data.get("done") is not None:
+        set_milestone_done(conn, milestone_id, data["done"], member_id=data.get("member_id"))
+
+
+def delete_milestone(conn, milestone_id: int) -> None:
+    milestone = get_milestone(conn, milestone_id)
+    if milestone:
+        conn.execute("DELETE FROM milestones WHERE id = ?", (milestone_id,))
+        sync_phase_from_milestones(conn, milestone["phase_id"])
+
+
+# ---------------------------------------------------------------------------
+# Contacts
+# ---------------------------------------------------------------------------
+
+CONTACT_FIELDS = ("name", "email", "phone", "kind", "role", "notify")
+CONTACT_KINDS = ("client", "consultant", "authority", "contractor")
+
+
+def list_contacts(conn, project_id: int) -> list[dict]:
+    return rows(conn.execute(
+        """SELECT * FROM contacts WHERE project_id = ?
+           ORDER BY CASE kind WHEN 'client' THEN 0 WHEN 'consultant' THEN 1 ELSE 2 END, name""",
+        (project_id,),
+    ))
+
+
+def get_contact(conn, contact_id: int) -> Optional[dict]:
+    row = conn.execute("SELECT * FROM contacts WHERE id = ?", (contact_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def upsert_contact(conn, project_id: int, data: dict) -> int:
+    values = {k: data[k] for k in CONTACT_FIELDS if k in data and data[k] is not None}
+    if "notify" in values:
+        values["notify"] = 1 if values["notify"] else 0
+    existing = conn.execute("SELECT id FROM contacts WHERE project_id = ? AND name = ?",
+                            (project_id, data["name"])).fetchone()
+    if existing:
+        assignments = ", ".join(f"{k} = ?" for k in values)
+        conn.execute(f"UPDATE contacts SET {assignments} WHERE id = ?", (*values.values(), existing["id"]))
+        return existing["id"]
+    values["project_id"] = project_id
+    cols = ", ".join(values)
+    marks = ", ".join("?" for _ in values)
+    return conn.execute(f"INSERT INTO contacts ({cols}) VALUES ({marks})", tuple(values.values())).lastrowid
+
+
+def update_contact(conn, contact_id: int, data: dict) -> None:
+    values = {k: v for k, v in data.items() if k in CONTACT_FIELDS}
+    if "notify" in values:
+        values["notify"] = 1 if values["notify"] else 0
+    if values:
+        assignments = ", ".join(f"{k} = ?" for k in values)
+        conn.execute(f"UPDATE contacts SET {assignments} WHERE id = ?", (*values.values(), contact_id))
+
+
+def delete_contact(conn, contact_id: int) -> None:
+    conn.execute("DELETE FROM contacts WHERE id = ?", (contact_id,))
 
 
 # ---------------------------------------------------------------------------

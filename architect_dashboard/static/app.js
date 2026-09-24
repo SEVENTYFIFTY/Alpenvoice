@@ -1,4 +1,4 @@
-/* Studio Dashboard — front end (no build step). */
+/* Atelier Studio Board: front end (no build step). */
 "use strict";
 
 const state = {
@@ -7,7 +7,17 @@ const state = {
   members: [],
   manageProjectId: null,
   timer: null,
+  boardFilter: "all",
+  dragId: null,
 };
+
+// Avatar colours: one per team member, assigned by id in a fixed order (initials carry identity too)
+const AVATAR = ["#1b2a4a", "#8b6914", "#166534", "#9a3412", "#1d4e89", "#57534e", "#6b3a7a", "#0f5e5e"];
+const avatarColor = (id) => AVATAR[(id - 1) % AVATAR.length];
+const initials = (name) => (name || "?").split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+function avatar(id, name) {
+  return `<span class="av" style="background:${avatarColor(id)}" title="${esc(name)}">${esc(initials(name))}</span>`;
+}
 
 const HEALTH = {
   overdue: { label: "Overdue", icon: "!" },
@@ -122,12 +132,31 @@ async function loadDashboard() {
 function renderWall() {
   const d = state.dashboard;
   $("#office-name").textContent = d.office;
-  document.title = `${d.office} — Dashboard`;
+  document.title = `Atelier · ${d.office}`;
   renderKpis(d.kpis);
   renderFilters(d.projects);
   renderProjects();
+  renderAttention(d.projects);
   renderActivity(d.activity);
   renderTeam(d.team);
+  renderBoard();
+}
+
+function renderAttention(projects) {
+  const items = projects.filter((p) => p.status === "active" && p.needs_attention)
+    .sort((a, b) => ATTENTION.indexOf(a.health) - ATTENTION.indexOf(b.health));
+  $("#attention").innerHTML = items.length ? items.map((p) => {
+    const why = [];
+    if (p.blocker) {
+      why.push(`<div class="blocker">${esc(p.blocker)}</div>`);
+      if (p.blocker_since) why.push(`<div class="why">Blocked since ${timeAgo(p.blocker_since)}</div>`);
+    }
+    if (p.health === "overdue" || p.health === "at_risk") {
+      const late = p.phases.filter((ph) => ph.health === p.health).map((ph) => ph.name).join(", ");
+      why.push(`<div class="why">${badge(p.health)} ${esc(late || (p.days_left < 0 ? "Past the deadline" : "Behind schedule"))}</div>`);
+    }
+    return `<li data-project="${p.id}" class="attention-item"><div class="what"><span class="code">${esc(p.code)}</span> <b>${esc(p.name)}</b></div>${why.join("")}</li>`;
+  }).join("") : `<li class="muted">Nothing blocked or behind. 🎉</li>`;
 }
 
 function renderKpis(k) {
@@ -156,12 +185,19 @@ function renderFilters(projects) {
     leads.map((l) => `<option ${l === current ? "selected" : ""}>${esc(l)}</option>`).join("");
 }
 
+function matchesSearch(p) {
+  const q = $("#search").value.trim().toLowerCase();
+  if (!q) return true;
+  return [p.code, p.name, p.client, p.location, p.lead_name, p.current_phase]
+    .some((v) => (v || "").toLowerCase().includes(q));
+}
+
 function visibleProjects() {
   const lead = $("#filter-lead").value;
   const health = $("#filter-health").value;
   const sort = $("#sort-by").value;
   const list = state.dashboard.projects.filter((p) =>
-    p.status === "active" && (!lead || p.lead_name === lead) && (!health || p.health === health));
+    p.status === "active" && matchesSearch(p) && (!lead || p.lead_name === lead) && (!health || p.health === health));
   const byDue = (a, b) => (a.due_date || "9999").localeCompare(b.due_date || "9999");
   const sorters = {
     attention: (a, b) => ATTENTION.indexOf(a.health) - ATTENTION.indexOf(b.health) || byDue(a, b),
@@ -187,6 +223,7 @@ function projectCard(p) {
   const phaseSegs = p.phases.map((ph) => {
     const tipHtml = `<b>${esc(ph.code ? ph.code + " " : "")}${esc(ph.name)}</b><br>${pct(ph.progress)} done` +
       (ph.expected != null && ph.progress < 100 ? ` · plan ${pct(ph.expected)}` : "") +
+      (ph.milestones_total ? `<br>${ph.milestones_done}/${ph.milestones_total} milestones` : "") +
       `<br>${HEALTH[ph.health].label}` +
       (ph.planned_end ? ` · ends ${fmtDate(ph.planned_end)}` : "") +
       (ph.assignee_name ? `<br>${esc(ph.assignee_name)}` : "");
@@ -207,6 +244,7 @@ function projectCard(p) {
       </div>
       ${badge(p.health)}
     </div>
+    ${p.blocker ? `<div class="blocker">${esc(p.blocker)}</div>` : ""}
     <div class="progress-row">
       <div class="progress-big">${Math.round(p.progress)}<small>%</small></div>
       <div class="progress-notes">
@@ -225,6 +263,7 @@ function projectCard(p) {
         <span>${current ? `Now: <b>${esc(current.code ? current.code + " " : "")}${esc(current.name)}</b> · ${pct(current.progress)}` : "All phases complete"}</span>
         <span class="muted">${p.phases.filter((ph) => ph.progress >= 100).length}/${p.phases.length} done</span>
       </div>
+      ${p.next_milestones.length ? `<div class="small muted" style="margin-top:4px">Next: ${p.next_milestones.map((m) => esc(m.title)).join(" · ")}</div>` : ""}
     </div>
     <div class="project-foot">
       <div>
@@ -308,70 +347,357 @@ function renderActivity(items) {
 }
 
 function renderTeam(team) {
-  const members = team.filter((m) => m.open_phases || m.open_drawings || m.leading);
+  const members = team;
   const max = Math.max(1, ...members.map((m) => m.open_phases + m.open_drawings));
   $("#team").innerHTML = members.length ? members.map((m) => `
     <div class="member-row">
-      <span class="name">${esc(m.name)}</span>
+      <span class="name">${avatar(m.id, m.name)} ${esc(m.name)}</span>
       <span class="counts">${m.open_phases} phases · ${m.open_drawings} dwg${m.leading ? ` · leads ${m.leading}` : ""}</span>
+      ${m.status ? `<span class="status">${esc(m.status)}</span>` : ""}
       <div class="bar" data-tip="<b>${esc(m.name)}</b><br>${m.open_phases} open phases, ${m.open_drawings} open drawings<br>Last update: ${m.last_update ? timeAgo(m.last_update) : "never"}">
         <div class="bar-fill" style="width:${((m.open_phases + m.open_drawings) / max) * 100}%"></div>
       </div>
-    </div>`).join("") : `<p class="muted small">Assign phases and drawings to see workload.</p>`;
+    </div>`).join("") : `<p class="muted small">Add your team under Data &amp; sync.</p>`;
+}
+
+// ---------------------------------------------------------------------------
+// board: one column per phase, drag a card to move the project
+// ---------------------------------------------------------------------------
+function boardProjects() {
+  const person = $("#board-person").value;
+  return state.dashboard.projects.filter((p) => {
+    if (p.status !== "active" || !matchesSearch(p)) return false;
+    if (state.boardFilter === "attention" && !p.needs_attention) return false;
+    if (person && !p.team_ids.includes(Number(person))) return false;
+    return true;
+  });
+}
+
+function renderBoard() {
+  if (!state.dashboard) return;
+  const personSel = $("#board-person");
+  const chosen = personSel.value;
+  personSel.innerHTML = `<option value="">Everyone</option>` + state.dashboard.team.map((m) =>
+    `<option value="${m.id}" ${String(m.id) === chosen ? "selected" : ""}>${esc(m.name)}</option>`).join("");
+
+  const list = boardProjects();
+  $("#board").innerHTML = state.dashboard.board.map((col) => {
+    const cards = list.filter((p) => (col.name === null ? p.current_phase === null : p.current_phase === col.name));
+    const key = col.name === null ? "" : col.name;
+    return `<section class="col" aria-label="${esc(col.label || col.name)}">
+      <div class="col-h"><span>${col.code && col.name ? `<span class="code">${esc(col.code)}</span> ` : ""}${esc(col.label || col.name)}</span><span class="count">${cards.length}</span></div>
+      <div class="col-body" data-phase="${esc(key)}" data-complete="${col.name === null}">${cards.map(boardCard).join("")}</div>
+    </section>`;
+  }).join("");
+}
+
+function boardCard(p) {
+  const team = p.team_ids.map((id) => state.dashboard.team.find((m) => m.id === id)).filter(Boolean);
+  const cur = p.phases.find((ph) => ph.id === p.current_phase_id);
+  return `<article class="bcard" draggable="true" tabindex="0" data-project="${p.id}" aria-label="${esc(p.name)}, ${pct(p.progress)}">
+    <div class="top"><h4>${esc(p.name)}</h4><span class="gold-chip">${esc(p.code)}</span></div>
+    <div class="client">${esc(p.client || "")}</div>
+    <div class="pct"><b>${Math.round(p.progress)}%</b><div class="bar"><div class="bar-fill" style="width:${p.progress}%"></div></div></div>
+    ${cur && cur.milestones_total ? `<div class="next">${cur.milestones_done}/${cur.milestones_total} milestones${p.next_milestones[0] ? ` · next: ${esc(p.next_milestones[0].title)}` : ""}</div>` : ""}
+    ${p.blocker ? `<div class="blocker">${esc(p.blocker)}</div>` : ""}
+    <div class="foot">
+      <div class="avatars">${team.slice(0, 4).map((m) => avatar(m.id, m.name)).join("")}${team.length > 4 ? `<span class="more">+${team.length - 4}</span>` : ""}</div>
+      <div class="flags">${p.health === "overdue" || p.health === "at_risk" ? badge(p.health) : ""}</div>
+    </div>
+  </article>`;
+}
+
+document.addEventListener("dragstart", (e) => {
+  const card = e.target.closest?.(".bcard");
+  if (!card) return;
+  state.dragId = Number(card.dataset.project);
+  card.classList.add("dragging");
+  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.setData("text/plain", card.dataset.project);
+});
+document.addEventListener("dragend", (e) => e.target.closest?.(".bcard")?.classList.remove("dragging"));
+document.addEventListener("dragover", (e) => {
+  const col = e.target.closest?.(".col-body");
+  if (!col || state.dragId == null) return;
+  e.preventDefault();
+  document.querySelectorAll(".col-body.over").forEach((c) => c !== col && c.classList.remove("over"));
+  col.classList.add("over");
+});
+document.addEventListener("dragleave", (e) => {
+  const col = e.target.closest?.(".col-body");
+  if (col && !col.contains(e.relatedTarget)) col.classList.remove("over");
+});
+document.addEventListener("drop", (e) => {
+  const col = e.target.closest?.(".col-body");
+  if (!col || state.dragId == null) return;
+  e.preventDefault();
+  col.classList.remove("over");
+  const project = state.dashboard.projects.find((p) => p.id === state.dragId);
+  state.dragId = null;
+  const complete = col.dataset.complete === "true";
+  const phaseName = complete ? null : col.dataset.phase;
+  if (!project || project.current_phase === phaseName) return;
+  if (!complete && !project.phases.some((ph) => ph.name === phaseName)) {
+    toast(`${project.code} has no “${phaseName}” phase`);
+    return;
+  }
+  confirmMove(project, phaseName);
+});
+
+function openModal(html) {
+  $("#modal-body").innerHTML = html;
+  const m = $("#modal");
+  if (!m.open) m.showModal();
+}
+
+async function confirmMove(project, phaseName) {
+  const detail = await api(`/api/projects/${project.id}`);
+  const notify = detail.contacts.filter((c) => c.notify && c.email);
+  const from = project.current_phase || "Complete";
+  const to = phaseName || "Complete";
+  const target = project.phases.find((ph) => ph.name === phaseName);
+  const backwards = target && project.current_phase_id &&
+    target.position < project.phases.find((ph) => ph.id === project.current_phase_id).position;
+  openModal(`
+    <div class="dialog-head"><div>
+      <div class="project-code">${esc(project.code)} · ${esc(project.name)}</div>
+      <h2 id="modal-title">Move to ${esc(to)}?</h2></div>
+      <button class="icon-btn" data-close-modal aria-label="Close">✕</button></div>
+    <div class="dialog-content">
+      <p>From <b>${esc(from)}</b>. ${phaseName
+        ? `Earlier phases are marked complete${backwards ? "; this phase and later ones are reopened" : ""}.`
+        : "All phases are marked complete."}</p>
+      <p>${phaseName
+        ? (notify.length
+          ? `${notify.length} contact${notify.length > 1 ? "s are" : " is"} marked <b>notify on phase change</b>: ${notify.map((c) => esc(c.name)).join(", ")}.`
+          : "No contact is marked to be notified on phase change.")
+        : ""}</p>
+      <div class="actions">
+        <button class="btn" data-close-modal>Cancel</button>
+        ${phaseName && notify.length ? `<button class="btn" data-do-move="${esc(phaseName)}" data-email="0">Move, don't email</button>
+          <button class="btn primary" data-do-move="${esc(phaseName)}" data-email="1">Move + email draft</button>`
+        : `<button class="btn primary" data-do-move="${esc(phaseName ?? "")}" data-complete="${phaseName === null}" data-email="0">Move</button>`}
+      </div>
+    </div>`);
+  state.moveProject = project;
+}
+
+async function doMove(btn) {
+  const project = state.moveProject;
+  const phaseName = btn.dataset.complete === "true" ? null : btn.dataset.doMove;
+  btn.disabled = true;
+  try {
+    const res = await api(`/api/projects/${project.id}/move`, {
+      method: "POST", body: { phase_name: phaseName, member_id: Number(storage("studio.me")) || null },
+    });
+    await loadDashboard();
+    if (btn.dataset.email === "1" && res.email) {
+      showDraft(project, res.email);
+    } else {
+      $("#modal").close();
+      toast(`${project.code} moved to ${phaseName || "Complete"}`);
+    }
+  } catch (err) {
+    toast(err.message);
+    btn.disabled = false;
+  }
+}
+
+function showDraft(project, email) {
+  openModal(`
+    <div class="dialog-head"><div>
+      <div class="project-code">${esc(project.code)} moved ✓</div>
+      <h2 id="modal-title">Email draft</h2></div>
+      <button class="icon-btn" data-close-modal aria-label="Close">✕</button></div>
+    <div class="dialog-content">
+      <p>Nothing has been sent. Open the draft, check it, and send it yourself.</p>
+      <div class="draft">
+        <div class="row"><b>To</b><span>${email.to.map((t) => `${esc(t.name)} &lt;${esc(t.email)}&gt;`).join(", ")}</span></div>
+        <div class="row"><b>Subject</b><span>${esc(email.subject)}</span></div>
+        <pre>${esc(email.body)}</pre>
+      </div>
+      <div class="actions">
+        <button class="btn" data-copy-draft>Copy text</button>
+        <a class="btn" href="${esc(email.mailto_url)}">Open in mail app</a>
+        <a class="btn primary" href="${esc(email.gmail_url)}" target="_blank" rel="noopener">Open in Gmail</a>
+      </div>
+    </div>`);
+  state.draft = email;
 }
 
 // project details dialog
-async function openProject(id) {
+async function openProject(id, tab = "overview") {
   const dialog = $("#project-dialog");
-  $("#dialog-body").innerHTML = `<div class="dialog-content muted">Loading…</div>`;
-  dialog.showModal();
+  if (!dialog.open) {
+    $("#dialog-body").innerHTML = `<div class="dialog-content muted">Loading…</div>`;
+    dialog.showModal();
+  }
   const p = await api(`/api/projects/${id}`);
+  state.openProject = p;
+  const tabs = [["overview", "Overview"], ["milestones", `Milestones`], ["people", `People (${p.contacts.length})`],
+    ["drawings", `Drawings (${p.drawing_list.length})`], ["drive", "Drive"]];
   $("#dialog-body").innerHTML = `
     <div class="dialog-head">
       <div>
-        <div class="project-code">${esc(p.code)}</div>
+        <div class="project-code">${esc(p.code)}${p.client ? ` · ${esc(p.client)}` : ""}</div>
         <h2 id="dialog-title" style="font-size:22px">${esc(p.name)}</h2>
-        <div class="project-meta">${esc([p.client, p.location, p.lead_name].filter(Boolean).join(" · "))}</div>
+        <div class="project-meta">${esc([p.location, p.lead_name && "lead " + p.lead_name, p.current_phase].filter(Boolean).join(" · "))}</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">${badge(p.health)}
-        <button class="btn small" data-edit="${p.id}">Update</button>
+        <button class="btn small" data-edit="${p.id}">Edit</button>
         <button class="icon-btn" data-close aria-label="Close">✕</button></div>
     </div>
+    <div class="dtabs" role="tablist">${tabs.map(([k, label]) =>
+      `<button class="dtab ${k === tab ? "on" : ""}" role="tab" aria-selected="${k === tab}" data-dtab="${k}">${label}</button>`).join("")}</div>
     <div class="dialog-content">
-      <h3>Phases — overall ${pct(p.progress)}${p.expected != null ? ` (plan ${pct(p.expected)})` : ""}</h3>
-      <div class="table-wrap"><table class="edit-table">
-        <thead><tr><th>Phase</th><th>Responsible</th><th>Planned</th><th>Weight</th><th>Progress</th><th>Status</th></tr></thead>
-        <tbody>${p.phases.map((ph) => `<tr>
-          <td>${esc(ph.code || "")} ${esc(ph.name)}</td>
-          <td>${esc(ph.assignee_name || "–")}</td>
-          <td class="num">${ph.planned_start ? fmtDate(ph.planned_start) + " – " + fmtDate(ph.planned_end) : "–"}</td>
-          <td class="num">${ph.weight}</td>
-          <td><div class="progress-cell"><div class="bar" style="flex:1"><div class="bar-fill" style="width:${ph.progress}%"></div>
-            ${ph.expected != null && ph.progress < 100 ? `<div class="bar-plan" style="left:calc(${ph.expected}% - 1px)"></div>` : ""}</div>
-            <span class="num">${pct(ph.progress)}</span></div></td>
-          <td>${badge(ph.health)}</td></tr>`).join("")}</tbody>
-      </table></div>
-      <h3>Drawings (${p.drawing_list.length})</h3>
-      <div class="table-wrap"><table class="edit-table">
-        <thead><tr><th>No.</th><th>Title</th><th>Phase</th><th>Scale</th><th>Rev</th><th>Stage</th><th>Responsible</th><th>Due</th></tr></thead>
-        <tbody>${p.drawing_list.map((d) => `<tr>
-          <td class="num">${esc(d.number)}</td><td>${esc(d.title || "")}</td><td>${esc(d.phase_name || "–")}</td>
-          <td>${esc(d.scale || "")}</td><td>${esc(d.revision || "")}</td><td>${STAGE_LABEL[d.stage] || esc(d.stage)}</td>
-          <td>${esc(d.assignee_name || "–")}</td><td class="num">${fmtDate(d.due_date)}</td></tr>`).join("") || `<tr><td colspan="8" class="muted">No drawings.</td></tr>`}
-        </tbody></table></div>
-      <h3>Google Drive</h3>
-      <div id="drive-files" class="muted small">Loading…</div>
+      <div data-pane="overview" ${tab === "overview" ? "" : "hidden"}>${overviewPane(p)}</div>
+      <div data-pane="milestones" ${tab === "milestones" ? "" : "hidden"}>${milestonesPane(p)}</div>
+      <div data-pane="people" ${tab === "people" ? "" : "hidden"}>${peoplePane(p)}</div>
+      <div data-pane="drawings" ${tab === "drawings" ? "" : "hidden"}>${drawingsPane(p)}</div>
+      <div data-pane="drive" ${tab === "drive" ? "" : "hidden"}><div id="drive-files" class="muted small">Loading…</div></div>
     </div>`;
   api(`/api/projects/${id}/drive-files`).then((res) => {
-    $("#drive-files").innerHTML = res.files.length
+    const el = $("#drive-files");
+    if (!el) return;
+    el.innerHTML = res.files.length
       ? `<ul class="files">${res.files.map((f) => `<li><a href="${esc(f.url)}" target="_blank" rel="noopener">${f.is_folder ? "📁 " : ""}${esc(f.name)}</a>
           <span class="muted">${esc(f.modified_by || "")} · ${f.modified ? timeAgo(f.modified) : ""}</span></li>`).join("")}</ul>`
       : esc(res.message || "Folder is empty.");
-  }).catch((err) => { $("#drive-files").textContent = err.message; });
+  }).catch((err) => { const el = $("#drive-files"); if (el) el.textContent = err.message; });
 }
 
+function overviewPane(p) {
+  return `
+    <form class="inline-form" data-blocker-form style="margin-bottom:14px">
+      <input name="blocker" value="${esc(p.blocker || "")}" placeholder="Blocked by… (e.g. waiting on structural calcs)" style="flex:1;min-width:220px">
+      <button class="btn" type="submit">${p.blocker ? "Update blocker" : "Set blocker"}</button>
+      ${p.blocker ? `<button class="btn" type="button" data-clear-blocker>Resolved</button>` : ""}
+    </form>
+    <h3>Phases: overall ${pct(p.progress)}${p.expected != null ? ` (plan ${pct(p.expected)})` : ""}</h3>
+    <div class="table-wrap"><table class="edit-table">
+      <thead><tr><th>Phase</th><th>Responsible</th><th>Planned</th><th>Weight</th><th>Progress</th><th>Status</th></tr></thead>
+      <tbody>${p.phases.map((ph) => `<tr>
+        <td>${esc(ph.code || "")} ${esc(ph.name)}${ph.milestones_total ? ` <span class="muted small">· ${ph.milestones_done}/${ph.milestones_total}</span>` : ""}</td>
+        <td>${esc(ph.assignee_name || "–")}</td>
+        <td class="num">${ph.planned_start ? fmtDate(ph.planned_start) + " – " + fmtDate(ph.planned_end) : "–"}</td>
+        <td class="num">${ph.weight}</td>
+        <td><div class="progress-cell"><div class="bar" style="flex:1"><div class="bar-fill" style="width:${ph.progress}%"></div>
+          ${ph.expected != null && ph.progress < 100 ? `<div class="bar-plan" style="left:calc(${ph.expected}% - 1px)"></div>` : ""}</div>
+          <span class="num">${pct(ph.progress)}</span></div></td>
+        <td>${badge(ph.health)}</td></tr>`).join("")}</tbody>
+    </table></div>`;
+}
+
+function milestonesPane(p) {
+  if (!p.phases.length) return `<p class="muted">Add phases first.</p>`;
+  return `<p class="muted small" style="margin-top:0">Ticking a milestone updates the phase % on the dashboard and the board.</p>` +
+    p.phases.map((ph) => {
+      const items = p.milestones.filter((m) => m.phase_id === ph.id);
+      const isCurrent = ph.id === p.current_phase_id;
+      if (!items.length && !isCurrent && ph.progress >= 100) return "";
+      return `<div class="ms-phase ${isCurrent ? "current" : ""}">
+        <h4><span>${esc(ph.code || "")} ${esc(ph.name)} <span class="muted" style="font-weight:400">${pct(ph.progress)}</span></span></h4>
+        ${items.map((m) => `<label class="ms ${m.done ? "done" : ""}">
+          <input type="checkbox" data-milestone="${m.id}" ${m.done ? "checked" : ""}> <span>${esc(m.title)}</span>
+          ${m.due_date ? `<span class="due">${fmtDate(m.due_date)}</span>` : ""}
+          <button type="button" class="btn small danger x" data-delete-milestone="${m.id}" aria-label="Remove milestone">✕</button>
+        </label>`).join("")}
+        <details class="add-ms" ${isCurrent && !items.length ? "open" : ""}><summary>+ Add milestone</summary>
+        <form class="inline-form" data-add-milestone="${ph.id}">
+          <input name="title" placeholder="e.g. Outline spec" required style="flex:1;min-width:180px">
+          <input type="date" name="due_date" aria-label="Due date">
+          <button class="btn small" type="submit">Add</button>
+        </form></details>
+      </div>`;
+    }).join("");
+}
+
+function peoplePane(p) {
+  const kinds = state.meta.contact_kinds;
+  const internal = [...new Set([p.lead_name, ...p.phases.map((ph) => ph.assignee_name)].filter(Boolean))];
+  return `
+    ${p.contacts.map((c) => `<div class="contact">
+      <span class="av" style="background:${c.kind === "client" ? "var(--gold)" : "#1b2a4a"};margin:0">${esc(initials(c.name))}</span>
+      <div class="who"><b>${esc(c.name)}</b><small>${[c.email && `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`, c.phone && esc(c.phone)].filter(Boolean).join(" · ")}</small></div>
+      <span class="chip ${c.kind === "client" ? "client" : ""}">${esc(c.kind)}${c.role ? ` · ${esc(c.role)}` : ""}</span>
+      <label class="notify-toggle"><input type="checkbox" data-notify="${c.id}" ${c.notify ? "checked" : ""}> notify on phase change</label>
+      <button class="btn small danger" data-delete-contact="${c.id}" aria-label="Remove contact">✕</button>
+    </div>`).join("") || `<p class="muted">No contacts yet.</p>`}
+    <form class="form-grid" data-add-contact style="margin-top:14px">
+      <label>Name <input name="name" required></label>
+      <label>Email <input name="email" type="email"></label>
+      <label>Type <select name="kind">${kinds.map((k) => `<option>${k}</option>`).join("")}</select></label>
+      <label>Role <input name="role" placeholder="Owner, Structural…"></label>
+      <label class="notify-toggle span-2"><input type="checkbox" name="notify"> Email a draft to them when the phase changes</label>
+      <div class="span-2 actions" style="margin:0;justify-content:flex-end"><button class="btn primary" type="submit">Add contact</button></div>
+    </form>
+    <p class="muted small" style="margin-top:14px">Internal: ${internal.map(esc).join(", ") || "–"}</p>`;
+}
+
+function drawingsPane(p) {
+  return `<div class="table-wrap"><table class="edit-table">
+    <thead><tr><th>No.</th><th>Title</th><th>Phase</th><th>Scale</th><th>Rev</th><th>Stage</th><th>Responsible</th><th>Due</th></tr></thead>
+    <tbody>${p.drawing_list.map((d) => `<tr>
+      <td class="num">${esc(d.number)}</td><td>${esc(d.title || "")}</td><td>${esc(d.phase_name || "–")}</td>
+      <td>${esc(d.scale || "")}</td><td>${esc(d.revision || "")}</td><td>${STAGE_LABEL[d.stage] || esc(d.stage)}</td>
+      <td>${esc(d.assignee_name || "–")}</td><td class="num">${fmtDate(d.due_date)}</td></tr>`).join("") || `<tr><td colspan="8" class="muted">No drawings.</td></tr>`}
+    </tbody></table></div>`;
+}
+
+async function refreshOpenProject(tab) {
+  await openProject(state.openProject.id, tab);
+  loadDashboard();
+}
+
+// interactions inside the project dialog
+document.addEventListener("click", async (e) => {
+  const t = e.target;
+  try {
+    if (t.matches("[data-dtab]")) {
+      document.querySelectorAll("[data-dtab]").forEach((b) => { b.classList.toggle("on", b === t); b.setAttribute("aria-selected", b === t); });
+      document.querySelectorAll("[data-pane]").forEach((p) => { p.hidden = p.dataset.pane !== t.dataset.dtab; });
+    } else if (t.matches("[data-delete-milestone]")) {
+      e.preventDefault();
+      await api(`/api/milestones/${t.dataset.deleteMilestone}`, { method: "DELETE" });
+      await refreshOpenProject("milestones");
+    } else if (t.matches("[data-delete-contact]")) {
+      if (!confirm("Remove this contact?")) return;
+      await api(`/api/contacts/${t.dataset.deleteContact}`, { method: "DELETE" });
+      await refreshOpenProject("people");
+    } else if (t.matches("[data-clear-blocker]")) {
+      await api(`/api/projects/${state.openProject.id}`, { method: "PATCH", body: { blocker: "" } });
+      toast("Blocker resolved");
+      await refreshOpenProject("overview");
+    } else if (t.matches("[data-close-modal]")) {
+      $("#modal").close();
+    } else if (t.matches("[data-do-move]")) {
+      await doMove(t);
+    } else if (t.matches("[data-copy-draft]")) {
+      const d = state.draft;
+      await navigator.clipboard.writeText(`To: ${d.to.map((x) => x.email).join(", ")}\nSubject: ${d.subject}\n\n${d.body}`);
+      toast("Draft copied");
+    }
+  } catch (err) { toast(err.message); }
+});
+
+document.addEventListener("change", async (e) => {
+  const t = e.target;
+  try {
+    if (t.matches("[data-milestone]")) {
+      const res = await api(`/api/milestones/${t.dataset.milestone}`, {
+        method: "PATCH", body: { done: t.checked, member_id: Number(storage("studio.me")) || null },
+      });
+      toast(`Phase now ${pct(res.phase_progress)}`);
+      await refreshOpenProject("milestones");
+    } else if (t.matches("[data-notify]")) {
+      await api(`/api/contacts/${t.dataset.notify}`, { method: "PATCH", body: { notify: t.checked } });
+      toast(t.checked ? "Will be offered an email on phase change" : "Won't be emailed on phase change");
+    }
+  } catch (err) { toast(err.message); }
+});
+
 document.addEventListener("click", (e) => {
-  const card = e.target.closest(".project");
+  const card = e.target.closest(".project, .bcard, .attention-item");
   if (card) openProject(card.dataset.project);
   if (e.target.closest("[data-close]")) $("#project-dialog").close();
   const edit = e.target.closest("[data-edit]");
@@ -382,10 +708,17 @@ document.addEventListener("click", (e) => {
   }
 });
 document.addEventListener("keydown", (e) => {
-  const card = e.target.closest?.(".project");
+  const card = e.target.closest?.(".project, .bcard");
   if (card && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openProject(card.dataset.project); }
 });
 $("#project-dialog").addEventListener("click", (e) => { if (e.target.id === "project-dialog") e.target.close(); });
+$("#search").addEventListener("input", () => { if (state.dashboard) { renderProjects(); renderBoard(); } });
+$("#board-person").addEventListener("change", renderBoard);
+document.querySelectorAll("[data-bfilter]").forEach((b) => b.addEventListener("click", () => {
+  state.boardFilter = b.dataset.bfilter;
+  document.querySelectorAll("[data-bfilter]").forEach((x) => x.classList.toggle("on", x === b));
+  renderBoard();
+}));
 ["#filter-lead", "#filter-health", "#sort-by"].forEach((sel) => $(sel).addEventListener("change", () => {
   storage(`studio.${sel}`, $(sel).value);
   renderProjects();
@@ -404,6 +737,7 @@ async function loadMembers() {
   document.querySelectorAll(".member-select").forEach((s) => { s.innerHTML = memberOptions(null); });
   const me = $("#m-member");
   me.innerHTML = memberOptions(Number(storage("studio.me")) || null, "— select your name —");
+  fillMyStatus();
   $("#members").innerHTML = state.members.map((m) =>
     `<li><span><b>${esc(m.name)}</b> ${esc(m.role || "")}</span><span class="muted">${esc(m.email || "")}</span></li>`).join("");
 }
@@ -434,6 +768,7 @@ function renderManageProject(p) {
       <label>Client <input name="client" value="${esc(p.client || "")}"></label>
       <label>Lead architect <select name="lead_id">${memberOptions(p.lead_id)}</select></label>
       <label>Status <select name="status">${statuses.map((s) => `<option ${s === p.status ? "selected" : ""}>${s}</option>`).join("")}</select></label>
+      <label class="span-all">Blocked by (leave empty when nothing is blocking) <input name="blocker" value="${esc(p.blocker || "")}" placeholder="e.g. Waiting on structural calcs"></label>
       <label>Start <input type="date" name="start_date" value="${esc(p.start_date || "")}"></label>
       <label>Due <input type="date" name="due_date" value="${esc(p.due_date || "")}"></label>
       <label class="span-2">Google Drive folder <input name="drive_folder_id" value="${esc(p.drive_folder_id || "")}" placeholder="Paste folder link"></label>
@@ -566,6 +901,27 @@ document.addEventListener("submit", async (e) => {
       const res = await api("/api/import/excel", { method: "POST", body: new FormData(form) });
       $("#excel-result").textContent = `Imported ${res.summary}` + (res.errors.length ? `\n${res.errors.join("\n")}` : "");
       form.reset(); await loadMembers();
+    } else if (form.matches("[data-blocker-form]")) {
+      e.preventDefault();
+      await api(`/api/projects/${state.openProject.id}`, { method: "PATCH", body: { blocker: fields.blocker || "" } });
+      toast(fields.blocker ? "Blocker saved" : "Blocker cleared");
+      await refreshOpenProject("overview");
+    } else if (form.matches("[data-add-milestone]")) {
+      e.preventDefault();
+      await api(`/api/phases/${form.dataset.addMilestone}/milestones`, { method: "POST", body: fields });
+      await refreshOpenProject("milestones");
+    } else if (form.matches("[data-add-contact]")) {
+      e.preventDefault();
+      await api(`/api/projects/${state.openProject.id}/contacts`, {
+        method: "POST", body: { ...fields, notify: form.elements.notify.checked },
+      });
+      toast("Contact added");
+      await refreshOpenProject("people");
+    } else if (form.id === "my-status") {
+      e.preventDefault();
+      if (!me()) { toast("Select your name first"); return; }
+      await api(`/api/members/${me()}`, { method: "PATCH", body: { status: fields.status || "" } });
+      toast("Status updated"); await loadMembers();
     } else if (form.id === "gdrive-add") {
       e.preventDefault();
       await api("/api/gdrive/sources", { method: "POST", body: fields });
@@ -578,7 +934,11 @@ document.addEventListener("submit", async (e) => {
 });
 
 $("#m-project").addEventListener("change", (e) => { state.manageProjectId = Number(e.target.value); loadManage(); });
-$("#m-member").addEventListener("change", (e) => storage("studio.me", e.target.value));
+function fillMyStatus() {
+  const m = state.members.find((x) => x.id === me());
+  $("#m-status").value = m?.status || "";
+}
+$("#m-member").addEventListener("change", (e) => { storage("studio.me", e.target.value); fillMyStatus(); });
 $("#m-new-project-btn").addEventListener("click", () => { $("#new-project").hidden = false; $('#new-project [name="code"]').focus(); });
 $("#cancel-new-project").addEventListener("click", () => { $("#new-project").hidden = true; });
 
@@ -616,10 +976,10 @@ document.addEventListener("click", async (e) => {
 // ---------------------------------------------------------------------------
 function route() {
   const view = (location.hash || "#wall").slice(1);
-  const known = ["wall", "manage", "data"].includes(view) ? view : "wall";
+  const known = ["wall", "board", "manage", "data"].includes(view) ? view : "wall";
   document.querySelectorAll(".view").forEach((v) => { v.hidden = v.id !== `view-${known}`; });
   document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.view === known));
-  if (known === "wall") loadDashboard();
+  if (known === "wall" || known === "board") loadDashboard();
   if (known === "manage") loadManage().catch((err) => toast(err.message));
   if (known === "data") loadSources().catch((err) => toast(err.message));
 }

@@ -13,13 +13,30 @@ from datetime import date, datetime, timedelta
 from . import config, db
 
 TEAM = [
-    ("Anna Keller", "Principal architect"),
-    ("Luca Moretti", "Project architect"),
-    ("Sofia Brunner", "Project architect"),
-    ("Jonas Weber", "Architect"),
-    ("Mia Frei", "Draughtsperson / BIM"),
-    ("Noah Graf", "Site architect"),
+    ("Anna Keller", "Principal architect", "Reviewing Seefeld tender documents"),
+    ("Luca Moretti", "Project architect", "Execution drawings · Office Enge"),
+    ("Sofia Brunner", "Project architect", "Massing options · Bahnhofplatz"),
+    ("Jonas Weber", "Architect", "Tender package · Villa am Hang"),
+    ("Mia Frei", "Draughtsperson / BIM", "Facade details in Revit"),
+    ("Noah Graf", "Site architect", "Site visit Arosa, back Thursday"),
 ]
+
+BLOCKERS = {
+    "25-002": "Waiting on structural calcs for the cantilever",
+    "23-021": "Heritage office: window replacement not approved yet",
+}
+
+# Typical checklist for each SIA phase
+MILESTONES = {
+    "21": ["Brief agreed", "Site analysis", "Feasibility study"],
+    "31": ["Massing options", "Client workshop", "Preliminary design booklet", "Cost estimate ±25%"],
+    "32": ["Plans 1:100 set", "Consultant coordination", "Cost estimate ±10%", "Client sign-off"],
+    "33": ["Permit submission", "Authority comments answered", "Permit granted"],
+    "41": ["Tender documents", "Tenders received", "Tender comparison", "Contracts awarded"],
+    "51": ["Detail drawings 1:20", "Consultant plans coordinated", "Construction schedule"],
+    "52": ["Site start", "Shell complete", "Weathertight", "Fit-out", "Snagging"],
+    "53": ["Handover inspection", "As-built documents", "Final account"],
+}
 
 # code, name, client, location, lead, months since start, months total, how far along (0-1)
 PROJECTS = [
@@ -57,7 +74,10 @@ def seed(reset: bool = False) -> None:
     today = date.today()
 
     with db.connect() as conn:
-        members = {name: db.upsert_member(conn, name, role) for name, role in TEAM}
+        members = {}
+        for name, role, status in TEAM:
+            members[name] = db.upsert_member(conn, name, role)
+            db.update_member(conn, members[name], {"status": status})
         staff = [m for n, m in members.items() if n != "Anna Keller"]
 
         for code, name, client, location, lead, elapsed, total, done in PROJECTS:
@@ -88,6 +108,11 @@ def seed(reset: bool = False) -> None:
                 _backfill(conn, phase["id"], target, today, rng, members[lead])
                 cursor, cumulative = end, cumulative + share
 
+            _milestones(conn, project_id)
+            _contacts(conn, project_id, code, client, rng)
+            if code in BLOCKERS:
+                db.update_project(conn, project_id, {"blocker": BLOCKERS[code]})
+
             phase_by_code = {p["code"]: p["id"] for p in phases}
             for number, title, discipline, scale in DRAWINGS:
                 if done < 0.1 and number in ("A-500", "A-510", "S-100", "M-100"):
@@ -103,6 +128,38 @@ def seed(reset: bool = False) -> None:
                     "due_date": (today + timedelta(days=rng.randint(-5, 40))).isoformat(),
                 }, source="seed")
     print(f"Demo data ready in {config.DB_PATH}")
+
+
+def _milestones(conn, project_id: int) -> None:
+    """Checklist items for each phase, ticked to roughly match its progress
+    (without changing the progress history the backfill created)."""
+    for phase in db.list_phases(conn, project_id):
+        titles = MILESTONES.get(phase["code"], [])
+        done_count = round(len(titles) * phase["progress"] / 100)
+        for position, title in enumerate(titles, start=1):
+            conn.execute(
+                "INSERT OR IGNORE INTO milestones (phase_id, title, position, done, done_at) VALUES (?, ?, ?, ?, ?)",
+                (phase["id"], title, position, 1 if position <= done_count else 0,
+                 db.now() if position <= done_count else None),
+            )
+
+
+def _contacts(conn, project_id: int, code: str, client: str, rng) -> None:
+    domain = client.lower().replace(" ", "").replace("ag", "").replace("sa", "")[:12] or "client"
+    if client == "Private client":
+        people = [("Claudia Meier", "client", "Owner", True), ("Peter Meier", "client", "Owner", True)]
+    else:
+        people = [(rng.choice(["Martin Huber", "Sandra Kunz", "Reto Baumann", "Nadia Schmid"]), "client",
+                   "Client project manager", True)]
+    people += [
+        (rng.choice(["Ruth Lehmann", "Marco Bianchi", "Urs Fischer"]), "consultant", "Structural engineer", False),
+        (rng.choice(["Karin Vogel", "Stefan Roth"]), "consultant", "HVAC engineer", False),
+    ]
+    for name, kind, role, notify in people:
+        first, last = name.lower().split()
+        email_domain = f"{domain}.example" if kind == "client" else f"{last}-ing.example"  # reserved TLD: never a real inbox
+        db.upsert_contact(conn, project_id, {"name": name, "kind": kind, "role": role, "notify": notify,
+                                             "email": f"{first}.{last}@{email_domain}"})
 
 
 def _backfill(conn, phase_id: int, target: float, today: date, rng, member_id: int) -> None:

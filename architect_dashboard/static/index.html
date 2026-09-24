@@ -3,21 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Studio Dashboard</title>
+  <title>Atelier Studio Board</title>
   <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <div>
-        <h1 id="office-name">Studio</h1>
-        <p class="muted" id="subtitle">Project progress</p>
-      </div>
+      <h1>Atelier</h1>
+      <p><span id="office-name">Studio</span> · <span id="subtitle"></span></p>
     </div>
+    <input class="search" id="search" type="search" placeholder="Filter projects, clients, codes…" aria-label="Filter projects">
     <nav class="tabs" aria-label="Views">
       <a href="#wall" data-view="wall" class="tab">Dashboard</a>
-      <a href="#manage" data-view="manage" class="tab">Update progress</a>
+      <a href="#board" data-view="board" class="tab">Board</a>
+      <a href="#manage" data-view="manage" class="tab">Update</a>
       <a href="#data" data-view="data" class="tab">Data &amp; sync</a>
     </nav>
     <div class="topbar-right">
@@ -55,16 +54,31 @@
       </section>
       <aside class="side">
         <section class="panel">
+          <h2>Needs attention</h2>
+          <ul class="attention-list" id="attention"></ul>
+        </section>
+        <section class="panel">
           <h2>Latest updates</h2>
           <ol class="activity" id="activity"></ol>
         </section>
         <section class="panel">
-          <h2>Team workload</h2>
-          <p class="muted small">Open phases and drawings assigned, active projects</p>
+          <h2>Studio</h2>
+          <p class="muted small">What everyone is on · open phases and drawings</p>
           <div id="team"></div>
         </section>
       </aside>
     </div>
+  </main>
+
+  <!-- ============ Board ============ -->
+  <main id="view-board" class="view" hidden>
+    <div class="board-bar">
+      <button class="pill on" data-bfilter="all">All</button>
+      <button class="pill" data-bfilter="attention">Needs attention</button>
+      <select id="board-person" aria-label="Show one person's projects"><option value="">Everyone</option></select>
+      <span class="board-hint">Drag a card to move the project to another phase · click to open</span>
+    </div>
+    <div class="board" id="board"></div>
   </main>
 
   <!-- ============ Update progress ============ -->
@@ -72,6 +86,10 @@
     <div class="manage-bar">
       <label>Project <select id="m-project"></select></label>
       <label>I am <select id="m-member"><option value="">— select your name —</option></select></label>
+      <form id="my-status" class="inline-form" style="align-items:end">
+        <label>What I'm working on <input name="status" id="m-status" placeholder="e.g. CD package · Harbor House" size="32"></label>
+        <button class="btn" type="submit">Update status</button>
+      </form>
       <button class="btn" id="m-new-project-btn">+ New project</button>
     </div>
 
@@ -165,6 +183,10 @@
 
   <dialog id="project-dialog" aria-labelledby="dialog-title">
     <div id="dialog-body"></div>
+  </dialog>
+
+  <dialog id="modal" class="modal" aria-labelledby="modal-title">
+    <div id="modal-body"></div>
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

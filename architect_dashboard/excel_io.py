@@ -3,10 +3,12 @@
 One workbook format is used everywhere: the downloadable template, the export,
 uploads, and spreadsheets pulled from Google Drive. Sheets (all optional):
 
-  Team      Name | Role | Email
-  Projects  Code | Name | Client | Location | Lead | Status | Start | Due | Drive Folder | Notes
-  Phases    Project | Code | Phase | Weight | Planned Start | Planned End | Progress | Status | Assignee
-  Drawings  Project | Number | Title | Phase | Discipline | Scale | Revision | Stage | Progress | Assignee | Due
+  Team        Name | Role | Email | Status
+  Projects    Code | Name | Client | Location | Lead | Status | Start | Due | Drive Folder | Template | Blocker | Notes
+  Phases      Project | Code | Phase | Weight | Planned Start | Planned End | Progress | Status | Assignee
+  Milestones  Project | Phase | Milestone | Due | Done
+  Drawings    Project | Number | Title | Phase | Discipline | Scale | Revision | Stage | Progress | Assignee | Due
+  Contacts    Project | Name | Type | Role | Email | Phone | Notify
 
 Rows are matched on their natural keys (team member name, project code,
 project + phase name, project + drawing number), so re-importing the same
@@ -24,14 +26,18 @@ from . import db, progress
 from .phases import DRAWING_STAGES, TEMPLATES
 
 SHEETS = {
-    "Team": ["Name", "Role", "Email"],
+    "Team": ["Name", "Role", "Email", "Status"],
     "Projects": ["Code", "Name", "Client", "Location", "Lead", "Status", "Start", "Due",
-                 "Drive Folder", "Template", "Notes"],
+                 "Drive Folder", "Template", "Blocker", "Notes"],
     "Phases": ["Project", "Code", "Phase", "Weight", "Planned Start", "Planned End",
                "Progress", "Status", "Assignee"],
+    "Milestones": ["Project", "Phase", "Milestone", "Due", "Done"],
     "Drawings": ["Project", "Number", "Title", "Phase", "Discipline", "Scale", "Revision",
                  "Stage", "Progress", "Assignee", "Due"],
+    "Contacts": ["Project", "Name", "Type", "Role", "Email", "Phone", "Notify"],
 }
+
+TRUE_WORDS = {"yes", "y", "true", "1", "x", "✓", "done", "ja", "oui", "sim", "si"}
 
 # Accepted alternative header spellings -> canonical header
 ALIASES = {
@@ -41,16 +47,18 @@ ALIASES = {
     "progress %": "progress", "percent": "progress", "drawing": "number", "drawing no": "number",
     "drawing number": "number", "rev": "revision", "responsible": "assignee", "owner": "assignee",
     "start planned": "planned start", "end planned": "planned end",
+    "task": "milestone", "kind": "type", "notify on phase change": "notify",
+    "waiting on": "blocker", "blocked by": "blocker",
 }
 
 
 class ImportReport(dict):
     def __init__(self):
-        super().__init__(team=0, projects=0, phases=0, drawings=0, errors=[])
+        super().__init__(team=0, projects=0, phases=0, milestones=0, drawings=0, contacts=0, errors=[])
 
     def summary(self) -> str:
-        text = (f"{self['projects']} projects, {self['phases']} phases, "
-                f"{self['drawings']} drawings, {self['team']} team members")
+        text = (f"{self['projects']} projects, {self['phases']} phases, {self['milestones']} milestones, "
+                f"{self['drawings']} drawings, {self['contacts']} contacts, {self['team']} team members")
         if self["errors"]:
             text += f" — {len(self['errors'])} row(s) skipped"
         return text
@@ -92,6 +100,14 @@ def _text(value) -> Optional[str]:
         return None
     text = str(value).strip()
     return text or None
+
+
+def _bool(value) -> Optional[bool]:
+    if value in (None, ""):
+        return None
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in TRUE_WORDS
 
 
 def _slug(value) -> Optional[str]:
@@ -139,7 +155,9 @@ def import_workbook(conn, data: bytes, source: str = "excel") -> ImportReport:
         name = _text(row.get("name"))
         if not name:
             raise ValueError("missing Name")
-        db.upsert_member(conn, name, _text(row.get("role")), _text(row.get("email")))
+        member_id = db.upsert_member(conn, name, _text(row.get("role")), _text(row.get("email")))
+        if _text(row.get("status")):
+            db.update_member(conn, member_id, {"status": _text(row.get("status"))})
 
     def project(row):
         code, name = _text(row.get("code")), _text(row.get("name"))
@@ -156,6 +174,7 @@ def import_workbook(conn, data: bytes, source: str = "excel") -> ImportReport:
             "due_date": _date(row.get("due")),
             "drive_folder_id": _text(row.get("drive folder")),
             "notes": _text(row.get("notes")),
+            "blocker": _text(row.get("blocker")),
         }
         existing = db.project_id_by_code(conn, code)
         if existing:
@@ -166,7 +185,10 @@ def import_workbook(conn, data: bytes, source: str = "excel") -> ImportReport:
             template = _slug(row.get("template"))
             if template and template not in TEMPLATES:
                 raise ValueError(f"unknown template '{template}'")
-            db.create_project(conn, data, template=template)
+            blocker = data.pop("blocker")
+            project_id = db.create_project(conn, data, template=template)
+            if blocker:
+                db.update_project(conn, project_id, {"blocker": blocker})
 
     def project_for(row) -> int:
         code = _text(row.get("project"))
@@ -192,6 +214,38 @@ def import_workbook(conn, data: bytes, source: str = "excel") -> ImportReport:
             "progress": _percent(row.get("progress")),
         }, source=source)
 
+    def find_phase(project_id, name):
+        if not name:
+            return None
+        found = conn.execute(
+            "SELECT id FROM phases WHERE project_id = ? AND (name = ? OR code = ?)",
+            (project_id, name, name),
+        ).fetchone()
+        return found["id"] if found else None
+
+    def milestone(row):
+        project_id = project_for(row)
+        phase_id = find_phase(project_id, _text(row.get("phase")))
+        if not phase_id:
+            raise ValueError(f"unknown phase '{_text(row.get('phase'))}'")
+        title = _text(row.get("milestone"))
+        if not title:
+            raise ValueError("missing Milestone")
+        db.upsert_milestone(conn, phase_id, title, _date(row.get("due")), _bool(row.get("done")), source=source)
+
+    def contact(row):
+        project_id = project_for(row)
+        name = _text(row.get("name"))
+        if not name:
+            raise ValueError("missing Name")
+        kind = _slug(row.get("type"))
+        if kind and kind not in db.CONTACT_KINDS:
+            raise ValueError(f"unknown type '{kind}' (use: {', '.join(db.CONTACT_KINDS)})")
+        db.upsert_contact(conn, project_id, {
+            "name": name, "kind": kind, "role": _text(row.get("role")), "email": _text(row.get("email")),
+            "phone": _text(row.get("phone")), "notify": _bool(row.get("notify")),
+        })
+
     def drawing(row):
         project_id = project_for(row)
         number = _text(row.get("number"))
@@ -200,14 +254,7 @@ def import_workbook(conn, data: bytes, source: str = "excel") -> ImportReport:
         stage = _slug(row.get("stage"))
         if stage and stage not in DRAWING_STAGES:
             raise ValueError(f"unknown stage '{stage}' (use: {', '.join(DRAWING_STAGES)})")
-        phase_name = _text(row.get("phase"))
-        phase_id = None
-        if phase_name:
-            found = conn.execute(
-                "SELECT id FROM phases WHERE project_id = ? AND (name = ? OR code = ?)",
-                (project_id, phase_name, phase_name),
-            ).fetchone()
-            phase_id = found["id"] if found else None
+        phase_id = find_phase(project_id, _text(row.get("phase")))
         db.upsert_drawing(conn, project_id, {
             "number": number,
             "title": _text(row.get("title")),
@@ -225,7 +272,9 @@ def import_workbook(conn, data: bytes, source: str = "excel") -> ImportReport:
     run("Team", team)
     run("Projects", project)
     run("Phases", phase)
+    run("Milestones", milestone)
     run("Drawings", drawing)
+    run("Contacts", contact)
     return report
 
 
@@ -270,25 +319,35 @@ def export_workbook(conn, empty: bool = False) -> bytes:
                        p["drawings"]["by_stage"]["issued"]] for p in summary["projects"]])
 
         _write_sheet(wb.create_sheet("Team"), SHEETS["Team"],
-                     [[m["name"], m["role"], m["email"]] for m in db.list_members(conn)])
+                     [[m["name"], m["role"], m["email"], m["status"]] for m in db.list_members(conn)])
 
         projects = db.list_projects(conn, include_archived=True)
         _write_sheet(wb.create_sheet("Projects"), SHEETS["Projects"],
                      [[p["code"], p["name"], p["client"], p["location"], p["lead_name"], p["status"],
-                       p["start_date"], p["due_date"], p["drive_folder_id"], None, p["notes"]]
+                       p["start_date"], p["due_date"], p["drive_folder_id"], None, p["blocker"], p["notes"]]
                       for p in projects])
 
-        phase_rows, drawing_rows = [], []
+        phase_rows, milestone_rows, drawing_rows, contact_rows = [], [], [], []
         for p in projects:
+            phase_names = {}
             for ph in db.list_phases(conn, p["id"]):
+                phase_names[ph["id"]] = ph["name"]
                 phase_rows.append([p["code"], ph["code"], ph["name"], ph["weight"], ph["planned_start"],
                                    ph["planned_end"], ph["progress"], ph["status"], ph["assignee_name"]])
+            for m in db.list_milestones(conn, p["id"]):
+                milestone_rows.append([p["code"], phase_names[m["phase_id"]], m["title"], m["due_date"],
+                                       "yes" if m["done"] else "no"])
+            for c in db.list_contacts(conn, p["id"]):
+                contact_rows.append([p["code"], c["name"], c["kind"], c["role"], c["email"], c["phone"],
+                                     "yes" if c["notify"] else "no"])
             for d in db.list_drawings(conn, p["id"]):
                 drawing_rows.append([p["code"], d["number"], d["title"], d["phase_name"], d["discipline"],
                                      d["scale"], d["revision"], d["stage"], d["progress"],
                                      d["assignee_name"], d["due_date"]])
         _write_sheet(wb.create_sheet("Phases"), SHEETS["Phases"], phase_rows)
+        _write_sheet(wb.create_sheet("Milestones"), SHEETS["Milestones"], milestone_rows)
         _write_sheet(wb.create_sheet("Drawings"), SHEETS["Drawings"], drawing_rows)
+        _write_sheet(wb.create_sheet("Contacts"), SHEETS["Contacts"], contact_rows)
 
     buffer = io.BytesIO()
     wb.save(buffer)
@@ -302,7 +361,11 @@ def _write_help(ws) -> None:
         ["Projects: Code is the unique key. Template (optional, new projects only): "
          + ", ".join(TEMPLATES) + " — creates the standard phases automatically."],
         ["Phases: Project = project Code. Progress is a % cell or a number from 0–100 (values up to 1 are read as fractions: 0.5 = 50%). Dates as YYYY-MM-DD or DD.MM.YYYY."],
+        ["Milestones: checklist items per phase (Project, Phase name or code, Milestone, Due, Done yes/no). "
+         "When a phase has milestones, its progress = share of milestones done."],
         ["Drawings: Stage is one of " + ", ".join(DRAWING_STAGES) + ". Progress defaults from the stage."],
+        ["Contacts: Type is one of " + ", ".join(db.CONTACT_KINDS) + ". Notify = yes to get an email draft "
+         "when the project moves to a new phase."],
         ["Re-importing updates existing rows; nothing is deleted by an import."],
     ]
     for line in lines:
