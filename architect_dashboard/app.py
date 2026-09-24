@@ -21,6 +21,7 @@ from . import auth, config, db, excel_io, gdrive, gmail, notify, progress
 from .phases import DRAWING_STAGES, PHASE_STATUSES, PROJECT_STATUSES, TEMPLATES
 
 STATIC = Path(__file__).parent / "static"
+SPOTLIGHT = Path(__file__).parent / "web" / "out"  # built with `npm run build` in web/
 XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
@@ -34,6 +35,17 @@ async def lifespan(_app):
 
 app = FastAPI(title="Atelier Studio Board", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
+if SPOTLIGHT.is_dir():
+    app.mount("/spotlight", StaticFiles(directory=SPOTLIGHT, html=True), name="spotlight")
+else:
+    @app.get("/spotlight/", include_in_schema=False)
+    def spotlight_not_built():
+        return Response(
+            "<p style='font-family:system-ui;padding:2rem'>Spotlight isn't built yet. On the server run "
+            "<code>cd architect_dashboard/web &amp;&amp; npm install &amp;&amp; npm run build</code>, "
+            "then restart Atelier. <a href='/'>Back to the dashboard</a></p>",
+            media_type="text/html", status_code=503,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -41,7 +53,8 @@ app.mount("/static", StaticFiles(directory=STATIC), name="static")
 # ---------------------------------------------------------------------------
 
 # Reachable without signing in
-PUBLIC = re.compile(r"^/(|static/.*|display/[^/]+|api/auth/(me|login|logout|setup|invite/[^/]+))$")
+# (Spotlight's page and scripts are public like /static; the data it loads is not.)
+PUBLIC = re.compile(r"^/(|static/.*|spotlight(/.*)?|display/[^/]+|api/auth/(me|login|logout|setup|invite/[^/]+))$")
 
 # (methods, path, minimum role). First match wins; otherwise reading needs "viewer"
 # and changing anything needs "member".

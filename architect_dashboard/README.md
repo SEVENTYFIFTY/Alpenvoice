@@ -13,6 +13,7 @@ schedule, how much moved today, and where each drawing stands.
 | **Blockers** | "Waiting on structural calcs": set it on a project and it appears on the card and in the *Needs attention* panel with how long it has been blocking. Mark it resolved when it's done. |
 | **People** | Client, consultant, authority and contractor contacts per project, each with a *notify on phase change* switch. Every team member keeps a one-line "what I'm working on" status that shows on the dashboard. |
 | **Live, all projects** | The dashboard updates by itself within about a second whenever anyone saves a change, and briefly outlines what changed in gold. The ● Live light in the top bar shows the connection. Active, on-hold and completed projects are all shown, grouped in that order (filter with *All projects*). Three views: **Cards** (one per project); **Stages** (a grid of every project × every phase with its %, the current phase outlined, late phases marked); **Timeline** (planned phases on a calendar with a Today line and deadlines). **⟳ Wall mode** cycles Cards → Stages → Timeline → Board every 30 s and slowly scrolls long pages. Wall-display links turn it on automatically. |
+| **Spotlight** | `/spotlight/` (the *Spotlight* tab) shows every project as a fanned, auto-advancing 3D card stack for the principal's screen. The front card shows % complete, today's and this week's movement, the plan marker, phases, blockers, mail and the deadline, with that project's phases listed underneath. It has the same live updates and filters (All, Needs attention, Active, On hold, Completed). Swipe, click a card, or use ← → to browse. It's a React / Next.js + TypeScript + Tailwind + shadcn app in `web/` (see `web/README.md`), built once with `npm run build`. |
 | **Wall dashboard** | One card per project. Each card shows overall % with the "plan today" marker, the change today and over 7 days, a phase strip, a 14-day trend, drawing stages and the deadline countdown. It refreshes itself every 60 s. Filter by architect and sort by "needs attention first". |
 | **Schedule health** | Each phase is *On track*, *At risk* (more than 10 points behind its planned dates) or *Overdue*. A project takes the status of its most serious phase. |
 | **Phases** | New projects get the studio's stages by default: Inquiry (5) → Concept (10) → Schematic design (15) → Design development (20) → Construction documents (25) → Permitting (10) → Construction administration (10) → Closeout (5). The number is each phase's weight in the overall %. The SIA 112 and international (AIA-style) sequences are also available. Set `DEFAULT_PHASE_TEMPLATE` to change the default. Weights, names and dates can all be edited. |
@@ -26,7 +27,8 @@ schedule, how much moved today, and where each drawing stands.
 
 ```bash
 pip install -r architect_dashboard/requirements.txt
-python -m architect_dashboard.seed --reset          # optional: demo office with 6 projects
+(cd architect_dashboard/web && npm install && npm run build)   # the Spotlight view (Node.js 20+)
+python -m architect_dashboard.seed --reset          # optional: demo office
 uvicorn architect_dashboard.app:app --host 0.0.0.0 --port 8000
 ```
 
@@ -143,6 +145,7 @@ architect_dashboard/
   auth.py       passwords, sessions, roles, invites, wall-display links, recovery command
   seed.py       demo data
   static/       the dashboard (plain HTML/CSS/JS, no build step)
+  web/          Spotlight: Next.js + TypeScript + Tailwind + shadcn (components/ui/card-stack.tsx)
   tests/        pytest suite
 ```
 

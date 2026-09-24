@@ -46,6 +46,10 @@ def test_everything_needs_sign_in(anon):
     assert anon.get("/api/projects/1").status_code == 401
     assert anon.post("/api/projects", json={"code": "X", "name": "Y"}).status_code == 401
     assert anon.get("/docs", follow_redirects=False).status_code == 307
+    # Spotlight's page itself loads (built: 200, not built yet: 503 with instructions) and then asks
+    # the same protected API for its data
+    assert anon.get("/spotlight/").status_code in (200, 503)
+    assert anon.get("/api/events").status_code == 401
 
 
 def test_login_logout_and_wrong_password(client):

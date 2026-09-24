@@ -1,0 +1,108 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* shadcn/ui: dark mode follows a `.dark` class on <html> (set in app/layout.tsx) */
+@custom-variant dark (&:is(.dark *));
+
+/* shadcn/ui theme tokens, set to the Atelier palette (navy + gold on warm paper) */
+:root {
+  --radius: 0.75rem;
+  --background: #f7f4ee;
+  --foreground: #1c1917;
+  --card: #fffcf7;
+  --card-foreground: #1c1917;
+  --popover: #fffcf7;
+  --popover-foreground: #1c1917;
+  --primary: #1b2a4a;
+  --primary-foreground: #ffffff;
+  --secondary: #efece6;
+  --secondary-foreground: #1c1917;
+  --muted: #efece6;
+  --muted-foreground: #57534e;
+  --accent: #f5ebd0;
+  --accent-foreground: #8b6914;
+  --destructive: #d03b3b;
+  --border: #e7e5e4;
+  --input: #e7e5e4;
+  --ring: #8b6914;
+
+  /* Atelier-specific */
+  --navy: #1b2a4a;
+  --navy-2: #2a3d63;
+  --gold: #8b6914;
+  --gold-soft: #f5ebd0;
+  --progress: #9bb0d3;
+  --good: #0ca30c;
+  --warning: #fab219;
+  --critical: #d03b3b;
+}
+
+.dark {
+  --background: #11151d;
+  --foreground: #f5f3ef;
+  --card: #1a2130;
+  --card-foreground: #f5f3ef;
+  --popover: #1a2130;
+  --popover-foreground: #f5f3ef;
+  --primary: #9bb0d3;
+  --primary-foreground: #11151d;
+  --secondary: #232b3c;
+  --secondary-foreground: #f5f3ef;
+  --muted: #232b3c;
+  --muted-foreground: #c3c0b8;
+  --accent: #3a3120;
+  --accent-foreground: #d4a93a;
+  --destructive: #e66767;
+  --border: #2a3244;
+  --input: #2a3244;
+  --ring: #d4a93a;
+
+  --navy: #1a2436;
+  --navy-2: #26324a;
+  --gold: #d4a93a;
+  --gold-soft: #3a3120;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-progress: var(--progress);
+  --color-good: var(--good);
+  --color-warning: var(--warning);
+  --color-critical: var(--critical);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
