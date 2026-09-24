@@ -134,7 +134,9 @@ h2 { font-size: 16px; }
 .tab:hover { background: #ffffff14; }
 .tab.active { background: #fff; color: #1b2a4a; border-color: #fff; font-weight: 600; }
 .topbar-right { display: flex; align-items: center; gap: 12px; }
-.clock { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.clock { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* the "Updated hh:mm" note is the first thing to go when the top bar gets crowded */
+@media (max-width: 1600px) { #last-refresh { display: none; } }
 .topbar .muted { color: #ffffffaa; }
 .icon-btn {
   width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
