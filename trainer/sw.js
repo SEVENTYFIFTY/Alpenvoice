@@ -1,8 +1,8 @@
 // Offline shell cache. The pose model and libraries are cached by the browser
 // on first use; app files are served cache-first and refreshed in the background.
-const CACHE = 'alpencoach-v2';
+const CACHE = 'alpencoach-v3';
 const SHELL = [
-  './', 'index.html', 'css/app.css', 'manifest.webmanifest', 'icon.svg',
+  './', 'index.html', 'css/app.css', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png',
   'js/main.js', 'js/store.js', 'js/geometry.js', 'js/exercises.js', 'js/repCounter.js',
   'js/coach.js', 'js/nutrition.js', 'js/planner.js', 'js/posture.js', 'js/pose.js',
   'js/session.js', 'js/pedometer.js', 'js/chat.js', 'js/schedule.js', 'js/week.js',
