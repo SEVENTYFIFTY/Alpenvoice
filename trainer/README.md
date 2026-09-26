@@ -11,6 +11,7 @@ It needs no app store and no backend, and your video never leaves the phone.
 | **Voice coach (EN / DE)** | Counts reps out loud ("Two more, keep pushing!", "One more, you can do it!"). Gives form cues ("Chest up", "Lift your hips"), catches partial reps and rushed tempo, cheers form streaks, nudges you when you stop, and runs rest countdowns. Beeps and vibrates on each rep. |
 | **Workout builder** | Pick body parts (chest, back, shoulders, arms, core, legs, glutes, cardio), time and level. You get a warm-up plus sets, reps and rests tuned to your goal and today's energy check-in. It suggests what to train next based on the last 48h. |
 | **19 tracked exercises** | Squat, reverse lunge, wall sit, glute bridge, good morning, bent-over row, push-up, incline push-up, pike push-up, shoulder press, lateral raise, biceps curl, chair dip, sit-up, plank, side plank, mountain climbers, high knees, jumping jacks |
+| **Fits your real life** | The **Week** tab asks about your job (office, home office, hybrid, shifts including night shifts, commute, lunch break), your **kids** (ages, daycare / kindergarten / school times and days, who does drop-off and pick-up, bedtimes, toddler naps), dinner, bed and wake times, and fixed commitments. From that it finds the gaps where you're **free**, where the **kids are with you**, and where you're **busy**, then plans your sessions in the best windows (preferred time of day, no back-to-back days, not too close to bedtime). It sets body-part splits, adds **walks** in the leftover gaps, and suggests **family workouts** when the only time you have is with the kids. It tells you honestly when fewer sessions fit than you asked for. The home screen shows today's window with a Start button, the app nudges you when the window opens, and **Add to my calendar** exports an `.ics` file with 10-minute reminders. |
 | **Body analysis** | BMI, BMR, daily burn, calorie and macro targets, and waist-to-height risk. **Posture scan** (5 s front + 5 s side) checks shoulder and hip tilt, head tilt, lateral shift, knee valgus, forward head, slouching and sway-back, with corrective exercises for each finding. |
 | **Food plan** | 7-day meal plan (omnivore / vegetarian / vegan) with gram portions scaled to your calorie target. You can tick meals as eaten, and it points out any protein gap. |
 | **Water & steps** | Daily goals, one-tap logging, hydration reminders, a live step counter from the accelerometer, and manual step entry. |
@@ -45,7 +46,7 @@ Then open the URL on your phone and choose *Add to Home Screen* so it runs full-
 cd trainer && npm test     # node --test, no dependencies
 ```
 
-The unit tests cover joint-angle math, rep counting on synthetic squat streams, partial-rep and tempo detection, form faults, hold timing, nutrition formulas, meal-plan diet filtering and calories, the workout builder, recommendations, posture findings and the step detector.
+The unit tests cover schedule planning (office worker, parent of a kindergartener, toddler naps, busy parent of two, night shift, morning preference), joint-angle math, rep counting on synthetic squat streams, partial-rep and tempo detection, form faults, hold timing, nutrition formulas, meal-plan diet filtering and calories, the workout builder, recommendations, posture findings and the step detector.
 
 ## Code map
 
@@ -58,11 +59,13 @@ The unit tests cover joint-angle math, rep counting on synthetic squat streams, 
 | `js/pose.js` | Camera + MediaPipe Pose Landmarker + skeleton overlay |
 | `js/session.js` | Guided workout runner and posture scan flow |
 | `js/planner.js` | Workout builder + next-workout recommendation |
+| `js/schedule.js` | Life schedule → free/family/busy day grid → weekly training plan, `.ics` export |
+| `js/week.js` | Week tab: schedule form and weekly plan view |
 | `js/posture.js` | Posture analysis and corrective exercises |
 | `js/nutrition.js` | BMI/BMR/TDEE, macros, water, steps, meal plans |
 | `js/pedometer.js` | Accelerometer step detection |
 | `js/chat.js` | Optional Claude-powered coach chat |
-| `js/main.js` | UI: Today, Train, Body, Food, Coach tabs |
+| `js/main.js` | UI: Today, Train, Week, Body, Food, Coach tabs |
 
 ## Limits (honest notes)
 - Pose tracking is 2D from one camera. Side-on vs facing placement matters, and it cannot judge everything a human trainer can (grip, breathing, spinal flexion under load).

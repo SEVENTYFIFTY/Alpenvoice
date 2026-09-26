@@ -8,6 +8,8 @@ import { postureScore } from './posture.js';
 import { Pedometer } from './pedometer.js';
 import { sendChat } from './chat.js';
 import { loadPoseModel } from './pose.js';
+import { defaultLife, weekPlan, dayIndex, toTime, toMin, toICS, describeLife, DAYS } from './schedule.js';
+import { weekPlanView, lifeFormView, applyInput, copyMonday, addKid, addCommitment, validLife, FAMILY_TIP } from './week.js';
 
 const view = document.getElementById('view');
 const S = () => store.get();
@@ -20,6 +22,8 @@ let pedometer;
 let draftPlan = null;
 let selectedParts = null;
 let foodDay = (new Date().getDay() + 6) % 7;
+let lifeDraft = null;
+let editingLife = false;
 
 function makeCoach() {
   const p = S().profile || {};
@@ -34,6 +38,24 @@ function todayWorkouts() {
   const k = store.todayKey();
   return S().workouts.filter((w) => store.todayKey(new Date(w.at)) === k);
 }
+
+// Days of the current week (Mon=0) with a logged workout.
+function doneDaysThisWeek() {
+  const monday = new Date();
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - dayIndex(monday));
+  return new Set(S().workouts.filter((w) => w.at >= monday.getTime()).map((w) => dayIndex(new Date(w.at))));
+}
+
+function todaySession() {
+  const life = S().life;
+  if (!life) return null;
+  const plan = weekPlan(life);
+  const day = plan.days[dayIndex()];
+  return { plan, day, s: day.session };
+}
+
+const nowMin = () => new Date().getHours() * 60 + new Date().getMinutes();
 
 function waterGoal() {
   const t = T();
@@ -82,6 +104,16 @@ function coachLines() {
   else if (hour >= 17) lines.push("There's still time for a quick 15-minute session. I'll count every rep with you.");
   else lines.push("Pick your body parts in Train and I'll build today's workout and watch your form.");
 
+  const ts = todaySession();
+  if (ts?.s && !doneToday) {
+    const s0 = ts.s, n = nowMin();
+    if (n < s0.start - 5) lines.push(`Your training window today: ${toTime(s0.start)} (${s0.label.toLowerCase()}). ${s0.minutes} minutes. I'll be ready.`);
+    else if (n <= s0.end) lines.push(`It's training time! ${s0.minutes} minutes, starting now. Let's go 💪`);
+    else if (n < toMin(S().life.sleep) - 60) lines.push('Missed today\'s window? No stress. Even 10 minutes still counts today.');
+  } else if (!S().life && s.profile) {
+    lines.push('Tell me about your job and family in the Week tab and I\'ll find the time to train for you.');
+  }
+
   if (t) {
     const expected = waterGoal() * Math.max(0, Math.min(1, (hour - 7) / 14));
     if (d.water < expected - 400) lines.push(`You're behind on water (${fmt(d.water)} ml). Grab a glass now 💧`);
@@ -128,6 +160,8 @@ function homeView() {
       <button class="btn" data-checkin="high">⚡ High</button>
     </div></div>`}
 
+  ${todayCard(rec, recLabels, d)}
+
   <div class="card">
     <div class="grid3">
       <div>${ring(d.water, waterGoal(), 'var(--water)', (d.water / 1000).toFixed(1) + 'L', `/${(waterGoal() / 1000).toFixed(1)}L`)}<div class="ring-label">Water</div></div>
@@ -155,11 +189,6 @@ function homeView() {
     <p class="small muted">Live counting works while the app is open. Copy your daily total from your phone's Health app for the full picture.</p>
   </div>
 
-  <div class="card stack">
-    <h3>Today's suggestion</h3>
-    <p>${esc(recLabels)} · ${d.checkin === 'low' ? 15 : 25} min</p>
-    <button class="btn primary big" data-quick="${rec.join(',')}">Start with my coach ▶</button>
-  </div>
 
   <div class="card">
     <h3>This week</h3>
@@ -169,6 +198,48 @@ function homeView() {
       <div class="stat"><b>${fmt(wk.reduce((a, w) => a + w.kcal, 0))}</b><span>kcal burned</span></div>
     </div>
   </div>`;
+}
+
+function todayCard(rec, recLabels, d) {
+  const quick = `<div class="card stack">
+    <h3>Today's suggestion</h3>
+    <p>${esc(recLabels)} · ${d.checkin === 'low' ? 15 : 25} min</p>
+    <button class="btn primary big" data-quick="${rec.join(',')}">Start with my coach ▶</button>
+  </div>`;
+  const ts = todaySession();
+  if (!ts) {
+    return `<div class="card stack"><h3>📅 Plan around your life</h3>
+      <p>Tell me your work hours, your kids' ages and school times, and your fixed commitments. I'll find the gaps and schedule your training in them.</p>
+      <button class="btn" data-go="week">Set up my week</button></div>${quick}`;
+  }
+  const { plan, day, s: sess } = ts;
+  const done = todayWorkouts().length > 0;
+  if (!sess) {
+    const next = [1, 2, 3, 4, 5, 6].map((k) => plan.days[(day.d + k) % 7]).find((x) => x.session);
+    return `<div class="card stack"><h3>🧘 Rest day</h3>
+      <p>No session planned today. Recovery builds muscle.${day.walks[0] ? ` Walk at ${toTime(day.walks[0].start)} for ${day.walks[0].minutes} min${day.walks[0].withKids ? ' with the kids' : ''}.` : ''}</p>
+      ${next ? `<p class="small muted">Next session: ${DAYS[next.d]} ${toTime(next.session.start)} · ${next.session.minutes} min</p>` : ''}
+      <button class="btn" data-quick="${rec.join(',')}" data-min="15">Train anyway (15 min)</button></div>`;
+  }
+  const n = nowMin();
+  const live = n >= sess.start - 30 && n <= sess.end + 90;
+  return `<div class="card stack" style="border-color:var(--accent)">
+    <div class="row between"><h3>⏰ Today's training window</h3>${done ? '<span class="tag accent">✓ Done</span>' : ''}</div>
+    <p><b style="font-size:22px">${toTime(sess.start)}–${toTime(sess.end)}</b> <span class="muted">· ${esc(sess.label)}</span></p>
+    <p>${sess.parts.map((p) => BODY_PARTS.find((b) => b.id === p)?.label || p).join(' + ')} · ${sess.minutes} min</p>
+    ${sess.mode === 'family' ? `<p class="small muted">${FAMILY_TIP}</p>` : ''}
+    ${sess.mode === 'cover' ? '<p class="small muted">Ask your partner to take the kids for this one.</p>' : ''}
+    ${done ? '' : `<button class="btn ${live ? 'primary' : ''} big" data-quick="${sess.parts.join(',')}" data-min="${sess.minutes}">${live ? 'Start now ▶' : 'Start early ▶'}</button>`}
+  </div>`;
+}
+
+function weekView() {
+  const s = S();
+  if (!s.life || editingLife) {
+    lifeDraft = lifeDraft || structuredClone(s.life || defaultLife());
+    return lifeFormView(lifeDraft, !s.life);
+  }
+  return `<h1>Week</h1>${weekPlanView(s.life, weekPlan(s.life), { doneDays: doneDaysThisWeek() })}`;
 }
 
 function trainView() {
@@ -357,6 +428,8 @@ function chatContext() {
     `Streak: ${store.streak()} days.`,
     recent ? `Recent workouts:\n${recent}` : 'No workouts logged yet.',
     findings ? `Posture findings: ${findings}` : '',
+    s.life ? `Life schedule:\n${describeLife(s.life)}` : 'Schedule not set up yet.',
+    s.life ? `Planned sessions this week: ${weekPlan(s.life).sessions.map((d) => `${DAYS[d.d]} ${toTime(d.session.start)} ${d.session.minutes}min ${d.session.parts.join('+')} (${d.session.label})`).join('; ') || 'none fit'}` : '',
   ].filter(Boolean).join('\n');
 }
 
@@ -364,7 +437,7 @@ function chatContext() {
 
 function render() {
   document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.tab === tab));
-  view.innerHTML = { home: homeView, train: trainView, body: bodyView, food: foodView, chat: chatView }[tab]();
+  view.innerHTML = { home: homeView, train: trainView, week: weekView, body: bodyView, food: foodView, chat: chatView }[tab]();
   if (tab === 'chat') {
     const log = document.getElementById('chatlog');
     log?.lastElementChild?.scrollIntoView({ block: 'end' });
@@ -424,7 +497,8 @@ view.addEventListener('click', async (e) => {
   if (ds.quick) {
     const s = S();
     const low = store.day().checkin === 'low';
-    const plan = buildWorkout({ parts: ds.quick.split(','), level: s.profile.level, goal: s.profile.goal, minutes: low ? 15 : 25, energy: store.day().checkin || 'ok' });
+    const minutes = Number(ds.min) || (low ? 15 : 25);
+    const plan = buildWorkout({ parts: ds.quick.split(','), level: s.profile?.level, goal: s.profile?.goal, minutes, energy: store.day().checkin || 'ok' });
     return startWorkout(plan);
   }
   if (ds.part) {
@@ -443,6 +517,19 @@ view.addEventListener('click', async (e) => {
     return render();
   }
   if (ds.ask) return askCoach(ds.ask);
+  if (ds.session) {
+    const sess = weekPlan(S().life).days[Number(ds.session)].session;
+    const p = S().profile;
+    return startWorkout(buildWorkout({ parts: sess.parts, level: p?.level, goal: p?.goal, minutes: sess.minutes, energy: store.day().checkin || 'ok' }));
+  }
+  if (ds.delkid) {
+    lifeDraft.kids.splice(Number(ds.delkid), 1);
+    return rerenderKeepScroll();
+  }
+  if (ds.delcom) {
+    lifeDraft.commitments.splice(Number(ds.delcom), 1);
+    return rerenderKeepScroll();
+  }
 
   switch (t.id) {
     case 'build':
@@ -459,6 +546,32 @@ view.addEventListener('click', async (e) => {
     case 'start':
       if (draftPlan) startWorkout(draftPlan);
       break;
+    case 'add-kid':
+      addKid(lifeDraft);
+      rerenderKeepScroll();
+      break;
+    case 'add-com':
+      addCommitment(lifeDraft);
+      rerenderKeepScroll();
+      break;
+    case 'copy-mon':
+      copyMonday(lifeDraft);
+      rerenderKeepScroll();
+      break;
+    case 'edit-life':
+      editingLife = true;
+      lifeDraft = null;
+      go('week');
+      break;
+    case 'ics': {
+      const blob = new Blob([toICS(weekPlan(S().life))], { type: 'text/calendar' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'alpencoach-week.ics';
+      a.click();
+      toast('Open the downloaded file to add this week\'s sessions to your calendar. You\'ll get a reminder 10 min before each one.', 7000);
+      break;
+    }
     case 'ped-toggle':
       try {
         if (pedometer?.active) pedometer.stop();
@@ -526,8 +639,18 @@ view.addEventListener('click', async (e) => {
   }
 });
 
+function rerenderKeepScroll() {
+  const y = window.scrollY;
+  render();
+  window.scrollTo(0, y);
+}
+
 view.addEventListener('change', (e) => {
   const t = e.target;
+  if (t.closest('#life-form')) {
+    if (applyInput(lifeDraft, t)) rerenderKeepScroll();
+    return;
+  }
   if (t.dataset.meal) {
     store.update(() => { store.day().meals[t.dataset.meal] = t.checked; });
     render();
@@ -551,9 +674,23 @@ view.addEventListener('submit', (e) => {
       };
     });
     makeCoach();
+    if (first && !S().life) {
+      toast(`Welcome ${S().profile.name}! Now tell me about your week so I can find time for you to train 💪`, 6000);
+      return go('week');
+    }
     toast(first ? `Welcome ${S().profile.name}! Your plan is ready. Let's do this 💪` : 'Saved. Targets updated.');
     render();
     window.scrollTo(0, 0);
+  } else if (e.target.id === 'life-form') {
+    const err = validLife(lifeDraft);
+    if (err) return toast(err);
+    const first = !S().life;
+    store.update((s) => { s.life = structuredClone(lifeDraft); });
+    lifeDraft = null;
+    editingLife = false;
+    const plan = weekPlan(S().life);
+    toast(first ? `Done! I found ${plan.sessions.length} training slots in your week. Add them to your calendar so I can remind you.` : 'Schedule saved. Your week has been re-planned.', 6000);
+    go('week');
   } else if (e.target.id === 'chatform') {
     const input = document.getElementById('chatmsg');
     const q = input.value.trim();
@@ -594,6 +731,24 @@ function onStep() {
   if (t && d.steps === t.steps) toast(`🎉 ${fmt(t.steps)} steps! Daily step goal smashed.`);
   if (tab === 'home' && d.steps % 10 === 0) render();
 }
+
+// "Training time" nudge when today's window opens (while the app is open).
+setInterval(() => {
+  const s = S();
+  const ts = todaySession();
+  if (!ts?.s || todayWorkouts().length || s.lastSessionNudge === store.todayKey()) return;
+  if (document.getElementById('session').classList.contains('open')) return;
+  const n = nowMin();
+  if (n >= ts.s.start - 5 && n <= ts.s.start + 15) {
+    s.lastSessionNudge = store.todayKey();
+    store.save();
+    makeCoach();
+    const msg = `${s.profile?.name || 'Hey'}, it's training time! ${ts.s.minutes} minutes of ${ts.s.parts.join(' and ')}. You can do it!`;
+    toast(msg, 10000);
+    coach.say(msg);
+    if (tab === 'home') render();
+  }
+}, 30000);
 
 // Hydration nudges while the app is open.
 setInterval(() => {

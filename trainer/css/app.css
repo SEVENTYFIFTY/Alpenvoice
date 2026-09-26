@@ -122,7 +122,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
 
 nav#tabs {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
-  display: grid; grid-template-columns: repeat(5, 1fr);
+  display: grid; grid-template-columns: repeat(6, 1fr);
   background: rgba(11, 13, 16, 0.92);
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--line);
@@ -131,7 +131,7 @@ nav#tabs {
 nav#tabs button {
   background: none; border: 0; padding: 10px 0 12px; color: var(--muted); font-size: 11px; cursor: pointer;
 }
-nav#tabs button .i { display: block; font-size: 22px; line-height: 1.2; }
+nav#tabs button .i { display: block; font-size: 21px; line-height: 1.2; }
 nav#tabs button.on { color: var(--accent); }
 
 .toast {

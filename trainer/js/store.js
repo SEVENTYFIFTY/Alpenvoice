@@ -8,6 +8,7 @@ const DEFAULT = {
   days: {}, // 'YYYY-MM-DD' -> {water, steps, checkin, meals:{}}
   workouts: [], // {at, parts, minutes, reps, kcal, formScore, blocks:[...]}
   posture: [], // {at, score, results}
+  life: null, // work, kids, commitments, preferences (see schedule.js)
   chat: [], // [{role, content}]
 };
 
