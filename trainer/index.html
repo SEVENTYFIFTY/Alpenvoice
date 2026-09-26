@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d10">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>AlpenCoach</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <main id="view"></main>
+
+  <nav id="tabs">
+    <button data-tab="home"><span class="i">🏠</span>Today</button>
+    <button data-tab="train"><span class="i">🏋️</span>Train</button>
+    <button data-tab="body"><span class="i">🧍</span>Body</button>
+    <button data-tab="food"><span class="i">🥗</span>Food</button>
+    <button data-tab="chat"><span class="i">💬</span>Coach</button>
+  </nav>
+
+  <section id="session" aria-label="Live workout">
+    <video playsinline muted></video>
+    <canvas></canvas>
+    <div class="depth" hidden><div></div></div>
+    <div class="hud top">
+      <div class="row between">
+        <div>
+          <div id="s-title" style="font-weight:700;font-size:18px"></div>
+          <div id="s-sub" class="small muted"></div>
+        </div>
+        <div class="row">
+          <button class="btn ghost" id="s-voice" title="Voice on/off">🔊</button>
+          <button class="btn ghost" id="s-flip" title="Switch camera">🔄</button>
+          <button class="btn ghost" id="s-close" title="End">✕</button>
+        </div>
+      </div>
+      <div class="progress" style="margin-top:8px"><div id="s-progress" style="width:0"></div></div>
+    </div>
+    <div class="phase-overlay" id="s-overlay" hidden></div>
+    <div class="hud bottom">
+      <div class="cue" id="s-cue"></div>
+      <div class="row between" style="align-items:flex-end">
+        <div class="rep-big" id="s-reps">0<small>/0</small></div>
+        <div style="text-align:right">
+          <div class="small muted">Form</div>
+          <div id="s-form" style="font-size:28px;font-weight:800">100%</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="s-plus" title="Count a rep manually">+1</button>
+        <button class="btn" id="s-pause">Pause</button>
+        <button class="btn primary" id="s-skip" style="flex:1">Skip ›</button>
+      </div>
+    </div>
+  </section>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
