@@ -1,4 +1,4 @@
-name: Deploy Petrus AI website to GitHub Pages
+name: Deploy websites to GitHub Pages
 
 on:
   workflow_dispatch:
@@ -25,8 +25,15 @@ jobs:
       - uses: actions/configure-pages@v5
         with:
           enablement: true
+      # Petrus AI at the site root (unchanged URLs), Seventy Fifty at /seventyfifty/
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp -r petrus-website/. _site/
+          mkdir -p _site/seventyfifty
+          cp -r seventyfifty-website/. _site/seventyfifty/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: petrus-website
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
