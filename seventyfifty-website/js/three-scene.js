@@ -3,6 +3,8 @@
 // between them. The camera drifts forward through the network as the page scrolls.
 
 import * as THREE from 'three';
+import { animate as anime, stagger, utils } from 'animejs';
+import { getInstances } from 'animejs/adapters/three';
 
 const canvas = document.getElementById('bg3d');
 const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -87,12 +89,61 @@ const pulsePoints = new THREE.Points(pulseGeo, new THREE.PointsMaterial({
 }));
 if (PULSE_COUNT) scene.add(pulsePoints);
 
-// ---- Hero centerpiece: rotating wireframe torus knot ----
-const knot = new THREE.Mesh(
-  new THREE.TorusKnotGeometry(3.4, 0.9, 110, 14),
-  new THREE.MeshBasicMaterial({ color: BLUE, wireframe: true, transparent: true, opacity: 0.22 }));
-knot.position.set(0, 0, -3);
-scene.add(knot);
+// ---- Hero centerpiece: instanced cube cluster (anime.js three adapter) ----
+// A 4x4x4 grid of cubes that rotates continuously and periodically explodes
+// outward and reassembles with grid-staggered timing, under a pulsing light.
+const GRID = 4;
+const CLUSTER_SIZE = 4.4;
+const cell = CLUSTER_SIZE / GRID;
+const clusterSpread = ((GRID - 1) / 2) * cell;
+const cubeMat = new THREE.MeshLambertMaterial({ color: BLUE, transparent: true, opacity: 0.85 });
+const cluster = new THREE.InstancedMesh(
+  new THREE.BoxGeometry(cell * 0.8, cell * 0.8, cell * 0.8), cubeMat, GRID ** 3);
+cluster.position.set(0, 0, -3);
+scene.add(cluster);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+dirLight.position.set(2, 3, 4);
+scene.add(dirLight);
+const pointLight = new THREE.PointLight(CYAN, 8, 20, 0.4);
+pointLight.position.set(0, 0, 0);
+scene.add(pointLight);
+
+const cubes = getInstances(cluster);
+utils.set(cubes, {
+  x: stagger([-clusterSpread, clusterSpread], { grid: [GRID, GRID, GRID], axis: 'x' }),
+  y: stagger([-clusterSpread, clusterSpread], { grid: [GRID, GRID, GRID], axis: 'y' }),
+  z: stagger([-clusterSpread, clusterSpread], { grid: [GRID, GRID, GRID], axis: 'z' }),
+});
+
+if (!prefersReduced) {
+  anime(cluster, {
+    rotateY: { to: 360, duration: 9000 },
+    rotateX: { to: 360, duration: 12000 },
+    loop: true,
+    ease: 'inOutQuad',
+  });
+  anime(pointLight, {
+    intensity: [20, 2],
+    duration: 2500,
+    loop: true,
+    loopDelay: 500,
+    alternate: true,
+    ease: 'out(3)',
+  });
+  anime(cubes, {
+    x: (c) => c.x * 3.2,
+    y: (c) => c.y * 3.2,
+    z: (c) => c.z * 3.2,
+    duration: 2000,
+    delay: stagger([0, 500], { grid: true, from: 'center', reversed: true, ease: 'in(3)' }),
+    loop: true,
+    loopDelay: 500,
+    alternate: true,
+    ease: 'inOutExpo',
+  });
+}
 
 // ---- Scroll + pointer ----
 let scrollT = 0, targetScrollT = 0;
@@ -145,9 +196,7 @@ function animate() {
     pulseGeo.attributes.position.needsUpdate = true;
   }
 
-  knot.rotation.y = t * 0.16;
-  knot.rotation.x = Math.sin(t * 0.2) * 0.3;
-  knot.material.opacity = 0.22 * Math.max(0, 1 - scrollT * 6); // fade past the hero
+  cubeMat.opacity = 0.85 * Math.max(0, 1 - scrollT * 6); // fade cluster past the hero
 
   renderer.render(scene, camera);
   requestAnimationFrame(animate);
