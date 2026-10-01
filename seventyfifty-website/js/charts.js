@@ -9,9 +9,21 @@
   Chart.defaults.font.family = "'Inter', sans-serif";
   Chart.defaults.borderColor = 'rgba(140,175,235,0.10)';
 
+  const isDE = (document.documentElement.lang || '').toLowerCase().startsWith('de');
+
   function buildHoursChart(ctx) {
     // Weekly hours; front desk = 7.5 h/day x 7, events = 42 h/month ~ 9.7 h/week
-    const data = [
+    const data = isDE ? [
+      { label: 'Front-Desk-KI-Assistent', hours: 52.5, note: '7,5 Std./Tag × 7 Tage' },
+      { label: 'Voice-KI-Concierge', hours: 45, note: '24/7-Sprachbuchungen' },
+      { label: 'Gästekommunikations-Hub', hours: 39, note: '70% automatisiert' },
+      { label: 'Restaurant-Bestell-KI', hours: 26, note: '75% der Anrufe automatisiert' },
+      { label: 'Housekeeping-Manager', hours: 15.75, note: 'Supervisor-Zeit' },
+      { label: 'Dynamic-Pricing-KI', hours: 15, note: 'Revenue Management' },
+      { label: 'Wartungssystem', hours: 10.5, note: '35% schnellere Reaktion' },
+      { label: 'Event-Management-KI', hours: 9.7, note: '42 Std./Monat' },
+      { label: 'Sicherheits-Monitoring-KI', hours: 8, note: 'Berichtszeit' },
+    ] : [
       { label: 'Front Desk AI Assistant', hours: 52.5, note: '7.5 h/day × 7 days' },
       { label: 'Voice AI Concierge', hours: 45, note: '24/7 voice bookings' },
       { label: 'Guest Communication Hub', hours: 39, note: '70% automated' },
@@ -38,7 +50,7 @@
         maintainAspectRatio: false,
         scales: {
           x: {
-            title: { display: true, text: 'Hours per week' },
+            title: { display: true, text: isDE ? 'Stunden pro Woche' : 'Hours per week' },
             grid: { color: 'rgba(140,175,235,0.08)' },
             beginAtZero: true,
           },
@@ -48,7 +60,9 @@
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (c) => ` ${c.parsed.x} hours/week — ${data[c.dataIndex].note}`,
+              label: (c) => isDE
+                ? ` ${String(c.parsed.x).replace('.', ',')} Std./Woche — ${data[c.dataIndex].note}`
+                : ` ${c.parsed.x} hours/week — ${data[c.dataIndex].note}`,
             },
           },
         },

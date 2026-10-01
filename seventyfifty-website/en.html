@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seventy Fifty — AI-Powered Software for Startups &amp; SMEs | Arosa, Switzerland</title>
+<meta name="description" content="Swiss AI automation studio building custom AI-powered projects for SMEs and hospitality. One-time project pricing — no monthly fees. Based in Arosa, Graubünden.">
+<meta property="og:title" content="Seventy Fifty — AI-Powered Software, Built as Projects You Own">
+<meta property="og:description" content="Custom AI agents, voice AI, automation and dashboards for Swiss SMEs. Project-based pricing, no subscriptions.">
+<meta property="og:url" content="https://seventyfifty.ch/en.html">
+<link rel="canonical" href="https://seventyfifty.ch/en.html">
+<link rel="alternate" hreflang="de-CH" href="https://seventyfifty.ch/">
+<link rel="alternate" hreflang="en" href="https://seventyfifty.ch/en.html">
+<link rel="alternate" hreflang="x-default" href="https://seventyfifty.ch/">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js" } }
+</script>
+</head>
+<body>
+
+<!-- ===== 3D BACKGROUND (fixed, scroll-reactive neural constellation) ===== -->
+<canvas id="bg3d" aria-hidden="true"></canvas>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ===== NAVIGATION ===== -->
+<header class="nav" id="nav">
+  <a class="nav__brand" href="#top">
+    <span class="nav__logo">75</span>
+    <span class="nav__name">Seventy <em>Fifty</em><small>AI Automation Studio</small></span>
+  </a>
+  <nav class="nav__links" id="navLinks">
+    <a href="#services">Services</a>
+    <a href="#projects">Projects</a>
+    <a href="#process">Process</a>
+    <a href="#results">Results</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <div class="lang" aria-label="Language"><a href="index.html" lang="de" hreflang="de-CH">DE</a><span class="is-active">EN</span></div>
+  <a href="#contact" class="btn btn--small btn--primary nav__cta">Free Consultation</a>
+  <button class="nav__burger" id="navBurger" aria-label="Menu"><span></span><span></span><span></span></button>
+</header>
+
+<main id="top">
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="hero">
+  <div class="hero__inner">
+    <div class="hero__badge reveal"><span class="pulse-dot"></span> Swiss AI Automation Studio — Arosa, Graubünden</div>
+    <h1 class="hero__title reveal">AI-Powered Software,<br><span class="grad-text">Built as Projects You Own</span></h1>
+    <p class="hero__sub reveal">We design and build custom AI agents, voice systems, automations and dashboards for startups and SMEs — then train your team to run them. One-time project pricing. No monthly fees. No lock-in.</p>
+    <div class="hero__actions reveal">
+      <a href="#contact" class="btn btn--primary">Start Your Project</a>
+      <a href="#projects" class="btn btn--ghost">See Our AI Projects</a>
+    </div>
+    <div class="hero__chips reveal">
+      <span class="chip">✓ One-time pricing — no subscriptions</span>
+      <span class="chip">34 industry AI solutions built</span>
+      <span class="chip">25+ years operational experience</span>
+    </div>
+  </div>
+  <div class="hero__scrollhint"><span></span></div>
+</section>
+
+<!-- ===== STATS STRIP ===== -->
+<section class="section section--tight" id="stats">
+  <div class="container">
+    <div class="grid grid--4 stats">
+      <div class="card stat tilt reveal">
+        <div class="stat__num grad-text" data-count="34">0</div>
+        <h3>AI Solutions Built</h3><p>Industry-specific solutions across our platform portfolio</p>
+      </div>
+      <div class="card stat tilt reveal">
+        <div class="stat__num grad-text" data-count="23" data-suffix="+">0</div>
+        <h3>Hours Freed Per Day</h3><p>Modeled for a 150-room hotel — nearly 3 full-time roles</p>
+      </div>
+      <div class="card stat tilt reveal">
+        <div class="stat__num grad-text">60–70%</div>
+        <h3>Inquiries Automated</h3><p>Routine questions answered instantly, staff kept for what matters</p>
+      </div>
+      <div class="card stat tilt reveal">
+        <div class="stat__num grad-text">2–3 mo</div>
+        <h3>Typical Payback</h3><p>Full return on project investment within the first quarter</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SERVICES ===== -->
+<section class="section section--alt" id="services">
+  <div class="container">
+    <p class="kicker reveal">What We Build</p>
+    <h2 class="reveal">Full-Cycle AI Development, <span class="grad-text">One Project at a Time</span></h2>
+    <p class="lead reveal">From first workshop to launch and staff training — we cover the whole cycle. You get working software, trained people, and systems you own outright.</p>
+    <div class="grid grid--3">
+      <div class="card tilt reveal"><div class="icon">🤖</div><h3>AI Agents &amp; Automation</h3><p>Custom AI agents with RAG knowledge bases that answer questions, execute workflows and hand off gracefully to your team when it matters.</p></div>
+      <div class="card tilt reveal"><div class="icon">🎙️</div><h3>Voice AI Systems</h3><p>24/7 voice assistants that take calls, answer questions, make bookings and route complex requests — in your brand's tone of voice.</p></div>
+      <div class="card tilt reveal"><div class="icon">💻</div><h3>Custom Web &amp; Software</h3><p>Modern web platforms and internal tools designed around your actual workflows — not the other way around.</p></div>
+      <div class="card tilt reveal"><div class="icon">📊</div><h3>Intelligent Dashboards</h3><p>Live dashboards that turn your operational data into decisions: occupancy, revenue, task status, response times.</p></div>
+      <div class="card tilt reveal"><div class="icon">🔗</div><h3>Systems Integration</h3><p>We connect the AI to the tools you already use — PMS, POS, calendars, email, messaging — so nothing runs in a silo.</p></div>
+      <div class="card tilt reveal"><div class="icon">🎓</div><h3>AI Strategy &amp; Team Training</h3><p>Real hands-on training, not just videos. Your staff learns to run, trust and extend the systems we build together.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== AI-POWERED PROJECTS (PORTFOLIO) ===== -->
+<section class="section" id="projects">
+  <div class="container">
+    <p class="kicker reveal">AI-Powered Projects</p>
+    <h2 class="reveal">Built by Us. Running in the Real World.</h2>
+    <p class="lead reveal">Every project below is our own product engineering — the same discipline we bring to client work.</p>
+
+    <div class="grid grid--2 projects">
+      <article class="card project tilt reveal">
+        <header><span class="project__logo">GF</span><div><h3>GuestFlow</h3><span class="project__type">Hospitality AI Platform</span></div></header>
+        <p>A complete AI operations suite for hotels: front-desk assistant, 24/7 voice concierge, guest communication hub, dynamic pricing and more — 9 core solutions, each with a measured ROI model.</p>
+        <ul class="project__facts">
+          <li><strong>7.5 h/day</strong> saved at the front desk alone</li>
+          <li><strong>60%+</strong> of calls and inquiries automated</li>
+          <li><strong>CHF 48,880/mo</strong> modeled revenue opportunity (150-room hotel)</li>
+        </ul>
+        <div class="tags"><span class="tag">Voice AI</span><span class="tag">RAG Agents</span><span class="tag">Dynamic Pricing</span><span class="tag">PMS Integration</span></div>
+      </article>
+
+      <article class="card project tilt reveal">
+        <header><span class="project__logo">P</span><div><h3>Petrus AI</h3><span class="project__type">Child Mental Health — Early Warning</span></div></header>
+        <p>An AI-supported early-detection platform for children's mental health in Swiss schools and psychiatry services. Personal-baseline analysis, a mandatory human gate, and privacy by design.</p>
+        <ul class="project__facts">
+          <li><strong>750+ hours</strong> of academic research with FH Graubünden</li>
+          <li><strong>33 institutions</strong> surveyed across 8 Swiss cantons</li>
+          <li><strong>nFADP / GDPR / EU AI Act</strong> compliance built in from day one</li>
+        </ul>
+        <div class="tags"><span class="tag">Behavioral AI</span><span class="tag">Privacy by Design</span><span class="tag">Research-Validated</span></div>
+      </article>
+
+      <article class="card project tilt reveal">
+        <header><span class="project__logo">M</span><div><h3>Motiaa</h3><span class="project__type">EU Migration Platform</span></div></header>
+        <p>A digital platform that guides people through complex EU migration processes with clear, practical, step-by-step assistance — turning bureaucratic anxiety into a plan.</p>
+        <ul class="project__facts">
+          <li><strong>Guided workflows</strong> for complex multi-step processes</li>
+          <li><strong>Accessible, multilingual</strong> user experience</li>
+          <li><strong>User-centric</strong> content designed to reduce anxiety</li>
+        </ul>
+        <div class="tags"><span class="tag">Web Platform</span><span class="tag">Guided UX</span><span class="tag">Multilingual</span></div>
+      </article>
+
+      <article class="card project tilt reveal">
+        <header><span class="project__logo">OA</span><div><h3>AI Outreach Agent</h3><span class="project__type">Sales Automation</span></div></header>
+        <p>An autonomous prospecting agent that researches companies, drafts personalised outreach, sends email sequences and books meetings straight into the calendar — end to end.</p>
+        <ul class="project__facts">
+          <li><strong>Automated research</strong> and personalisation per prospect</li>
+          <li><strong>Email + scheduling</strong> integration out of the box</li>
+          <li><strong>Human review</strong> checkpoints before anything sends</li>
+        </ul>
+        <div class="tags"><span class="tag">Autonomous Agent</span><span class="tag">Email Automation</span><span class="tag">Calendar Integration</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GUESTFLOW SOLUTION LIBRARY ===== -->
+<section class="section section--alt" id="solutions">
+  <div class="container">
+    <p class="kicker reveal">Inside GuestFlow</p>
+    <h2 class="reveal">Nine AI Solutions, Each With Measured Impact</h2>
+    <p class="lead reveal">Every solution ships with a concrete time-savings and revenue model — because "AI-powered" should mean numbers, not buzzwords.</p>
+
+    <div class="split split--wide reveal">
+      <div class="card chart-card">
+        <h3>Hours returned to your team per week</h3>
+        <p class="muted">By GuestFlow solution — front desk shown at 7.5 h/day over a 7-day week</p>
+        <div class="chart-wrap chart-wrap--tall"><canvas id="hoursChart"></canvas></div>
+      </div>
+      <div class="solution-list">
+        <div class="sol reveal"><div class="sol__head"><span>🛎️ Front Desk AI Assistant</span><strong>7.5 h/day</strong></div><p>Automated check-in/out, Q&amp;A and upgrades — 60% of calls automated, 1.3 FTE saved.</p></div>
+        <div class="sol reveal"><div class="sol__head"><span>🗣️ Voice AI Concierge (24/7)</span><strong>45 h/week</strong></div><p>Voice recommendations, bookings and reservations — 65% of requests automated.</p></div>
+        <div class="sol reveal"><div class="sol__head"><span>💬 Guest Communication Hub</span><strong>39 h/week</strong></div><p>Unified inbox with instant responses — 70% automated, 1 FTE saved.</p></div>
+        <div class="sol reveal"><div class="sol__head"><span>🍽️ Restaurant Order AI</span><strong>26 h/week</strong></div><p>Voice order-taking with a 22% upsell acceptance rate — 75% of calls automated.</p></div>
+        <div class="sol reveal"><div class="sol__head"><span>📅 Event Management AI</span><strong>42 h/month</strong></div><p>BEOs in 35 minutes and 25% more events booked.</p></div>
+        <div class="sol reveal"><div class="sol__head"><span>🧹 Housekeeping Task Manager</span><strong>15.75 h/week</strong></div><p>Smart coordination and live status — +7% room capacity.</p></div>
+        <div class="sol reveal"><div class="sol__head"><span>📈 Dynamic Pricing AI</span><strong>15 h/week</strong></div><p>Real-time rates and event forecasting — 8–12% RevPAR lift, CHF 28,000+ per month.</p></div>
+        <div class="sol reveal"><div class="sol__head"><span>🔧 Maintenance Request System</span><strong>10.5 h/week</strong></div><p>Smart work-order routing with predictive triage — 35% faster response.</p></div>
+        <div class="sol reveal"><div class="sol__head"><span>🛡️ Security Monitoring AI</span><strong>8 h/week</strong></div><p>Smart camera feeds, instant alerts, automated reporting — 60% faster response.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROCESS ===== -->
+<section class="section" id="process">
+  <div class="container">
+    <p class="kicker reveal">How We Work</p>
+    <h2 class="reveal">From First Call to Launch in About Five Weeks</h2>
+    <p class="lead reveal">A clear, fixed process. You always know what happens next — and what it costs before we start.</p>
+    <div class="timeline">
+      <div class="tl reveal"><span class="tl__dot"></span><div class="tl__body"><span class="tl__when">Week 1</span><h3>Discovery &amp; Planning</h3><p>We learn your business — workflows, bottlenecks, unique selling points — and define the project scope with a fixed quote.</p></div></div>
+      <div class="tl reveal"><span class="tl__dot"></span><div class="tl__body"><span class="tl__when">Weeks 2–3</span><h3>Development &amp; Integration</h3><p>We build the AI systems and connect them to your existing tools — PMS, POS, calendars, email, phone.</p></div></div>
+      <div class="tl reveal"><span class="tl__dot"></span><div class="tl__body"><span class="tl__when">Week 4</span><h3>Testing &amp; Training</h3><p>Real hands-on training for your staff, including sales-skill coaching — not just videos. We go live only when your team is confident.</p></div></div>
+      <div class="tl reveal"><span class="tl__dot"></span><div class="tl__body"><span class="tl__when">Week 5+</span><h3>Launch &amp; Optimization</h3><p>We launch, monitor, and tune. Revenue reviews and system refinements make sure the results show up in your numbers — 24-hour email response, 4-hour response on urgent issues.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== RESULTS ===== -->
+<section class="section section--alt" id="results">
+  <div class="container">
+    <p class="kicker reveal">Measured Results</p>
+    <h2 class="reveal">What a 150-Room Hotel Gets Back</h2>
+    <p class="lead reveal">Our ROI framework, modeled on a 150-room property at typical occupancy. Three phases: automate the repetitive, amplify guest relationships, then keep multiplying ROI as a partnership.</p>
+    <div class="grid grid--4">
+      <div class="card stat--sm reveal"><strong class="grad-text">CHF 7–10K</strong><h5>Extra Per Month</h5><p>Typical additional revenue after launch</p></div>
+      <div class="card stat--sm reveal"><strong class="grad-text">CHF 48,880</strong><h5>Monthly Opportunity</h5><p>Full modeled revenue potential: upsells, upgrades, dynamic pricing</p></div>
+      <div class="card stat--sm reveal"><strong class="grad-text">CHF 588,000</strong><h5>Annual Profit Improvement</h5><p>Modeled full-deployment impact for a 150-room hotel</p></div>
+      <div class="card stat--sm reveal"><strong class="grad-text">2–3 h/day</strong><h5>Per Staff Member</h5><p>Time returned to every member of your team</p></div>
+    </div>
+    <div class="banner reveal">Phase 1: <strong>Automate</strong> the repetitive → Phase 2: <strong>Amplify</strong> guest relationships &amp; upsells → Phase 3: <strong>Dominate</strong> with continuous optimization</div>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section class="section" id="pricing">
+  <div class="container">
+    <p class="kicker reveal">Pricing</p>
+    <h2 class="reveal">One Project. One Investment. <span class="grad-text">No Monthly Fees.</span></h2>
+    <p class="lead reveal">We quote the project, we build it, you own it. No subscriptions, no per-seat licences, no lock-in. Every quote is fixed before work begins.</p>
+    <div class="grid grid--3 plans">
+      <div class="card plan tilt reveal">
+        <h3>Launch</h3><span class="plan__for">For your first AI automation</span>
+        <div class="plan__price">One-time<br><em>custom quote</em></div>
+        <ul class="checklist">
+          <li>Up to 3 core automations</li>
+          <li>AI agent with RAG knowledge base</li>
+          <li>Foundation onboarding</li>
+          <li>Essential dashboards</li>
+          <li>Staff walkthrough &amp; documentation</li>
+        </ul>
+        <a href="#contact" class="btn btn--ghost btn--block">Request a Quote</a>
+      </div>
+      <div class="card plan plan--featured tilt reveal">
+        <span class="plan__flag">Most Popular</span>
+        <h3>Scale</h3><span class="plan__for">For operations-wide automation</span>
+        <div class="plan__price">One-time<br><em>custom quote</em></div>
+        <ul class="checklist">
+          <li>Expanded automation suite</li>
+          <li>Voice AI &amp; multi-channel agents</li>
+          <li>Enhanced integrations (PMS, POS, calendars)</li>
+          <li>Hands-on staff workshops</li>
+          <li>Sales-skill training for your team</li>
+          <li>Launch monitoring &amp; tuning</li>
+        </ul>
+        <a href="#contact" class="btn btn--primary btn--block">Request a Quote</a>
+      </div>
+      <div class="card plan tilt reveal">
+        <h3>Transform</h3><span class="plan__for">For full digital transformation</span>
+        <div class="plan__price">One-time<br><em>custom quote</em></div>
+        <ul class="checklist">
+          <li>Unlimited automations in scope</li>
+          <li>Predictive AI &amp; advanced integrations</li>
+          <li>Optimization lab &amp; agent upgrades</li>
+          <li>Strategic advisory during delivery</li>
+          <li>Full team enablement program</li>
+        </ul>
+        <a href="#contact" class="btn btn--ghost btn--block">Request a Quote</a>
+      </div>
+    </div>
+    <p class="note reveal">For reference: a full hotel deployment typically represents a one-time implementation investment of <strong>CHF 15,000–25,000</strong>, with payback in 2–3 months. Ongoing support is optional and shaped around you — never a forced subscription.</p>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section class="section section--alt" id="about">
+  <div class="container">
+    <p class="kicker reveal">About Seventy Fifty</p>
+    <h2 class="reveal">Operators First. Technologists Second.</h2>
+    <div class="split">
+      <div class="card person tilt reveal">
+        <div class="person__avatar">AM</div>
+        <h4>Alex Matos</h4><span class="person__role">Founder &amp; CEO</span>
+        <span class="person__org">Arosa, Graubünden, Switzerland</span>
+        <p>25+ years of international business leadership across hospitality, construction and trade — in Switzerland, Portugal, Spain and Angola. Cambridge Business Analytics (2024). Fluent in Portuguese, English and Spanish.</p>
+        <p class="quote-inline">“I understand your operations because I've run them. I know hospitality, I know the Swiss market, and I know what actually works — not just what looks good in a demo.”</p>
+        <div class="tags"><span class="tag">Hospitality Operations</span><span class="tag">Business Analytics</span><span class="tag">AI Automation</span></div>
+      </div>
+      <div class="card card--feature reveal">
+        <h3>Why Businesses Choose Us</h3>
+        <ul class="checklist">
+          <li><strong>Real operational experience</strong> — we've run hotels, not just built software for them</li>
+          <li><strong>Partnership, not vendorship</strong> — hands-on training, revenue reviews, honest timelines</li>
+          <li><strong>Staff empowerment, not replacement</strong> — AI takes the repetitive work; people do what only people can</li>
+          <li><strong>Swiss market focus</strong> — local expertise, Swiss data-privacy standards, CHF-denominated ROI</li>
+          <li><strong>You own everything</strong> — the systems, the data, the results</li>
+        </ul>
+        <blockquote class="quote">“Technology should empower people, not replace them. AI gives us back our time to do what only humans can do — connect, create, and care. That's the business I'm building.”<cite>— Alex Matos, Founder</cite></blockquote>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="section" id="faq">
+  <div class="container container--narrow">
+    <p class="kicker reveal">Frequently Asked Questions</p>
+    <h2 class="reveal">Straight Answers</h2>
+    <div class="faq reveal">
+      <details><summary>Why no monthly fees?</summary><p>Because you shouldn't rent your own operations. We quote the project, build it, train your team, and hand you the keys — you own the systems and the data. Ongoing support is available when you want it, shaped around your needs, never as a forced subscription.</p></details>
+      <details><summary>Will our customers actually like talking to AI?</summary><p>They already text, email and check FAQs. AI gives instant answers to simple questions — and complex requests still go to your empowered staff. Nothing changes for guests who prefer the phone or the front desk.</p></details>
+      <details><summary>Won't our staff feel threatened?</summary><p>Only if it's positioned wrong. This liberates staff from repetitive work to do what requires expertise and personality. In our experience, staff become the biggest advocates within a month.</p></details>
+      <details><summary>What if the AI makes mistakes?</summary><p>It will — rarely. We monitor continuously, update weekly, and build in safety measures and human hand-off points. Within months, AI accuracy exceeds human consistency for routine inquiries.</p></details>
+      <details><summary>How long until we see results?</summary><p>Weeks 1–3: your staff notices breathing room. Weeks 4–6: first measurable upselling increase. Months 2–3: revenue improvements are clear and consistent. Month 4+: the new normal — better service, better revenue.</p></details>
+      <details><summary>Who is this for?</summary><p>Primarily Swiss hotels of 50–200 rooms, restaurants, and SMEs with repetitive operational tasks — anyone who wants efficiency and revenue growth without adding headcount.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section class="section section--contact" id="contact">
+  <div class="container container--narrow center">
+    <h2 class="reveal">Let's Scope <span class="grad-text">Your Project</span></h2>
+    <p class="lead center-lead reveal">A free consultation: we look at your operations, identify the highest-ROI automations, and give you a fixed one-time quote. No obligation, no subscription — ever.</p>
+    <div class="cta-row center reveal">
+      <a class="btn btn--primary" href="mailto:alex@seventyfifty.ch?subject=Project%20Consultation%20—%20Seventy%20Fifty">Book a Free Consultation</a>
+      <a class="btn btn--ghost" href="tel:+41762699173">Call +41 76 269 91 73</a>
+    </div>
+    <div class="contact-meta reveal">
+      <span>✉️ <a href="mailto:alex@seventyfifty.ch">alex@seventyfifty.ch</a></span>
+      <span>📱 Phone / WhatsApp: +41 76 269 91 73</span>
+      <span>📍 Arosa, Graubünden, Switzerland</span>
+    </div>
+    <p class="muted reveal">Office hours: Monday–Friday, 9:00–18:00 CET • 24-hour email response • 4-hour response on urgent issues</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container footer__grid">
+    <div>
+      <a class="nav__brand" href="#top"><span class="nav__logo">75</span><span class="nav__name">Seventy <em>Fifty</em><small>AI Automation Studio</small></span></a>
+      <p class="muted">Arosa, Graubünden, Switzerland</p>
+    </div>
+    <nav class="footer__links">
+      <a href="#services">Services</a>
+      <a href="#projects">Projects</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+  <div class="container footer__legal">
+    <p>© 2026 Seventy Fifty. All rights reserved.</p>
+    <p class="muted">seventyfifty.ch • AI that empowers people, not replaces them.</p>
+  </div>
+</footer>
+
+<script src="vendor/chart.umd.min.js"></script>
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script type="module" src="js/three-scene.js"></script>
+<script src="js/charts.js" defer></script>
+<script src="js/main.js" defer></script>
+</body>
+</html>
