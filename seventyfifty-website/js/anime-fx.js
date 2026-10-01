@@ -1,10 +1,12 @@
 // Seventy Fifty — anime.js v4 effects.
 // 1) Hero: a looping timeline choreographing three geometric shapes
 //    (circle / triangle / square), echoing the anime.js timeline pattern.
-// 2) Solutions: an animated list/grid view toggle using createLayout,
+// 2) Solutions: a staggered x-slide entrance (delay: stagger(100)) when
+//    the list scrolls into view.
+// 3) Solutions: an animated list/grid view toggle using createLayout,
 //    with staggered FLIP transitions between the two layouts.
 
-import { createTimeline, createLayout, stagger } from 'animejs';
+import { animate, createTimeline, createLayout, stagger, utils } from 'animejs';
 
 const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -16,8 +18,25 @@ if (!prefersReduced && document.querySelector('.fx-shapes')) {
     .add('.fx-shape--circle', { scale: [1, 1.5, 1], x: '1.6rem' }, 0);
 }
 
-/* ---------- Solutions list/grid layout toggle ---------- */
+/* ---------- Solutions staggered entrance ---------- */
 const list = document.querySelector('.solution-list');
+if (!prefersReduced && list) {
+  utils.set('.sol', { opacity: 0 });
+  const io = new IntersectionObserver((entries, obs) => {
+    if (!entries.some((e) => e.isIntersecting)) return;
+    animate('.sol', {
+      x: ['-1.5rem', '0rem'],
+      opacity: [0, 1],
+      delay: stagger(100),
+      duration: 700,
+      ease: 'outQuad',
+    });
+    obs.disconnect();
+  }, { threshold: 0.15 });
+  io.observe(list);
+}
+
+/* ---------- Solutions list/grid layout toggle ---------- */
 const toggle = document.getElementById('viewToggle');
 if (list && toggle) {
   const layout = createLayout(list);
