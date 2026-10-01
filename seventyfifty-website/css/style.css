@@ -245,6 +245,55 @@ strong { color: var(--ink); }
 }
 @keyframes scrollhint { 0% { opacity: 1; top: 8px; } 70% { opacity: 0; top: 24px; } 100% { opacity: 0; top: 8px; } }
 
+/* ---------- Hero geometric shapes (anime.js choreography) ---------- */
+.fx-shapes { position: absolute; inset: 0; pointer-events: none; }
+.fx-shape { position: absolute; display: block; opacity: 0.4; }
+.fx-shape--circle {
+  width: 46px; height: 46px;
+  border: 2px solid var(--cyan); border-radius: 50%;
+  left: 9%; bottom: 24%;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.35);
+}
+.fx-shape--triangle {
+  width: 48px; height: 48px;
+  background: rgba(59, 130, 246, 0.3);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  right: 10%; top: 26%;
+}
+.fx-shape--square {
+  width: 40px; height: 40px;
+  border: 2px solid var(--indigo); border-radius: 8px;
+  right: 15%; bottom: 20%;
+  box-shadow: 0 0 20px rgba(129, 140, 248, 0.3);
+}
+@media (max-width: 820px) { .fx-shapes { display: none; } }
+
+/* ---------- Solutions view toggle + grid layout ---------- */
+.solutions-col { display: flex; flex-direction: column; gap: 0.8rem; min-width: 0; }
+.view-toggle {
+  align-self: flex-end;
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+.view-toggle button {
+  border: 0; background: none; cursor: pointer;
+  padding: 0.45rem 1rem;
+  font-family: var(--font-head); font-weight: 600; font-size: 0.8rem;
+  color: var(--ink-dim);
+  transition: color 0.25s, background 0.25s;
+}
+.view-toggle button:hover { color: var(--ink); }
+.view-toggle button.is-active { color: #04121c; background: var(--grad); }
+.solution-list.is-grid { grid-template-columns: repeat(2, 1fr); }
+.solution-list.is-grid .sol p { display: none; }
+.solution-list.is-grid .sol__head { flex-direction: column; align-items: flex-start; gap: 0.15rem; }
+.solution-list.is-grid .sol:hover { transform: translateY(-3px); }
+@media (max-width: 560px) { .solution-list.is-grid { grid-template-columns: 1fr; } }
+
 /* ---------- Quotes ---------- */
 .quote {
   font-family: "Fraunces", serif; font-style: italic;
