@@ -5,8 +5,10 @@
 //    the list scrolls into view.
 // 3) Solutions: an animated list/grid view toggle using createLayout,
 //    with staggered FLIP transitions between the two layouts.
+// 4) WAAPI micro-interactions: hardware-accelerated hover effects on the
+//    project logo badges and a full spin on the nav logo.
 
-import { animate, createTimeline, createLayout, stagger, utils } from 'animejs';
+import { animate, createTimeline, createLayout, stagger, utils, waapi } from 'animejs';
 
 const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -52,4 +54,33 @@ if (list && toggle) {
       ease: 'inOutQuad',
     });
   });
+}
+
+/* ---------- WAAPI hover micro-interactions ---------- */
+if (!prefersReduced && window.matchMedia('(pointer: fine)').matches) {
+  document.querySelectorAll('.project').forEach((card) => {
+    const logo = card.querySelector('.project__logo');
+    if (!logo) return;
+    card.addEventListener('mouseenter', () => {
+      waapi.animate(logo, { rotate: -8, scale: 1.12, duration: 350, ease: 'out(3)' });
+    });
+    card.addEventListener('mouseleave', () => {
+      waapi.animate(logo, { rotate: 0, scale: 1, duration: 350, ease: 'out(3)' });
+    });
+  });
+
+  const brand = document.querySelector('.nav__logo');
+  if (brand) {
+    let spinning = false;
+    brand.parentElement.addEventListener('mouseenter', () => {
+      if (spinning) return;
+      spinning = true;
+      waapi.animate(brand, {
+        rotate: 360,
+        duration: 700,
+        ease: 'inOut(2)',
+        onComplete: () => { brand.style.rotate = ''; spinning = false; },
+      });
+    });
+  }
 }
