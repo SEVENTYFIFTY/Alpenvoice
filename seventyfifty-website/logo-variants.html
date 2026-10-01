@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wordmark Variants</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  :root { --bg:#1a1817; --ink:#f4f2ef; --dim:#8d8a85; --coral:#e75744; --cyan:#22d3ee; --line:rgba(244,242,239,.14); }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--ink); font-family:Inter,sans-serif; padding:56px 64px; }
+  h1 { font-family:'Space Grotesk'; font-weight:500; font-size:20px; letter-spacing:.18em; text-transform:uppercase; color:var(--dim); margin-bottom:8px; }
+  .rule { height:1px; background:var(--line); margin:18px 0 36px; }
+  .row { display:flex; align-items:baseline; gap:48px; padding:26px 0; border-bottom:1px solid var(--line); }
+  .tag { width:200px; flex-shrink:0; font-size:12px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; }
+  .tag b { display:block; color:var(--ink); font-size:14px; letter-spacing:0; text-transform:none; margin-bottom:3px; }
+  sup { font-size:.34em; vertical-align:super; letter-spacing:.06em; }
+
+  /* Seventy Fifty variants */
+  .sf-a { font-family:'Space Grotesk'; font-size:44px; }
+  .sf-a .w1 { font-weight:700; } .sf-a .w2 { font-weight:300; }
+  .sf-a .dot { color:var(--coral); font-weight:700; }
+  .sf-b { font-family:'Space Grotesk'; font-weight:500; font-size:26px; letter-spacing:.38em; text-transform:uppercase; border-bottom:2px solid var(--coral); padding-bottom:10px; }
+  .sf-c { font-family:Inter,sans-serif; font-weight:800; font-size:44px; letter-spacing:-.03em; }
+  .sf-c sup { color:var(--coral); font-weight:700; }
+  .sf-d { font-family:'Fraunces',serif; font-style:italic; font-weight:600; font-size:44px; }
+  .sf-d .dot { color:var(--coral); }
+  .sf-e { font-family:'Space Grotesk'; font-weight:500; font-size:40px; }
+  .sf-e .dot { color:var(--coral); }
+
+  /* Petrus + Motiaa */
+  .petrus { font-family:Inter,sans-serif; font-weight:800; font-size:44px; letter-spacing:-.03em; }
+  .petrus sup { color:var(--coral); font-weight:700; }
+  .motiaa-a { font-family:'Space Grotesk'; font-weight:500; font-size:40px; }
+  .motiaa-a .dot { color:var(--coral); }
+  .motiaa-b { font-family:Inter,sans-serif; font-weight:800; font-size:40px; letter-spacing:-.02em; }
+  .motiaa-b sup { color:var(--coral); font-weight:700; }
+  .note { margin-top:30px; font-size:13px; color:var(--dim); }
+  .reco { color:var(--coral); font-weight:600; }
+</style>
+</head>
+<body>
+  <h1>Seventy Fifty — Wordmark Directions</h1>
+  <div class="rule"></div>
+  <div class="row"><div class="tag"><b>A — Duo-weight grotesque</b>Space Grotesk 700/300 <span class="reco">· recommended</span></div><div class="sf-a"><span class="w1">Seventy</span> <span class="w2">Fifty</span><span class="dot">.</span></div></div>
+  <div class="row"><div class="tag"><b>B — Spaced capitals</b>Space Grotesk 500, coral rule</div><div class="sf-b">Seventy Fifty</div></div>
+  <div class="row"><div class="tag"><b>C — Superscript system</b>Inter 800, mirrors Petrus AI</div><div class="sf-c">Seventy<sup>FIFTY</sup></div></div>
+  <div class="row"><div class="tag"><b>D — Editorial serif</b>Fraunces italic</div><div class="sf-d">Seventy Fifty<span class="dot">.</span></div></div>
+  <div class="row"><div class="tag"><b>E — Lowercase minimal</b>Space Grotesk 500</div><div class="sf-e">seventyfifty<span class="dot">.</span></div></div>
+
+  <h1 style="margin-top:48px">Project Wordmarks</h1>
+  <div class="rule"></div>
+  <div class="row"><div class="tag"><b>Petrus AI</b>recreated from your deck</div><div class="petrus">Petrus<sup>AI</sup></div></div>
+  <div class="row"><div class="tag"><b>Motiaa — a</b>lowercase grotesque</div><div class="motiaa-a">motiaa<span class="dot">.</span></div></div>
+  <div class="row"><div class="tag"><b>Motiaa — b</b>superscript system</div><div class="motiaa-b">Motiaa<sup>EU</sup></div></div>
+
+  <p class="note">Warm black #1a1817 · ink #f4f2ef · coral #e75744 — sampled from the Petrus AI deck. One accent color, hairline rules, no gradients.</p>
+</body>
+</html>

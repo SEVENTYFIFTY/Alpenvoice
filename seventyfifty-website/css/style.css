@@ -14,6 +14,7 @@
   --indigo: #818cf8;
   --amber: #fbbf24;
   --chart: #0891b2; /* validated for dark-mode data marks */
+  --coral: #e75744; /* brand accent, sampled from the Petrus AI deck */
   --glass: rgba(13, 21, 40, 0.55);
   --grad: linear-gradient(100deg, var(--cyan), var(--blue) 55%, var(--indigo));
   --radius: 18px;
@@ -72,18 +73,15 @@ strong { color: var(--ink); }
   border-bottom: 1px solid var(--line);
 }
 .nav__brand { display: flex; align-items: center; gap: 0.7rem; }
-.nav__logo {
-  width: 42px; height: 42px;
-  display: grid; place-items: center;
-  font-family: var(--font-head); font-weight: 800; font-size: 1.05rem;
-  color: #04121c;
-  background: var(--grad);
-  border-radius: 12px;
-  box-shadow: 0 0 24px rgba(34, 211, 238, 0.45);
-}
-.nav__name { font-family: var(--font-head); font-weight: 700; color: var(--ink); display: flex; flex-direction: column; line-height: 1.1; }
-.nav__name em { font-style: normal; }
-.nav__name small { font-size: 0.62rem; font-weight: 400; color: var(--ink-dim); letter-spacing: 0.08em; text-transform: uppercase; }
+.nav__name { display: flex; flex-direction: column; line-height: 1.15; }
+.nav__name small { font-size: 0.6rem; font-weight: 400; color: var(--ink-dim); letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ---------- Brand wordmarks (minimal editorial system) ---------- */
+.wm { font-family: 'Space Grotesk', var(--font-head), sans-serif; color: var(--ink); letter-spacing: -0.01em; }
+.wm .w1 { font-weight: 700; }
+.wm .w2 { font-weight: 300; }
+.wm .dot { color: var(--coral); font-weight: 700; }
+.nav__name .wm { font-size: 1.35rem; }
 .nav__links { display: flex; gap: 1.5rem; margin-left: auto; }
 .nav__links a { color: var(--ink-dim); font-size: 0.92rem; font-weight: 500; transition: color 0.25s; position: relative; }
 .nav__links a::after { content: ""; position: absolute; left: 0; bottom: -6px; width: 0; height: 2px; background: var(--grad); transition: width 0.3s; border-radius: 2px; }
@@ -307,16 +305,24 @@ strong { color: var(--ink); }
 
 /* ---------- Projects ---------- */
 .projects { margin-top: 2.2rem; }
-.project header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.9rem; }
-.project__logo {
-  width: 54px; height: 54px; flex-shrink: 0;
-  display: grid; place-items: center;
-  font-family: var(--font-head); font-weight: 800; font-size: 1.1rem;
-  color: #04121c;
-  background: var(--grad);
-  border-radius: 14px;
-  box-shadow: 0 0 22px rgba(34, 211, 238, 0.35);
+.project header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.9rem; }
+.project__wm {
+  font-family: 'Space Grotesk', var(--font-head), sans-serif;
+  font-size: 1.75rem; font-weight: 700; letter-spacing: -0.01em;
+  margin-bottom: 0.15rem; display: inline-block;
 }
+.project__wm .w2 { font-weight: 300; }
+.project__wm .dot { color: var(--coral); }
+.project__wm--sup { font-family: var(--font-body); font-weight: 800; letter-spacing: -0.03em; }
+.project__wm--sup sup { color: var(--coral); font-size: 0.38em; font-weight: 700; letter-spacing: 0.06em; vertical-align: super; }
+.project__wm--lower { font-weight: 500; letter-spacing: 0; }
+.project__link {
+  font-size: 0.8rem; color: var(--ink-dim); white-space: nowrap;
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 0.32rem 0.85rem; margin-top: 0.3rem;
+  transition: color 0.25s, border-color 0.25s;
+}
+.project__link:hover { color: var(--ink); border-color: var(--coral); }
 .project__type { display: block; font-size: 0.8rem; color: var(--cyan); font-weight: 600; letter-spacing: 0.04em; }
 .project p { font-size: 0.95rem; }
 .project__facts { list-style: none; margin-top: 1rem; display: grid; gap: 0.45rem; }

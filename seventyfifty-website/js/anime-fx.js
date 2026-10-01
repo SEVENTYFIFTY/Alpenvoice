@@ -59,27 +59,29 @@ if (list && toggle) {
 /* ---------- WAAPI hover micro-interactions ---------- */
 if (!prefersReduced && window.matchMedia('(pointer: fine)').matches) {
   document.querySelectorAll('.project').forEach((card) => {
-    const logo = card.querySelector('.project__logo');
-    if (!logo) return;
+    const wm = card.querySelector('.project__wm');
+    if (!wm) return;
     card.addEventListener('mouseenter', () => {
-      waapi.animate(logo, { rotate: -8, scale: 1.12, duration: 350, ease: 'out(3)' });
+      waapi.animate(wm, { x: 6, scale: 1.03, duration: 350, ease: 'out(3)' });
     });
     card.addEventListener('mouseleave', () => {
-      waapi.animate(logo, { rotate: 0, scale: 1, duration: 350, ease: 'out(3)' });
+      waapi.animate(wm, { x: 0, scale: 1, duration: 350, ease: 'out(3)' });
     });
   });
 
-  const brand = document.querySelector('.nav__logo');
-  if (brand) {
-    let spinning = false;
-    brand.parentElement.addEventListener('mouseenter', () => {
-      if (spinning) return;
-      spinning = true;
-      waapi.animate(brand, {
-        rotate: 360,
-        duration: 700,
-        ease: 'inOut(2)',
-        onComplete: () => { brand.style.rotate = ''; spinning = false; },
+  // nav wordmark: nudge the coral dot on hover
+  const brandDot = document.querySelector('.nav__brand .dot');
+  if (brandDot) {
+    brandDot.style.display = 'inline-block';
+    let busy = false;
+    document.querySelector('.nav__brand').addEventListener('mouseenter', () => {
+      if (busy) return;
+      busy = true;
+      waapi.animate(brandDot, {
+        y: [0, -6, 0],
+        duration: 500,
+        ease: 'out(2)',
+        onComplete: () => { busy = false; },
       });
     });
   }
